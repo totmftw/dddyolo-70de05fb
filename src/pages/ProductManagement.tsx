@@ -232,7 +232,7 @@ const ProductManagement = () => {
                         />
                         <select
                             name="prodCollection"
-                            value={formData.prodCollection || ''}
+                            value={String(formData.prodCollection)}
                             onChange={handleInputChange}
                             className="w-full p-2 border rounded"
                         >
@@ -243,7 +243,7 @@ const ProductManagement = () => {
                         </select>
                         <select
                             name="prodSubcategory"
-                            value={formData.prodSubcategory || ''}
+                            value={String(formData.prodSubcategory)}
                             onChange={handleInputChange}
                             className="w-full p-2 border rounded"
                             disabled={!formData.prodCollection}
@@ -262,7 +262,7 @@ const ProductManagement = () => {
                             <select
                                 key={num}
                                 name={`prodColor${num}`}
-                                value={formData[`prodColor${num}` as keyof Product] || ''}
+                                value={String(formData[`prodColor${num}` as keyof Product])}
                                 onChange={handleInputChange}
                                 className="w-full p-2 border rounded"
                                 style={{

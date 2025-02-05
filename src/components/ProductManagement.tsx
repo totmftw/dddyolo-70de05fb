@@ -107,24 +107,19 @@ const ProductManagement = () => {
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-        const { name, value, type } = e.target;
-        let parsedValue: string | number = value;
+        const { name, value, type } = e.target as HTMLInputElement;
+        let parsedValue: string | number | boolean = value;
         
         if (type === 'number') {
             parsedValue = value === '' ? '' : Number(value);
+        } else if (type === 'checkbox') {
+            parsedValue = e.target.checked;
         }
 
+        const valueToSet = typeof parsedValue === 'boolean' ? parsedValue : String(parsedValue);
         setFormData(prev => ({
             ...prev,
-            [name]: parsedValue
-        }));
-    };
-
-    const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, checked } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: checked
+            [name]: valueToSet
         }));
     };
 
@@ -422,7 +417,7 @@ const ProductManagement = () => {
                             type="checkbox"
                             name="prodStatus"
                             checked={formData.prodStatus}
-                            onChange={handleCheckboxChange}
+                            onChange={handleInputChange}
                             className="form-checkbox"
                         />
                         <span>Active Product</span>

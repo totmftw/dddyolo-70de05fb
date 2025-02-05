@@ -1,33 +1,120 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
-import * as XLSX from 'xlsx';
+import { toast } from 'sonner';
+import { motion } from 'framer-motion';
+import { LuFilter, LuPlus, LuUpload, LuDownload } from 'react-icons/lucent';
 
-interface CustomerExcelData {
-    BusinessName: string;
-    OwnerName: string;
-    Phone: string;
-    WhatsApp: string;
-    OwnerPhone: string;
-    OwnerWhatsApp: string;
-    Email: string;
-    OwnerEmail: string;
-    CustomerType: string;
-    Address: string;
-    Province: string;
-    City: string;
-    Pincode: string;
-    GST: string;
-    Remarks: string;
-    Status: string;
-    CreditPeriod: string;
+interface Customer {
+  id: number;
+  businessName: string;
+  ownerName: string;
+  email: string;
+  type: string;
+  status: 'active' | 'inactive';
+  phone: string;
+  whatsapp: string;
+  ownerPhone: string;
+  ownerWhatsapp: string;
+  ownerEmail: string;
+  address: string;
+  province: string;
+  city: string;
+  pincode: string;
+  gst: string;
+  remarks: string;
+  creditPeriod: string;
 }
 
 const CustomerManagement = () => {
-    const [customers, setCustomers] = useState([]);
-    const [filteredCustomers, setFilteredCustomers] = useState([]);
-    const [showAddForm, setShowAddForm] = useState(false);
-    const [showEditForm, setShowEditForm] = useState(false);
-    const [formData, setFormData] = useState({
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>([]);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [formData, setFormData] = useState({
+    businessName: '',
+    ownerName: '',
+    phone: '',
+    whatsapp: '',
+    ownerPhone: '',
+    ownerWhatsapp: '',
+    email: '',
+    ownerEmail: '',
+    type: '',
+    address: '',
+    province: '',
+    city: '',
+    pincode: '',
+    gst: '',
+    remarks: '',
+    status: '',
+    creditPeriod: '',
+  });
+
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
+
+  const fetchCustomers = async () => {
+    const { data, error } = await supabase.from('CustomerMaster').select('*');
+    if (error) toast.error('Failed to load customers');
+    else {
+      setCustomers(data);
+      setFilteredCustomers(data);
+    }
+  };
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    filterCustomers();
+  };
+
+  const handleStatusFilter = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setStatusFilter(e.target.value);
+    filterCustomers();
+  };
+
+  const filterCustomers = () => {
+    let filtered = customers.filter(customer => 
+      customer.businessName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    if (statusFilter) {
+      filtered = filtered.filter(customer => customer.status === statusFilter);
+    }
+    setFilteredCustomers(filtered);
+  };
+
+  const handleAddCustomer = async () => {
+    const { error } = await supabase
+      .from('CustomerMaster')
+      .insert([
+        {
+          businessname: formData.businessName,
+          ownername: formData.ownerName,
+          phone: formData.phone,
+          whatsapp: formData.whatsapp,
+          ownerphone: formData.ownerPhone,
+          ownerwhatsapp: formData.ownerWhatsapp,
+          email: formData.email,
+          owneremail: formData.ownerEmail,
+          type: formData.type,
+          address: formData.address,
+          province: formData.province,
+          city: formData.city,
+          pincode: formData.pincode,
+          gst: formData.gst,
+          remarks: formData.remarks,
+          status: formData.status,
+          creditperiod: formData.creditPeriod,
+        },
+      ]);
+    if (error) toast.error('Failed to add customer');
+    else {
+      toast.success('Customer added successfully');
+      setShowAddForm(false);
+      fetchCustomers();
+      setFormData({
         businessName: '',
         ownerName: '',
         phone: '',
@@ -45,523 +132,411 @@ const CustomerManagement = () => {
         remarks: '',
         status: '',
         creditPeriod: '',
-    });
-    const [selectedCustomerId, setSelectedCustomerId] = useState(null);
-    const [userRole, setUserRole] = useState('');
-    const [campaigns, setCampaigns] = useState([]);
-    const [newCampaign, setNewCampaign] = useState({ name: '', content: '' });
-    const [abTest, setAbTest] = useState({ content: '' });
-    const [followUps, setFollowUps] = useState([]);
+      });
+    }
+  };
 
-    useEffect(() => {
-        fetchCustomers();
-        fetchUserRole();
-        fetchCampaigns();
-    }, []);
+  const handleUpdateCustomer = async () => {
+    const { error } = await supabase
+      .from('CustomerMaster')
+      .update({
+        businessname: formData.businessName,
+        ownername: formData.ownerName,
+        phone: formData.phone,
+        whatsapp: formData.whatsapp,
+        ownerphone: formData.ownerPhone,
+        ownerwhatsapp: formData.ownerWhatsapp,
+        email: formData.email,
+        owneremail: formData.ownerEmail,
+        type: formData.type,
+        address: formData.address,
+        province: formData.province,
+        city: formData.city,
+        pincode: formData.pincode,
+        gst: formData.gst,
+        remarks: formData.remarks,
+        status: formData.status,
+        creditperiod: formData.creditPeriod,
+      })
+      .eq('id', selectedCustomer?.id);
+    if (error) toast.error('Failed to update customer');
+    else {
+      toast.success('Customer updated successfully');
+      setSelectedCustomer(null);
+      setShowAddForm(false);
+      fetchCustomers();
+      setFormData({
+        businessName: '',
+        ownerName: '',
+        phone: '',
+        whatsapp: '',
+        ownerPhone: '',
+        ownerWhatsapp: '',
+        email: '',
+        ownerEmail: '',
+        type: '',
+        address: '',
+        province: '',
+        city: '',
+        pincode: '',
+        gst: '',
+        remarks: '',
+        status: '',
+        creditPeriod: '',
+      });
+    }
+  };
 
-    const fetchCustomers = async () => {
-        const { data, error } = await supabase
-            .from('CustomerMaster')
-            .select('*');
-        if (error) console.error('Error fetching customers:', error);
-        else setCustomers(data || []);
-    };
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value, type } = e.target;
+    let parsedValue: string | number = value;
+    
+    if (type === 'number') {
+        parsedValue = value === '' ? '' : Number(value);
+    }
 
-    const fetchUserRole = async () => {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) return;
-        
-        const { data, error } = await supabase
-            .from('UserProfiles')
-            .select('role')
-            .eq('id', session.user.id)
-            .single();
-        if (error) console.error('Error fetching user role:', error);
-        else setUserRole(data?.role || '');
-    };
+    setFormData(prev => ({
+        ...prev,
+        [name]: parsedValue
+    }));
+  };
 
-    const fetchCampaigns = async () => {
-        const { data, error } = await supabase
-            .from('Campaigns')
-            .select('*');
-        if (error) console.error('Error fetching campaigns:', error);
-        else setCampaigns(data || []);
-    };
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+    setFormData(prev => ({
+        ...prev,
+        [name]: checked
+    }));
+  };
 
-    const addCustomer = async () => {
-        const { error } = await supabase
-            .from('CustomerMaster')
-            .insert([
-                {
-                    businessname: formData.businessName,
-                    ownername: formData.ownerName,
-                    phone: formData.phone,
-                    whatsapp: formData.whatsapp,
-                    ownerphone: formData.ownerPhone,
-                    ownerwhatsapp: formData.ownerWhatsapp,
-                    email: formData.email,
-                    owneremail: formData.ownerEmail,
-                    type: formData.type,
-                    address: formData.address,
-                    province: formData.province,
-                    city: formData.city,
-                    pincode: formData.pincode,
-                    gst: formData.gst,
-                    remarks: formData.remarks,
-                    status: formData.status,
-                    creditperiod: formData.creditPeriod,
-                },
-            ]);
-        if (error) console.error('Error adding customer:', error);
-        else {
-            fetchCustomers();
-            resetFormData();
-            setShowAddForm(false);
-        }
-    };
-
-    const editCustomer = async (id) => {
-        const { data, error } = await supabase
-            .from('CustomerMaster')
-            .select('*')
-            .eq('id', id)
-            .single();
-        if (error) console.error('Error fetching customer:', error);
-        else {
-            setSelectedCustomerId(id);
-            setFormData({
-                businessName: data.businessname,
-                ownerName: data.ownername,
-                phone: data.phone,
-                whatsapp: data.whatsapp,
-                ownerPhone: data.ownerphone,
-                ownerWhatsapp: data.ownerwhatsapp,
-                email: data.email,
-                ownerEmail: data.owneremail,
-                type: data.type,
-                address: data.address,
-                province: data.province,
-                city: data.city,
-                pincode: data.pincode,
-                gst: data.gst,
-                remarks: data.remarks,
-                status: data.status,
-                creditPeriod: data.creditperiod,
-            });
-            setShowEditForm(true);
-        }
-    };
-
-    const updateCustomer = async () => {
-        const { error } = await supabase
-            .from('CustomerMaster')
-            .update({
-                businessname: formData.businessName,
-                ownername: formData.ownerName,
-                phone: formData.phone,
-                whatsapp: formData.whatsapp,
-                ownerphone: formData.ownerPhone,
-                ownerwhatsapp: formData.ownerWhatsapp,
-                email: formData.email,
-                owneremail: formData.ownerEmail,
-                type: formData.type,
-                address: formData.address,
-                province: formData.province,
-                city: formData.city,
-                pincode: formData.pincode,
-                gst: formData.gst,
-                remarks: formData.remarks,
-                status: formData.status,
-                creditperiod: formData.creditPeriod,
-            })
-            .eq('id', selectedCustomerId);
-        if (error) console.error('Error updating customer:', error);
-        else {
-            fetchCustomers();
-            resetFormData();
-            setShowEditForm(false);
-        }
-    };
-
-    const addCampaign = async () => {
-        const { error } = await supabase
-            .from('Campaigns')
-            .insert([{ campaign_name: newCampaign.name, content: newCampaign.content }]);
-        if (error) console.error('Error adding campaign:', error);
-        else {
-            fetchCampaigns();
-            setNewCampaign({ name: '', content: '' });
-        }
-    };
-
-    const runABTest = async () => {
-        const { data, error } = await supabase
-            .from('CustomerMaster')
-            .select('*');
-        if (error) console.error('Error fetching customers for A/B test:', error);
-        else {
-            const testGroup = data.filter(customer => customer.id % 2 === 0);
-            const controlGroup = data.filter(customer => customer.id % 2 !== 0);
-            await sendCampaign(testGroup, newCampaign.name, newCampaign.content);
-            await sendCampaign(controlGroup, 'A/B Test', abTest.content);
-        }
-    };
-
-    const sendCampaign = async (customers, campaignName, campaignContent) => {
-        customers.forEach(customer => {
-            console.log(`Sending campaign to ${customer.name}: ${campaignName} - ${campaignContent}`);
-        });
-    };
-
-    const handleFilter = (filterCriteria) => {
-        const filteredCustomers = customers.filter(customer =>
-            customer.businessname.toLowerCase().includes(filterCriteria.toLowerCase()) ||
-            customer.ownername.toLowerCase().includes(filterCriteria.toLowerCase()) ||
-            customer.email.toLowerCase().includes(filterCriteria.toLowerCase())
-        );
-        setFilteredCustomers(filteredCustomers);
-    };
-
-    const handleInputChange = (event) => {
-        setFormData({ ...formData, [event.target.name]: event.target.value });
-    };
-
-    const resetFormData = () => {
-        setFormData({
-            businessName: '',
-            ownerName: '',
-            phone: '',
-            whatsapp: '',
-            ownerPhone: '',
-            ownerWhatsapp: '',
-            email: '',
-            ownerEmail: '',
-            type: '',
-            address: '',
-            province: '',
-            city: '',
-            pincode: '',
-            gst: '',
-            remarks: '',
-            status: '',
-            creditPeriod: '',
-        });
-    };
-
-    const downloadTemplate = () => {
-        const templateData = [
-            ["Business Name", "Owner Name", "Phone", "WhatsApp", "Owner Phone", "Owner WhatsApp", "Email", "Owner Email", "Customer Type", "Address", "Province", "City", "Pincode", "GST", "Remarks", "Status", "Credit Period"],
-        ];
-        const ws = XLSX.utils.aoa_to_sheet(templateData);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Customer Template");
-        XLSX.writeFile(wb, "customer_template.xlsx");
-    };
-
-    const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (!file) return;
-        
-        const data = await file.arrayBuffer();
-        const workbook = XLSX.read(data);
-        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet) as CustomerExcelData[];
-
-        const { data: existingCustomers, error: fetchError } = await supabase
-            .from('CustomerMaster')
-            .select('*');
-        if (fetchError) {
-            console.error('Error fetching existing customers:', fetchError);
-            return;
-        }
-
-        const existingCustomerEmails = new Set(existingCustomers.map(customer => customer.email));
-        const existingCustomerNames = new Set(existingCustomers.map(customer => customer.name));
-
-        const duplicates = jsonData.filter(customer => 
-            existingCustomerEmails.has(customer.Email) || existingCustomerNames.has(customer.OwnerName)
-        );
-
-        if (duplicates.length > 0) {
-            alert(`The following customers already exist in the database:\n${duplicates.map(c => c.OwnerName).join(', ')}`);
-        }
-
-        const newCustomers = jsonData.filter(customer => 
-            !existingCustomerEmails.has(customer.Email) && !existingCustomerNames.has(customer.OwnerName)
-        );
-
-        for (const customer of newCustomers) {
-            const { error: insertError } = await supabase
-                .from('CustomerMaster')
-                .insert([{ 
-                    businessname: customer.BusinessName,
-                    ownername: customer.OwnerName,
-                    phone: customer.Phone,
-                    whatsapp: customer.WhatsApp,
-                    ownerphone: customer.OwnerPhone,
-                    ownerwhatsapp: customer.OwnerWhatsApp,
-                    email: customer.Email,
-                    owneremail: customer.OwnerEmail,
-                    type: customer.CustomerType,
-                    address: customer.Address,
-                    province: customer.Province,
-                    city: customer.City,
-                    pincode: customer.Pincode,
-                    gst: customer.GST,
-                    remarks: customer.Remarks,
-                    status: customer.Status,
-                    creditperiod: customer.CreditPeriod,
-                }]);
-            if (insertError) {
-                console.error('Error inserting new customer:', insertError);
-            }
-        }
-    };
-
-    return (
-        <div className="customer-management">
-            <h2>Customer Management</h2>
-
-            {/* SECTION: CUSTOMER LIST */}
-            <section>
-                <h3>Customer Directory</h3>
-                <div className="filters">
-                    <input
-                        type="text"
-                        placeholder="Filter customers..."
-                        onChange={(e) => handleFilter(e.target.value)}
-                    />
-                    <button onClick={() => setShowAddForm(true)}>Add Customer</button>
-                </div>
-
-                {/* Customer Table */}
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Type</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredCustomers.map(customer => (
-                            <tr key={customer.id}>
-                                <td>{customer.businessname}</td>
-                                <td>{customer.email}</td>
-                                <td>{customer.type}</td>
-                                <td>{customer.status}</td>
-                                <td>
-                                    <button onClick={() => editCustomer(customer.id)}>Edit</button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </section>
-
-            {/* SECTION: ADD/EDIT FORM (Modal or Collapsible Section) */}
-            {(showAddForm || showEditForm) && (
-                <div className="form-container">
-                    <form onSubmit={showEditForm ? updateCustomer : addCustomer}>
-                        <input
-                            type="text"
-                            name="businessName"
-                            value={formData.businessName}
-                            onChange={handleInputChange}
-                            placeholder="Business Name"
-                            required
-                        />
-                        <input
-                            type="text"
-                            name="ownerName"
-                            value={formData.ownerName}
-                            onChange={handleInputChange}
-                            placeholder="Owner Name"
-                            required
-                        />
-                        <input
-                            type="tel"
-                            name="phone"
-                            value={formData.phone}
-                            onChange={handleInputChange}
-                            placeholder="Phone"
-                            required
-                        />
-                        <input
-                            type="tel"
-                            name="whatsapp"
-                            value={formData.whatsapp}
-                            onChange={handleInputChange}
-                            placeholder="WhatsApp"
-                            required
-                        />
-                        <input
-                            type="tel"
-                            name="ownerPhone"
-                            value={formData.ownerPhone}
-                            onChange={handleInputChange}
-                            placeholder="Owner Phone"
-                            required
-                        />
-                        <input
-                            type="tel"
-                            name="ownerWhatsapp"
-                            value={formData.ownerWhatsapp}
-                            onChange={handleInputChange}
-                            placeholder="Owner WhatsApp"
-                            required
-                        />
-                        <input
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleInputChange}
-                            placeholder="Email"
-                            required
-                        />
-                        <input
-                            type="text"
-                            name="ownerEmail"
-                            value={formData.ownerEmail}
-                            onChange={handleInputChange}
-                            placeholder="Owner Email"
-                            required
-                        />
-                        <input
-                            type="text"
-                            name="type"
-                            value={formData.type}
-                            onChange={handleInputChange}
-                            placeholder="Customer Type"
-                            required
-                        />
-                        <input
-                            type="text"
-                            name="address"
-                            value={formData.address}
-                            onChange={handleInputChange}
-                            placeholder="Address"
-                            required
-                        />
-                        <input
-                            type="text"
-                            name="province"
-                            value={formData.province}
-                            onChange={handleInputChange}
-                            placeholder="Province"
-                            required
-                        />
-                        <input
-                            type="text"
-                            name="city"
-                            value={formData.city}
-                            onChange={handleInputChange}
-                            placeholder="City"
-                            required
-                        />
-                        <input
-                            type="tel"
-                            name="pincode"
-                            value={formData.pincode}
-                            onChange={handleInputChange}
-                            placeholder="Pincode"
-                            required
-                        />
-                        <input
-                            type="text"
-                            name="gst"
-                            value={formData.gst}
-                            onChange={handleInputChange}
-                            placeholder="GST"
-                        />
-                        <textarea
-                            name="remarks"
-                            value={formData.remarks}
-                            onChange={handleInputChange}
-                            placeholder="Remarks"
-                        />
-                        <select
-                            name="status"
-                            value={formData.status}
-                            onChange={handleInputChange}
-                        >
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
-                        </select>
-                        <input
-                            type="number"
-                            name="creditPeriod"
-                            value={formData.creditPeriod}
-                            onChange={handleInputChange}
-                            placeholder="Credit Period"
-                        />
-                        <button type="submit">
-                            {showEditForm ? 'Update Customer' : 'Add Customer'}
-                        </button>
-                        <button onClick={() => {
-                            setShowAddForm(false);
-                            setShowEditForm(false);
-                            resetFormData();
-                        }}>Cancel</button>
-                    </form>
-                </div>
-            )}
-
-            {/* SECTION: MARKETING AUTOMATION */}
-            <section>
-                <h3>Marketing Automation</h3>
-                {/* CAMPAIGN CREATION */}
-                <div>
-                    <input
-                        type="text"
-                        placeholder="Campaign Name"
-                        value={newCampaign.name}
-                        onChange={(e) => setNewCampaign({ ...newCampaign, name: e.target.value })}
-                    />
-                    <textarea
-                        placeholder="Campaign Content"
-                        value={newCampaign.content}
-                        onChange={(e) => setNewCampaign({ ...newCampaign, content: e.target.value })}
-                    />
-                    <button onClick={addCampaign}>Create Campaign</button>
-                </div>
-
-                {/* A/B TEST SECTION */}
-                <div>
-                    <input
-                        type="text"
-                        placeholder="A/B Test Content"
-                        value={abTest.content}
-                        onChange={(e) => setAbTest({ ...abTest, content: e.target.value })}
-                    />
-                    <button onClick={runABTest}>Run A/B Test</button>
-                </div>
-            </section>
-
-            {/* SECTION: SEGMENTATION */}
-            <section>
-                <h3>Customer Segmentation</h3>
-                <div>
-                    <button onClick={() => handleFilter('')}>Segment Customers</button>
-                </div>
-            </section>
-
-            {/* SECTION: BULK MANAGEMENT */}
-            <section>
-                <h3>Import/Export</h3>
-                <div>
-                    <button onClick={downloadTemplate}>Download Template</button>
-                    <input
-                        type="file"
-                        accept=".xlsx"
-                        onChange={handleFileUpload}
-                    />
-                </div>
-            </section>
+  return (
+    <div className="customer-management-container">
+      {/* Page Header */}
+      <header className="page-header">
+        <h1 className="text-2xl font-bold">Customer Management</h1>
+        <div className="header-actions flex items-center gap-4">
+          <button 
+            onClick={() => setShowAddForm(true)} 
+            className="btn-primary"
+          >
+            <LuPlus className="mr-2" /> Add Customer
+          </button>
+          <button 
+            onClick={() => console.log('Implement export logic')}
+            className="btn-secondary"
+          >
+            <LuDownload className="mr-2" /> Export
+          </button>
         </div>
-    );
+      </header>
+
+      {/* Search & Filter Section */}
+      <section className="search-filter-section mt-8 p-6 bg-white rounded-lg shadow-md">
+        <div className="flex items-center gap-4">
+          <input
+            type="text"
+            placeholder="Search customers..."
+            value={searchTerm}
+            onChange={handleSearch}
+            className="w-full p-3 border rounded-lg flex-1"
+          />
+          <select
+            value={statusFilter}
+            onChange={handleStatusFilter}
+            className="w-40 p-3 border rounded-lg"
+          >
+            <option value="">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+          <button 
+            onClick={() => console.log('Implement advanced filter')}
+            className="btn-tertiary p-3 rounded-lg"
+          >
+            <LuFilter className="text-lg" />
+          </button>
+        </div>
+      </section>
+
+      {/* Customer List Table */}
+      <section className="customer-table-section mt-8">
+        <div className="table-container">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="py-3 px-4">Name</th>
+                <th className="py-3 px-4">Email</th>
+                <th className="py-3 px-4">Type</th>
+                <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredCustomers.map(customer => (
+                <tr key={customer.id} className="hover:bg-gray-100">
+                  <td className="py-3 px-4">{customer.businessName}</td>
+                  <td className="py-3 px-4">{customer.email}</td>
+                  <td className="py-3 px-4">{customer.type}</td>
+                  <td className="py-3 px-4">
+                    <span 
+                      className={`inline-block px-3 py-1 rounded-full ${
+                        customer.status === 'active' 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-red-100 text-red-800'
+                      }`}
+                    >
+                      {customer.status}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4">
+                    <button 
+                      onClick={() => {
+                        setSelectedCustomer(customer);
+                        setFormData({
+                          businessName: customer.businessName,
+                          ownerName: customer.ownerName,
+                          phone: customer.phone,
+                          whatsapp: customer.whatsapp,
+                          ownerPhone: customer.ownerPhone,
+                          ownerWhatsapp: customer.ownerWhatsapp,
+                          email: customer.email,
+                          ownerEmail: customer.ownerEmail,
+                          type: customer.type,
+                          address: customer.address,
+                          province: customer.province,
+                          city: customer.city,
+                          pincode: customer.pincode,
+                          gst: customer.gst,
+                          remarks: customer.remarks,
+                          status: customer.status,
+                          creditPeriod: customer.creditPeriod,
+                        });
+                        setShowAddForm(true);
+                      }}
+                      className="text-blue-500 hover:underline"
+                    >
+                      Edit
+                    </button>
+                    <button 
+                      onClick={() => console.log('Implement delete')}
+                      className="ml-4 text-red-500 hover:underline"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* Marketing Automation Section */}
+      <section className="marketing-section mt-12 p-6 bg-white rounded-lg shadow-md">
+        <h2 className="text-xl font-semibold mb-6">Marketing Automation</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="campaign-card bg-gray-50 p-6 rounded-lg">
+            <h3 className="text-lg font-semibold mb-4">Campaigns</h3>
+            <button className="w-full btn-primary mb-4">Create Campaign</button>
+            <div className="campaign-list">
+              {/* Campaign items */}
+            </div>
+          </div>
+          <div className="ab-test-card bg-gray-50 p-6 rounded-lg">
+            <h3 className="text-lg font-semibold mb-4">A/B Testing</h3>
+            <button className="w-full btn-primary mb-4">Run A/B Test</button>
+            <div className="test-config">
+              {/* Test configuration */}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Add/Edit Customer Modal */}
+      {showAddForm && (
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="fixed top-0 left-0 w-full h-full bg-black/50 flex items-center justify-center z-50"
+        >
+          <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+            <h2 className="text-xl font-semibold mb-6">
+              {selectedCustomer ? 'Edit Customer' : 'Add Customer'}
+            </h2>
+            <form onSubmit={selectedCustomer ? handleUpdateCustomer : handleAddCustomer}>
+              <input
+                type="text"
+                name="businessName"
+                value={formData.businessName}
+                onChange={handleInputChange}
+                placeholder="Business Name"
+                required
+              />
+              <input
+                type="text"
+                name="ownerName"
+                value={formData.ownerName}
+                onChange={handleInputChange}
+                placeholder="Owner Name"
+                required
+              />
+              <input
+                type="tel"
+                name="phone"
+                value={formData.phone}
+                onChange={handleInputChange}
+                placeholder="Phone"
+                required
+              />
+              <input
+                type="tel"
+                name="whatsapp"
+                value={formData.whatsapp}
+                onChange={handleInputChange}
+                placeholder="WhatsApp"
+                required
+              />
+              <input
+                type="tel"
+                name="ownerPhone"
+                value={formData.ownerPhone}
+                onChange={handleInputChange}
+                placeholder="Owner Phone"
+                required
+              />
+              <input
+                type="tel"
+                name="ownerWhatsapp"
+                value={formData.ownerWhatsapp}
+                onChange={handleInputChange}
+                placeholder="Owner WhatsApp"
+                required
+              />
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                placeholder="Email"
+                required
+              />
+              <input
+                type="text"
+                name="ownerEmail"
+                value={formData.ownerEmail}
+                onChange={handleInputChange}
+                placeholder="Owner Email"
+                required
+              />
+              <input
+                type="text"
+                name="type"
+                value={formData.type}
+                onChange={handleInputChange}
+                placeholder="Customer Type"
+                required
+              />
+              <input
+                type="text"
+                name="address"
+                value={formData.address}
+                onChange={handleInputChange}
+                placeholder="Address"
+                required
+              />
+              <input
+                type="text"
+                name="province"
+                value={formData.province}
+                onChange={handleInputChange}
+                placeholder="Province"
+                required
+              />
+              <input
+                type="text"
+                name="city"
+                value={formData.city}
+                onChange={handleInputChange}
+                placeholder="City"
+                required
+              />
+              <input
+                type="tel"
+                name="pincode"
+                value={formData.pincode}
+                onChange={handleInputChange}
+                placeholder="Pincode"
+                required
+              />
+              <input
+                type="text"
+                name="gst"
+                value={formData.gst}
+                onChange={handleInputChange}
+                placeholder="GST"
+              />
+              <textarea
+                name="remarks"
+                value={formData.remarks}
+                onChange={handleInputChange}
+                placeholder="Remarks"
+              />
+              <select
+                name="status"
+                value={formData.status}
+                onChange={handleInputChange}
+              >
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+              <input
+                type="number"
+                name="creditPeriod"
+                value={formData.creditPeriod}
+                onChange={handleInputChange}
+                placeholder="Credit Period"
+              />
+              <div className="flex items-center gap-4 mt-6">
+                <button 
+                  type="submit" 
+                  className="btn-primary flex-1"
+                >
+                  {selectedCustomer ? 'Update' : 'Add'}
+                </button>
+                <button 
+                  onClick={() => {
+                    setShowAddForm(false);
+                    setFormData({
+                      businessName: '',
+                      ownerName: '',
+                      phone: '',
+                      whatsapp: '',
+                      ownerPhone: '',
+                      ownerWhatsapp: '',
+                      email: '',
+                      ownerEmail: '',
+                      type: '',
+                      address: '',
+                      province: '',
+                      city: '',
+                      pincode: '',
+                      gst: '',
+                      remarks: '',
+                      status: '',
+                      creditPeriod: '',
+                    });
+                  }} 
+                  className="btn-secondary flex-1"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </motion.div>
+      )}
+    </div>
+  );
 };
 
 export default CustomerManagement;

@@ -108,27 +108,16 @@ const ProductManagement = () => {
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value, type } = e.target;
-        let parsedValue: any = value;
+        let parsedValue: string | number = value;
         
         if (type === 'number') {
             parsedValue = value === '' ? '' : Number(value);
-        } else if (type === 'checkbox') {
-            parsedValue = (e.target as HTMLInputElement).checked;
-            // Store checkbox value separately to avoid type conflicts
-            setFormData(prev => ({
-                ...prev,
-                [name]: parsedValue
-            }));
-            return;
         }
-        
-        // Only update non-checkbox values through this path
-        if (type !== 'checkbox') {
-            setFormData(prev => ({
-                ...prev,
-                [name]: parsedValue
-            }));
-        }
+
+        setFormData(prev => ({
+            ...prev,
+            [name]: parsedValue
+        }));
     };
 
     const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {

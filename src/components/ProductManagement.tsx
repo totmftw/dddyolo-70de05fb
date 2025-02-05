@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { Package } from 'lucide-react';
@@ -108,7 +109,7 @@ const ProductManagement = () => {
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value, type } = e.target;
-        let parsedValue: string | number | boolean = value;
+        let parsedValue: string | number | boolean | string[] = value;
         
         if (type === 'number') {
             parsedValue = value === '' ? '' : Number(value);
@@ -451,7 +452,7 @@ const ProductManagement = () => {
                                     className="w-full h-48 object-cover rounded mb-4"
                                 />
                             )}
-                            <h4 className="font-semibold">{String(product.prodName)}</h4>
+                            <h4 className="font-semibold">{product.prodName}</h4>
                             <p className="text-sm text-gray-600">Brand: {product.prodBrand || 'N/A'}</p>
                             <p className="text-sm text-gray-600">Collection: {product.prodCollection || 'N/A'}</p>
                             <p className="text-sm text-gray-600">Subcategory: {product.prodSubcategory || 'N/A'}</p>
@@ -466,7 +467,7 @@ const ProductManagement = () => {
                                                 key={num}
                                                 className="w-6 h-6 rounded-full border border-gray-300"
                                                 style={{ backgroundColor: colorValue }}
-                                                title={colorName}
+                                                title={String(colorName)}
                                             />
                                         );
                                     }

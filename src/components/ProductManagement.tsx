@@ -1,42 +1,47 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
-import { Package, Image, Trash2 } from 'lucide-react';
+import { Package } from 'lucide-react';
 import { toast } from "sonner";
 
 interface Product {
-  prodId: string;
-  prodName: string;
-  prodBrand?: string;
-  prodCategory?: string;
-  prodType?: string;
-  prodVariant?: string;
-  prodMaterial?: string;
-  prodPackaging?: string;
-  prodMoq?: number;
-  prodPackcount?: number;
-  prodCbm?: number;
-  prodUnitweight?: number;
-  prodGrossweight?: number;
-  prodNettweight?: number;
-  prodColor1?: string;
-  prodColor2?: string;
-  prodColor3?: string;
-  prodColor4?: string;
-  prodColor5?: string;
-  prodPromo1?: string;
-  prodPromo2?: string;
-  prodLandingcost?: number;
-  prodVariableprice?: number;
-  prodBasePrice?: number;
-  prodSlaborice1?: number;
-  prodSlabprice2?: number;
-  prodSlabprice3?: number;
-  prodSlabprice4?: number;
-  prodSlabprice5?: number;
-  prodBoxstock?: number;
-  prodPiecestock?: number;
-  prodStatus?: boolean;
+    prodId: string;
+    prodName: string;
+    prodBrand?: string;
+    prodCategory?: string;
+    prodCollection?: string;
+    prodSubcategory?: string;
+    prodType?: string;
+    prodVariant?: string;
+    prodMaterial?: string;
+    prodPackaging?: string;
+    prodMoq?: number;
+    prodPackcount?: number;
+    prodCbm?: number;
+    prodUnitweight?: number;
+    prodGrossweight?: number;
+    prodNettweight?: number;
+    prodColor1?: string;
+    prodColor2?: string;
+    prodColor3?: string;
+    prodColor4?: string;
+    prodColor5?: string;
+    prodImages?: string[];
+    prodPromo1?: string;
+    prodPromo2?: string;
+    prodLandingcost?: number;
+    prodVariableprice?: number;
+    prodBasePrice?: number;
+    prodSlaborice1?: number;
+    prodSlabprice2?: number;
+    prodSlabprice3?: number;
+    prodSlabprice4?: number;
+    prodSlabprice5?: number;
+    prodBoxstock?: number;
+    prodPiecestock?: number;
+    prodStatus?: boolean;
+    prodRestockDate?: string;
+    prodSku?: string;
+    prodShortName?: string;
 }
 
 const ProductManagement = () => {
@@ -44,9 +49,44 @@ const ProductManagement = () => {
     const [formData, setFormData] = useState<Product>({
         prodId: '',
         prodName: '',
+        prodBrand: 'Black Gold', // Default brand
         prodStatus: true
     });
     const [loading, setLoading] = useState(false);
+    const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
+
+    const collections = [
+        'Living Room',
+        'Bedroom',
+        'Dining Room',
+        'Kitchen',
+        'Bathroom',
+        'Outdoor',
+        'Office'
+    ];
+
+    const subCategories = {
+        'Living Room': ['Sofas', 'Coffee Tables', 'TV Units', 'Bookshelves', 'Lounge Chairs'],
+        'Bedroom': ['Beds', 'Wardrobes', 'Dressers', 'Nightstands', 'Mattresses'],
+        'Dining Room': ['Dining Tables', 'Dining Chairs', 'Buffets', 'Bar Cabinets'],
+        'Kitchen': ['Kitchen Islands', 'Bar Stools', 'Storage Units', 'Cabinets'],
+        'Bathroom': ['Vanities', 'Mirrors', 'Storage Units', 'Accessories'],
+        'Outdoor': ['Garden Furniture', 'Planters', 'Decor', 'Lighting'],
+        'Office': ['Desks', 'Office Chairs', 'Storage', 'Accessories']
+    };
+
+    const colors = [
+        { name: 'Natural Wood', value: '#A0522D' },
+        { name: 'White', value: '#FFFFFF' },
+        { name: 'Black', value: '#000000' },
+        { name: 'Grey', value: '#808080' },
+        { name: 'Navy Blue', value: '#000080' },
+        { name: 'Forest Green', value: '#228B22' },
+        { name: 'Burgundy', value: '#800020' },
+        { name: 'Gold', value: '#FFD700' },
+        { name: 'Silver', value: '#C0C0C0' },
+        { name: 'Bronze', value: '#CD7F32' }
+    ];
 
     useEffect(() => {
         fetchProducts();
@@ -82,14 +122,46 @@ const ProductManagement = () => {
         }));
     };
 
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0) {
+            if (e.target.files.length > 10) {
+                toast.error('Maximum 10 images allowed');
+                return;
+            }
+            setSelectedFiles(e.target.files);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
 
-        // Generate a unique product ID if not provided
+        const images: string[] = [];
+        if (selectedFiles) {
+            for (let i = 0; i < selectedFiles.length; i++) {
+                const file = selectedFiles[i];
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${Date.now()}-${i}.${fileExt}`;
+                const { error: uploadError, data } = await supabase.storage
+                    .from('products')
+                    .upload(fileName, file);
+
+                if (uploadError) {
+                    toast.error(`Error uploading image ${i + 1}`);
+                    console.error(uploadError);
+                } else if (data) {
+                    const { data: { publicUrl } } = supabase.storage
+                        .from('products')
+                        .getPublicUrl(fileName);
+                    images.push(publicUrl);
+                }
+            }
+        }
+
         const productData = {
             ...formData,
-            prodId: formData.prodId || `PROD-${Date.now()}`
+            prodId: formData.prodId || `PROD-${Date.now()}`,
+            prodImages: images
         };
 
         const { error } = await supabase
@@ -105,8 +177,10 @@ const ProductManagement = () => {
             setFormData({
                 prodId: '',
                 prodName: '',
+                prodBrand: 'Black Gold',
                 prodStatus: true
             });
+            setSelectedFiles(null);
         }
         setLoading(false);
     };
@@ -135,25 +209,88 @@ const ProductManagement = () => {
                         <input
                             type="text"
                             name="prodBrand"
-                            value={formData.prodBrand || ''}
+                            value={formData.prodBrand}
                             onChange={handleInputChange}
                             placeholder="Brand"
+                            className="w-full p-2 border rounded bg-gray-100"
+                            readOnly
+                        />
+                        <input
+                            type="text"
+                            name="prodSku"
+                            value={formData.prodSku || ''}
+                            onChange={handleInputChange}
+                            placeholder="SKU"
                             className="w-full p-2 border rounded"
                         />
                         <select
-                            name="prodCategory"
-                            value={formData.prodCategory || ''}
+                            name="prodCollection"
+                            value={formData.prodCollection || ''}
                             onChange={handleInputChange}
                             className="w-full p-2 border rounded"
                         >
-                            <option value="">Select Category</option>
-                            <option value="Furniture">Furniture</option>
-                            <option value="Decor">Decor</option>
-                            <option value="Lighting">Lighting</option>
-                            <option value="Textiles">Textiles</option>
-                            <option value="Kitchen">Kitchen</option>
-                            <option value="Bath">Bath</option>
+                            <option value="">Select Collection</option>
+                            {collections.map(collection => (
+                                <option key={collection} value={collection}>{collection}</option>
+                            ))}
                         </select>
+                        <select
+                            name="prodSubcategory"
+                            value={formData.prodSubcategory || ''}
+                            onChange={handleInputChange}
+                            className="w-full p-2 border rounded"
+                            disabled={!formData.prodCollection}
+                        >
+                            <option value="">Select Subcategory</option>
+                            {formData.prodCollection && subCategories[formData.prodCollection as keyof typeof subCategories].map(sub => (
+                                <option key={sub} value={sub}>{sub}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Color Options */}
+                    <div className="space-y-4">
+                        <h3 className="font-semibold text-lg">Color Options</h3>
+                        {[1, 2, 3, 4, 5].map((num) => (
+                            <select
+                                key={num}
+                                name={`prodColor${num}`}
+                                value={formData[`prodColor${num}` as keyof Product] || ''}
+                                onChange={handleInputChange}
+                                className="w-full p-2 border rounded"
+                                style={{
+                                    backgroundColor: colors.find(c => c.name === formData[`prodColor${num}` as keyof Product])?.value
+                                }}
+                            >
+                                <option value="">Select Color {num}</option>
+                                {colors.map(color => (
+                                    <option 
+                                        key={color.name} 
+                                        value={color.name}
+                                        style={{ backgroundColor: color.value }}
+                                    >
+                                        {color.name}
+                                    </option>
+                                ))}
+                            </select>
+                        ))}
+                    </div>
+
+                    {/* Images Upload */}
+                    <div className="space-y-4">
+                        <h3 className="font-semibold text-lg">Product Images</h3>
+                        <div className="border-2 border-dashed border-gray-300 p-4 rounded-lg">
+                            <input
+                                type="file"
+                                multiple
+                                accept="image/*"
+                                onChange={handleFileChange}
+                                className="w-full"
+                            />
+                            <p className="text-sm text-gray-500 mt-2">
+                                Upload up to 10 images (1024x1024 recommended)
+                            </p>
+                        </div>
                     </div>
 
                     {/* Specifications */}
@@ -271,35 +408,6 @@ const ProductManagement = () => {
                             className="w-full p-2 border rounded"
                         />
                     </div>
-
-                    {/* Colors */}
-                    <div className="space-y-4">
-                        <h3 className="font-semibold text-lg">Colors Available</h3>
-                        <input
-                            type="text"
-                            name="prodColor1"
-                            value={formData.prodColor1 || ''}
-                            onChange={handleInputChange}
-                            placeholder="Color 1"
-                            className="w-full p-2 border rounded"
-                        />
-                        <input
-                            type="text"
-                            name="prodColor2"
-                            value={formData.prodColor2 || ''}
-                            onChange={handleInputChange}
-                            placeholder="Color 2"
-                            className="w-full p-2 border rounded"
-                        />
-                        <input
-                            type="text"
-                            name="prodColor3"
-                            value={formData.prodColor3 || ''}
-                            onChange={handleInputChange}
-                            placeholder="Color 3"
-                            className="w-full p-2 border rounded"
-                        />
-                    </div>
                 </div>
 
                 <div className="flex items-center gap-4">
@@ -328,10 +436,35 @@ const ProductManagement = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {products.map((product) => (
                         <div key={product.prodId} className="bg-white p-4 rounded-lg shadow">
+                            {product.prodImages && product.prodImages[0] && (
+                                <img
+                                    src={product.prodImages[0]}
+                                    alt={product.prodName}
+                                    className="w-full h-48 object-cover rounded mb-4"
+                                />
+                            )}
                             <h4 className="font-semibold">{product.prodName}</h4>
                             <p className="text-sm text-gray-600">Brand: {product.prodBrand || 'N/A'}</p>
-                            <p className="text-sm text-gray-600">Category: {product.prodCategory || 'N/A'}</p>
+                            <p className="text-sm text-gray-600">Collection: {product.prodCollection || 'N/A'}</p>
+                            <p className="text-sm text-gray-600">Subcategory: {product.prodSubcategory || 'N/A'}</p>
                             <p className="text-sm text-gray-600">Stock: {product.prodPiecestock || 0} pieces</p>
+                            <div className="mt-2 flex gap-2">
+                                {[1, 2, 3, 4, 5].map(num => {
+                                    const colorName = product[`prodColor${num}` as keyof Product];
+                                    if (colorName) {
+                                        const colorValue = colors.find(c => c.name === colorName)?.value;
+                                        return (
+                                            <div
+                                                key={num}
+                                                className="w-6 h-6 rounded-full border border-gray-300"
+                                                style={{ backgroundColor: colorValue }}
+                                                title={colorName}
+                                            />
+                                        );
+                                    }
+                                    return null;
+                                })}
+                            </div>
                             <div className="mt-2">
                                 <span className={`px-2 py-1 rounded-full text-xs ${product.prodStatus ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                                     {product.prodStatus ? 'Active' : 'Inactive'}

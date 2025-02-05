@@ -669,6 +669,7 @@ export type Database = {
           prodBrand: string | null
           prodCategory: string | null
           prodCbm: number | null
+          prodCollection: string | null
           prodColor1: string | null
           prodColor2: string | null
           prodColor3: string | null
@@ -676,6 +677,7 @@ export type Database = {
           prodColor5: string | null
           prodGrossweight: number | null
           prodId: string
+          prodImages: string[] | null
           prodLandingcost: number | null
           prodMaterial: string | null
           prodMoq: number | null
@@ -686,12 +688,16 @@ export type Database = {
           prodPiecestock: number | null
           prodPromo1: string | null
           prodPromo2: string | null
+          prodRestockDate: string | null
+          prodShortName: string | null
+          prodSku: string | null
           prodSlaborice1: number | null
           prodSlabprice2: number | null
           prodSlabprice3: number | null
           prodSlabprice4: number | null
           prodSlabprice5: number | null
           prodStatus: boolean | null
+          prodSubcategory: string | null
           prodType: string | null
           prodUnitweight: number | null
           prodVariableprice: number | null
@@ -703,6 +709,7 @@ export type Database = {
           prodBrand?: string | null
           prodCategory?: string | null
           prodCbm?: number | null
+          prodCollection?: string | null
           prodColor1?: string | null
           prodColor2?: string | null
           prodColor3?: string | null
@@ -710,6 +717,7 @@ export type Database = {
           prodColor5?: string | null
           prodGrossweight?: number | null
           prodId: string
+          prodImages?: string[] | null
           prodLandingcost?: number | null
           prodMaterial?: string | null
           prodMoq?: number | null
@@ -720,12 +728,16 @@ export type Database = {
           prodPiecestock?: number | null
           prodPromo1?: string | null
           prodPromo2?: string | null
+          prodRestockDate?: string | null
+          prodShortName?: string | null
+          prodSku?: string | null
           prodSlaborice1?: number | null
           prodSlabprice2?: number | null
           prodSlabprice3?: number | null
           prodSlabprice4?: number | null
           prodSlabprice5?: number | null
           prodStatus?: boolean | null
+          prodSubcategory?: string | null
           prodType?: string | null
           prodUnitweight?: number | null
           prodVariableprice?: number | null
@@ -737,6 +749,7 @@ export type Database = {
           prodBrand?: string | null
           prodCategory?: string | null
           prodCbm?: number | null
+          prodCollection?: string | null
           prodColor1?: string | null
           prodColor2?: string | null
           prodColor3?: string | null
@@ -744,6 +757,7 @@ export type Database = {
           prodColor5?: string | null
           prodGrossweight?: number | null
           prodId?: string
+          prodImages?: string[] | null
           prodLandingcost?: number | null
           prodMaterial?: string | null
           prodMoq?: number | null
@@ -754,12 +768,16 @@ export type Database = {
           prodPiecestock?: number | null
           prodPromo1?: string | null
           prodPromo2?: string | null
+          prodRestockDate?: string | null
+          prodShortName?: string | null
+          prodSku?: string | null
           prodSlaborice1?: number | null
           prodSlabprice2?: number | null
           prodSlabprice3?: number | null
           prodSlabprice4?: number | null
           prodSlabprice5?: number | null
           prodStatus?: boolean | null
+          prodSubcategory?: string | null
           prodType?: string | null
           prodUnitweight?: number | null
           prodVariableprice?: number | null
@@ -934,6 +952,38 @@ export type Database = {
             columns: ["reports_to"]
             isOneToOne: false
             referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      userFavoriteCategories: {
+        Row: {
+          category: string
+          created_at: string | null
+          id: string
+          subcategory: string | null
+          userId: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          id?: string
+          subcategory?: string | null
+          userId?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          id?: string
+          subcategory?: string | null
+          userId?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "userFavoriteCategories_userId_fkey"
+            columns: ["userId"]
+            isOneToOne: false
+            referencedRelation: "user_management"
             referencedColumns: ["id"]
           },
         ]

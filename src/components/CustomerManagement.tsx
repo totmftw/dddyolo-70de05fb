@@ -24,33 +24,34 @@ interface CustomerExcelData {
 
 const CustomerManagement = () => {
     const [customers, setCustomers] = useState([]);
-    const [custBusinessname, setCustBusinessname] = useState('');
-    const [custOwnername, setCustOwnername] = useState('');
-    const [custPhone, setCustPhone] = useState('');
-    const [custWhatsapp, setCustWhatsapp] = useState('');
-    const [custOwnerphone, setCustOwnerphone] = useState('');
-    const [custOwnerwhatsapp, setCustOwnerwhatsapp] = useState('');
-    const [custEmail, setCustEmail] = useState('');
-    const [custOwneremail, setCustOwneremail] = useState('');
-    const [custType, setCustType] = useState('');
-    const [custAddress, setCustAddress] = useState('');
-    const [custProvince, setCustProvince] = useState('');
-    const [custCity, setCustCity] = useState('');
-    const [custPincode, setCustPincode] = useState('');
-    const [custGST, setCustGST] = useState('');
-    const [custRemarks, setCustRemarks] = useState('');
-    const [custStatus, setCustStatus] = useState('');
-    const [custCreditperiod, setCustCreditperiod] = useState('');
+    const [filteredCustomers, setFilteredCustomers] = useState([]);
+    const [showAddForm, setShowAddForm] = useState(false);
+    const [showEditForm, setShowEditForm] = useState(false);
+    const [formData, setFormData] = useState({
+        businessName: '',
+        ownerName: '',
+        phone: '',
+        whatsapp: '',
+        ownerPhone: '',
+        ownerWhatsapp: '',
+        email: '',
+        ownerEmail: '',
+        type: '',
+        address: '',
+        province: '',
+        city: '',
+        pincode: '',
+        gst: '',
+        remarks: '',
+        status: '',
+        creditPeriod: '',
+    });
     const [selectedCustomerId, setSelectedCustomerId] = useState(null);
     const [userRole, setUserRole] = useState('');
     const [campaigns, setCampaigns] = useState([]);
-    const [newCampaignName, setNewCampaignName] = useState('');
-    const [newCampaignContent, setNewCampaignContent] = useState('');
-    const [abTestContent, setAbTestContent] = useState('');
-    const [filterCriteria, setFilterCriteria] = useState('');
-    const [filteredCustomers, setFilteredCustomers] = useState([]);
+    const [newCampaign, setNewCampaign] = useState({ name: '', content: '' });
+    const [abTest, setAbTest] = useState({ content: '' });
     const [followUps, setFollowUps] = useState([]);
-    const [showAddCustomerForm, setShowAddCustomerForm] = useState(false);
 
     useEffect(() => {
         fetchCustomers();
@@ -92,30 +93,30 @@ const CustomerManagement = () => {
             .from('CustomerMaster')
             .insert([
                 {
-                    businessname: custBusinessname,
-                    ownername: custOwnername,
-                    phone: custPhone,
-                    whatsapp: custWhatsapp,
-                    ownerphone: custOwnerphone,
-                    ownerwhatsapp: custOwnerwhatsapp,
-                    email: custEmail,
-                    owneremail: custOwneremail,
-                    type: custType,
-                    address: custAddress,
-                    province: custProvince,
-                    city: custCity,
-                    pincode: custPincode,
-                    gst: custGST,
-                    remarks: custRemarks,
-                    status: custStatus,
-                    creditperiod: custCreditperiod,
+                    businessname: formData.businessName,
+                    ownername: formData.ownerName,
+                    phone: formData.phone,
+                    whatsapp: formData.whatsapp,
+                    ownerphone: formData.ownerPhone,
+                    ownerwhatsapp: formData.ownerWhatsapp,
+                    email: formData.email,
+                    owneremail: formData.ownerEmail,
+                    type: formData.type,
+                    address: formData.address,
+                    province: formData.province,
+                    city: formData.city,
+                    pincode: formData.pincode,
+                    gst: formData.gst,
+                    remarks: formData.remarks,
+                    status: formData.status,
+                    creditperiod: formData.creditPeriod,
                 },
             ]);
         if (error) console.error('Error adding customer:', error);
         else {
             fetchCustomers();
-            clearFields();
-            setShowAddCustomerForm(false);
+            resetFormData();
+            setShowAddForm(false);
         }
     };
 
@@ -128,23 +129,26 @@ const CustomerManagement = () => {
         if (error) console.error('Error fetching customer:', error);
         else {
             setSelectedCustomerId(id);
-            setCustBusinessname(data.businessname);
-            setCustOwnername(data.ownername);
-            setCustPhone(data.phone);
-            setCustWhatsapp(data.whatsapp);
-            setCustOwnerphone(data.ownerphone);
-            setCustOwnerwhatsapp(data.ownerwhatsapp);
-            setCustEmail(data.email);
-            setCustOwneremail(data.owneremail);
-            setCustType(data.type);
-            setCustAddress(data.address);
-            setCustProvince(data.province);
-            setCustCity(data.city);
-            setCustPincode(data.pincode);
-            setCustGST(data.gst);
-            setCustRemarks(data.remarks);
-            setCustStatus(data.status);
-            setCustCreditperiod(data.creditperiod);
+            setFormData({
+                businessName: data.businessname,
+                ownerName: data.ownername,
+                phone: data.phone,
+                whatsapp: data.whatsapp,
+                ownerPhone: data.ownerphone,
+                ownerWhatsapp: data.ownerwhatsapp,
+                email: data.email,
+                ownerEmail: data.owneremail,
+                type: data.type,
+                address: data.address,
+                province: data.province,
+                city: data.city,
+                pincode: data.pincode,
+                gst: data.gst,
+                remarks: data.remarks,
+                status: data.status,
+                creditPeriod: data.creditperiod,
+            });
+            setShowEditForm(true);
         }
     };
 
@@ -152,41 +156,41 @@ const CustomerManagement = () => {
         const { error } = await supabase
             .from('CustomerMaster')
             .update({
-                businessname: custBusinessname,
-                ownername: custOwnername,
-                phone: custPhone,
-                whatsapp: custWhatsapp,
-                ownerphone: custOwnerphone,
-                ownerwhatsapp: custOwnerwhatsapp,
-                email: custEmail,
-                owneremail: custOwneremail,
-                type: custType,
-                address: custAddress,
-                province: custProvince,
-                city: custCity,
-                pincode: custPincode,
-                gst: custGST,
-                remarks: custRemarks,
-                status: custStatus,
-                creditperiod: custCreditperiod,
+                businessname: formData.businessName,
+                ownername: formData.ownerName,
+                phone: formData.phone,
+                whatsapp: formData.whatsapp,
+                ownerphone: formData.ownerPhone,
+                ownerwhatsapp: formData.ownerWhatsapp,
+                email: formData.email,
+                owneremail: formData.ownerEmail,
+                type: formData.type,
+                address: formData.address,
+                province: formData.province,
+                city: formData.city,
+                pincode: formData.pincode,
+                gst: formData.gst,
+                remarks: formData.remarks,
+                status: formData.status,
+                creditperiod: formData.creditPeriod,
             })
             .eq('id', selectedCustomerId);
         if (error) console.error('Error updating customer:', error);
         else {
             fetchCustomers();
-            clearFields();
-            setSelectedCustomerId(null);
+            resetFormData();
+            setShowEditForm(false);
         }
     };
 
     const addCampaign = async () => {
         const { error } = await supabase
             .from('Campaigns')
-            .insert([{ campaign_name: newCampaignName, content: newCampaignContent }]);
+            .insert([{ campaign_name: newCampaign.name, content: newCampaign.content }]);
         if (error) console.error('Error adding campaign:', error);
         else {
             fetchCampaigns();
-            clearCampaignFields();
+            setNewCampaign({ name: '', content: '' });
         }
     };
 
@@ -198,29 +202,8 @@ const CustomerManagement = () => {
         else {
             const testGroup = data.filter(customer => customer.id % 2 === 0);
             const controlGroup = data.filter(customer => customer.id % 2 !== 0);
-            await sendCampaign(testGroup, newCampaignName, newCampaignContent);
-            await sendCampaign(controlGroup, 'A/B Test', abTestContent);
-        }
-    };
-
-    const filterCustomers = async () => {
-        const { data, error } = await supabase
-            .from('CustomerMaster')
-            .select('*')
-            .ilike('name', `%${filterCriteria}%`);
-        if (error) console.error('Error filtering customers:', error);
-        else setFilteredCustomers(data);
-    };
-
-    const setupFollowUps = async () => {
-        const { data, error } = await supabase
-            .from('CustomerMaster')
-            .select('*');
-        if (error) console.error('Error fetching customers for follow-ups:', error);
-        else {
-            const followUpCustomers = data.filter(customer => customer.id % 2 === 0);
-            await sendCampaign(followUpCustomers, 'Follow-up', 'This is a follow-up campaign.');
-            setFollowUps(followUpCustomers);
+            await sendCampaign(testGroup, newCampaign.name, newCampaign.content);
+            await sendCampaign(controlGroup, 'A/B Test', abTest.content);
         }
     };
 
@@ -230,29 +213,39 @@ const CustomerManagement = () => {
         });
     };
 
-    const clearFields = () => {
-        setCustBusinessname('');
-        setCustOwnername('');
-        setCustPhone('');
-        setCustWhatsapp('');
-        setCustOwnerphone('');
-        setCustOwnerwhatsapp('');
-        setCustEmail('');
-        setCustOwneremail('');
-        setCustType('');
-        setCustAddress('');
-        setCustProvince('');
-        setCustCity('');
-        setCustPincode('');
-        setCustGST('');
-        setCustRemarks('');
-        setCustStatus('');
-        setCustCreditperiod('');
+    const handleFilter = (filterCriteria) => {
+        const filteredCustomers = customers.filter(customer =>
+            customer.businessname.toLowerCase().includes(filterCriteria.toLowerCase()) ||
+            customer.ownername.toLowerCase().includes(filterCriteria.toLowerCase()) ||
+            customer.email.toLowerCase().includes(filterCriteria.toLowerCase())
+        );
+        setFilteredCustomers(filteredCustomers);
     };
 
-    const clearCampaignFields = () => {
-        setNewCampaignName('');
-        setNewCampaignContent('');
+    const handleInputChange = (event) => {
+        setFormData({ ...formData, [event.target.name]: event.target.value });
+    };
+
+    const resetFormData = () => {
+        setFormData({
+            businessName: '',
+            ownerName: '',
+            phone: '',
+            whatsapp: '',
+            ownerPhone: '',
+            ownerWhatsapp: '',
+            email: '',
+            ownerEmail: '',
+            type: '',
+            address: '',
+            province: '',
+            city: '',
+            pincode: '',
+            gst: '',
+            remarks: '',
+            status: '',
+            creditPeriod: '',
+        });
     };
 
     const downloadTemplate = () => {
@@ -326,97 +319,247 @@ const CustomerManagement = () => {
     };
 
     return (
-        <div>
+        <div className="customer-management">
             <h2>Customer Management</h2>
-            {userRole === 'Admin' ? (
-                <button onClick={() => setShowAddCustomerForm(true)}>Add Customer</button>
-            ) : null}
-            {showAddCustomerForm && (
-                <div className="customer-form">
-                    <h3>Add Customer</h3>
-                    <input type="text" value={custBusinessname} onChange={(e) => setCustBusinessname(e.target.value)} placeholder="Business Name" required />
-                    <input type="text" value={custOwnername} onChange={(e) => setCustOwnername(e.target.value)} placeholder="Owner Name" required />
-                    <input type="tel" value={custPhone} onChange={(e) => setCustPhone(e.target.value)} placeholder="Phone" required />
-                    <input type="tel" value={custWhatsapp} onChange={(e) => setCustWhatsapp(e.target.value)} placeholder="WhatsApp" required />
-                    <input type="tel" value={custOwnerphone} onChange={(e) => setCustOwnerphone(e.target.value)} placeholder="Owner Phone" required />
-                    <input type="tel" value={custOwnerwhatsapp} onChange={(e) => setCustOwnerwhatsapp(e.target.value)} placeholder="Owner WhatsApp" required />
-                    <input type="email" value={custEmail} onChange={(e) => setCustEmail(e.target.value)} placeholder="Email" required />
-                    <input type="text" value={custOwneremail} onChange={(e) => setCustOwneremail(e.target.value)} placeholder="Owner Email" required />
-                    <input type="text" value={custType} onChange={(e) => setCustType(e.target.value)} placeholder="Customer Type" required />
-                    <input type="text" value={custAddress} onChange={(e) => setCustAddress(e.target.value)} placeholder="Address" required />
-                    <input type="text" value={custProvince} onChange={(e) => setCustProvince(e.target.value)} placeholder="Province" required />
-                    <input type="text" value={custCity} onChange={(e) => setCustCity(e.target.value)} placeholder="City" required />
-                    <input type="tel" value={custPincode} onChange={(e) => setCustPincode(e.target.value)} placeholder="Pincode" required />
-                    <input type="text" value={custGST} onChange={(e) => setCustGST(e.target.value)} placeholder="GST" />
-                    <textarea value={custRemarks} onChange={(e) => setCustRemarks(e.target.value)} placeholder="Remarks"></textarea>
-                    <select value={custStatus} onChange={(e) => setCustStatus(e.target.value)}>
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                    </select>
-                    <input type="number" value={custCreditperiod} onChange={(e) => setCustCreditperiod(e.target.value)} placeholder="Credit Period" />
-                    <button onClick={addCustomer}>Submit</button>
-                    <button onClick={() => setShowAddCustomerForm(false)}>Cancel</button>
+
+            {/* SECTION: CUSTOMER LIST */}
+            <section>
+                <h3>Customer Directory</h3>
+                <div className="filters">
+                    <input
+                        type="text"
+                        placeholder="Filter customers..."
+                        onChange={(e) => handleFilter(e.target.value)}
+                    />
+                    <button onClick={() => setShowAddForm(true)}>Add Customer</button>
+                </div>
+
+                {/* Customer Table */}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filteredCustomers.map(customer => (
+                            <tr key={customer.id}>
+                                <td>{customer.businessname}</td>
+                                <td>{customer.email}</td>
+                                <td>{customer.type}</td>
+                                <td>{customer.status}</td>
+                                <td>
+                                    <button onClick={() => editCustomer(customer.id)}>Edit</button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </section>
+
+            {/* SECTION: ADD/EDIT FORM (Modal or Collapsible Section) */}
+            {(showAddForm || showEditForm) && (
+                <div className="form-container">
+                    <form onSubmit={showEditForm ? updateCustomer : addCustomer}>
+                        <input
+                            type="text"
+                            name="businessName"
+                            value={formData.businessName}
+                            onChange={handleInputChange}
+                            placeholder="Business Name"
+                            required
+                        />
+                        <input
+                            type="text"
+                            name="ownerName"
+                            value={formData.ownerName}
+                            onChange={handleInputChange}
+                            placeholder="Owner Name"
+                            required
+                        />
+                        <input
+                            type="tel"
+                            name="phone"
+                            value={formData.phone}
+                            onChange={handleInputChange}
+                            placeholder="Phone"
+                            required
+                        />
+                        <input
+                            type="tel"
+                            name="whatsapp"
+                            value={formData.whatsapp}
+                            onChange={handleInputChange}
+                            placeholder="WhatsApp"
+                            required
+                        />
+                        <input
+                            type="tel"
+                            name="ownerPhone"
+                            value={formData.ownerPhone}
+                            onChange={handleInputChange}
+                            placeholder="Owner Phone"
+                            required
+                        />
+                        <input
+                            type="tel"
+                            name="ownerWhatsapp"
+                            value={formData.ownerWhatsapp}
+                            onChange={handleInputChange}
+                            placeholder="Owner WhatsApp"
+                            required
+                        />
+                        <input
+                            type="email"
+                            name="email"
+                            value={formData.email}
+                            onChange={handleInputChange}
+                            placeholder="Email"
+                            required
+                        />
+                        <input
+                            type="text"
+                            name="ownerEmail"
+                            value={formData.ownerEmail}
+                            onChange={handleInputChange}
+                            placeholder="Owner Email"
+                            required
+                        />
+                        <input
+                            type="text"
+                            name="type"
+                            value={formData.type}
+                            onChange={handleInputChange}
+                            placeholder="Customer Type"
+                            required
+                        />
+                        <input
+                            type="text"
+                            name="address"
+                            value={formData.address}
+                            onChange={handleInputChange}
+                            placeholder="Address"
+                            required
+                        />
+                        <input
+                            type="text"
+                            name="province"
+                            value={formData.province}
+                            onChange={handleInputChange}
+                            placeholder="Province"
+                            required
+                        />
+                        <input
+                            type="text"
+                            name="city"
+                            value={formData.city}
+                            onChange={handleInputChange}
+                            placeholder="City"
+                            required
+                        />
+                        <input
+                            type="tel"
+                            name="pincode"
+                            value={formData.pincode}
+                            onChange={handleInputChange}
+                            placeholder="Pincode"
+                            required
+                        />
+                        <input
+                            type="text"
+                            name="gst"
+                            value={formData.gst}
+                            onChange={handleInputChange}
+                            placeholder="GST"
+                        />
+                        <textarea
+                            name="remarks"
+                            value={formData.remarks}
+                            onChange={handleInputChange}
+                            placeholder="Remarks"
+                        />
+                        <select
+                            name="status"
+                            value={formData.status}
+                            onChange={handleInputChange}
+                        >
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                        <input
+                            type="number"
+                            name="creditPeriod"
+                            value={formData.creditPeriod}
+                            onChange={handleInputChange}
+                            placeholder="Credit Period"
+                        />
+                        <button type="submit">
+                            {showEditForm ? 'Update Customer' : 'Add Customer'}
+                        </button>
+                        <button onClick={() => {
+                            setShowAddForm(false);
+                            setShowEditForm(false);
+                            resetFormData();
+                        }}>Cancel</button>
+                    </form>
                 </div>
             )}
-            {selectedCustomerId && userRole === 'Admin' ? (
-                <button onClick={updateCustomer}>Update Customer</button>
-            ) : null}
-            <div>
+
+            {/* SECTION: MARKETING AUTOMATION */}
+            <section>
                 <h3>Marketing Automation</h3>
-                <h4>Campaign Management</h4>
-                <input type="text" value={newCampaignName} onChange={(e) => setNewCampaignName(e.target.value)} placeholder="Campaign Name" />
-                <textarea value={newCampaignContent} onChange={(e) => setNewCampaignContent(e.target.value)} placeholder="Campaign Content" />
-                <button onClick={addCampaign}>Schedule Campaign</button>
-                <h4>A/B Testing</h4>
-                <input type="text" value={abTestContent} onChange={(e) => setAbTestContent(e.target.value)} placeholder="A/B Test Content" />
-                <button onClick={runABTest}>Run A/B Test</button>
-            </div>
-            <div>
-                <h3>Segmentation & Targeting</h3>
-                <input type="text" value={filterCriteria} onChange={(e) => setFilterCriteria(e.target.value)} placeholder="Filter by behavior, demographics, etc." />
-                <button onClick={filterCustomers}>Filter Customers</button>
-                <ul>
-                    {filteredCustomers.map((customer) => (
-                        <li key={customer.id}>{customer.name} - {customer.email}</li>
-                    ))}
-                </ul>
-            </div>
-            <div>
-                <h3>Lead Nurturing</h3>
-                <button onClick={setupFollowUps}>Setup Automated Follow-Ups</button>
-                <ul>
-                    {followUps.map((customer) => (
-                        <li key={customer.id}>{customer.name} - {customer.email}</li>
-                    ))}
-                </ul>
-            </div>
-            <div>
-                <h3>Campaign Management</h3>
-                <h4>Existing Campaigns</h4>
-                <ul>
-                    {campaigns.map((campaign) => (
-                        <li key={campaign.id}>{campaign.campaign_name}</li>
-                    ))}
-                </ul>
-            </div>
-            <div>
-                <h3>Customer List</h3>
-                <ul>
-                    {customers.map((customer) => (
-                        <li key={customer.id}>
-                            {customer.businessname} - {customer.email} 
-                            {userRole === 'Admin' ? (
-                                <button onClick={() => editCustomer(customer.id)}>Edit</button>
-                            ) : null}
-                        </li>
-                    ))}
-                </ul>
-            </div>
-            <div>
-                <h3>Import Customers</h3>
-                <button onClick={downloadTemplate}>Download Excel Template</button>
-                <input type="file" accept=".xlsx" onChange={handleFileUpload} />
-            </div>
+                {/* CAMPAIGN CREATION */}
+                <div>
+                    <input
+                        type="text"
+                        placeholder="Campaign Name"
+                        value={newCampaign.name}
+                        onChange={(e) => setNewCampaign({ ...newCampaign, name: e.target.value })}
+                    />
+                    <textarea
+                        placeholder="Campaign Content"
+                        value={newCampaign.content}
+                        onChange={(e) => setNewCampaign({ ...newCampaign, content: e.target.value })}
+                    />
+                    <button onClick={addCampaign}>Create Campaign</button>
+                </div>
+
+                {/* A/B TEST SECTION */}
+                <div>
+                    <input
+                        type="text"
+                        placeholder="A/B Test Content"
+                        value={abTest.content}
+                        onChange={(e) => setAbTest({ ...abTest, content: e.target.value })}
+                    />
+                    <button onClick={runABTest}>Run A/B Test</button>
+                </div>
+            </section>
+
+            {/* SECTION: SEGMENTATION */}
+            <section>
+                <h3>Customer Segmentation</h3>
+                <div>
+                    <button onClick={() => handleFilter('')}>Segment Customers</button>
+                </div>
+            </section>
+
+            {/* SECTION: BULK MANAGEMENT */}
+            <section>
+                <h3>Import/Export</h3>
+                <div>
+                    <button onClick={downloadTemplate}>Download Template</button>
+                    <input
+                        type="file"
+                        accept=".xlsx"
+                        onChange={handleFileUpload}
+                    />
+                </div>
+            </section>
         </div>
     );
 };

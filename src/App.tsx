@@ -8,6 +8,11 @@ import NotFound from "./pages/NotFound";
 import React from 'react';
 import Sidebar from './components/Dashboard/Sidebar';
 import DashboardGrid from './components/Dashboard/DashboardGrid';
+import ProductManagement from './components/ProductManagement';
+import CustomerManagement from './components/CustomerManagement';
+import InventoryManagement from './components/InventoryManagement';
+import PaymentTracking from './components/PaymentTracking';
+import UserRoleManagement from './components/UserRoleManagement';
 import './App.css'; // Add any global styles
 
 const queryClient = new QueryClient();
@@ -18,19 +23,18 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={
-            <div className="app-container">
-              <Sidebar />
-              <div className="main-content">
-                <DashboardGrid />
-              </div>
-            </div>
-          } />
-          <Route path="/index" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <Sidebar />
+        <div className="main-content">
+          <Routes>
+            <Route path="/" element={<DashboardGrid />} />
+            <Route path="/products" element={<ProductManagement />} />
+            <Route path="/customers" element={<CustomerManagement />} />
+            <Route path="/inventory" element={<InventoryManagement />} />
+            <Route path="/payments" element={<PaymentTracking />} />
+            <Route path="/roles" element={<UserRoleManagement />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </div>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

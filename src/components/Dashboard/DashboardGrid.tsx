@@ -1,10 +1,12 @@
 import React from 'react';
-import { GridLayout } from 'react-grid-layout';
+import ReactGridLayout from 'react-grid-layout';
 import KPIWidget from './widgets/KPIWidget';
 import RevenueChart from './widgets/RevenueChart';
 import TrafficWidget from './widgets/TrafficWidget';
 import SalesTable from './widgets/SalesTable';
-import './DashboardGrid.css'; // Add styles for the grid
+import 'react-grid-layout/css/styles.css';
+import 'react-resizable/css/styles.css';
+import './DashboardGrid.css';
 
 const DashboardGrid = () => {
     const layout = [
@@ -15,12 +17,30 @@ const DashboardGrid = () => {
     ];
 
     return (
-        <GridLayout className="layout" layout={layout} cols={6} rowHeight={30} width={1200}>
-            <div key="kpi"><KPIWidget /></div>
-            <div key="revenue"><RevenueChart /></div>
-            <div key="traffic"><TrafficWidget /></div>
-            <div key="sales"><SalesTable /></div>
-        </GridLayout>
+        <div className="dashboard-container">
+            <ReactGridLayout
+                className="layout"
+                layout={layout}
+                cols={6}
+                rowHeight={100}
+                width={1200}
+                isDraggable={false}
+                isResizable={false}
+            >
+                <div key="kpi">
+                    <KPIWidget />
+                </div>
+                <div key="revenue">
+                    <RevenueChart />
+                </div>
+                <div key="traffic">
+                    <TrafficWidget />
+                </div>
+                <div key="sales">
+                    <SalesTable />
+                </div>
+            </ReactGridLayout>
+        </div>
     );
 };
 

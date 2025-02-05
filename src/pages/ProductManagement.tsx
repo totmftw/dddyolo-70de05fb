@@ -73,7 +73,7 @@ const ProductManagement = () => {
         'Dining Room': ['Dining Tables', 'Dining Chairs', 'Buffets', 'Bar Cabinets'],
         'Kitchen': ['Kitchen Islands', 'Bar Stools', 'Storage Units', 'Cabinets'],
         'Bathroom': ['Vanities', 'Mirrors', 'Storage Units', 'Accessories'],
-        'Outdoor': ['Garden Furniture', 'Planters', 'Decor', 'Lighting'],
+        'Outdoor': ['Garden Furniture', 'Planters', 'Decor', 'Lighting', 'Doormats'],
         'Office': ['Desks', 'Office Chairs', 'Storage', 'Accessories']
     };
 
@@ -390,30 +390,78 @@ const ProductManagement = () => {
                     {/* Measurements */}
                     <div className="space-y-4">
                         <h3 className="font-semibold text-lg">Measurements</h3>
-                        <input
-                            type="number"
-                            name="prodUnitweight"
-                            value={formData.prodUnitweight || ''}
-                            onChange={handleInputChange}
-                            placeholder="Unit Weight (kg)"
-                            className="w-full p-2 border rounded"
-                        />
-                        <input
-                            type="number"
-                            name="prodGrossweight"
-                            value={formData.prodGrossweight || ''}
-                            onChange={handleInputChange}
-                            placeholder="Gross Weight (kg)"
-                            className="w-full p-2 border rounded"
-                        />
-                        <input
-                            type="number"
-                            name="prodNettweight"
-                            value={formData.prodNettweight || ''}
-                            onChange={handleInputChange}
-                            placeholder="Net Weight (kg)"
-                            className="w-full p-2 border rounded"
-                        />
+                        <div className="grid grid-cols-1 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Box Measurements (L x W x H in cm)</label>
+                                <div className="grid grid-cols-3 gap-2">
+                                    <input
+                                        type="number"
+                                        name="boxLength"
+                                        placeholder="Length"
+                                        className="w-full p-2 border rounded"
+                                    />
+                                    <input
+                                        type="number"
+                                        name="boxWidth"
+                                        placeholder="Width"
+                                        className="w-full p-2 border rounded"
+                                    />
+                                    <input
+                                        type="number"
+                                        name="boxHeight"
+                                        placeholder="Height"
+                                        className="w-full p-2 border rounded"
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Product Dimensions (L x W x H in cm)</label>
+                                <div className="grid grid-cols-3 gap-2">
+                                    <input
+                                        type="number"
+                                        name="prodLength"
+                                        placeholder="Length"
+                                        className="w-full p-2 border rounded"
+                                    />
+                                    <input
+                                        type="number"
+                                        name="prodWidth"
+                                        placeholder="Width"
+                                        className="w-full p-2 border rounded"
+                                    />
+                                    <input
+                                        type="number"
+                                        name="prodHeight"
+                                        placeholder="Height"
+                                        className="w-full p-2 border rounded"
+                                    />
+                                </div>
+                            </div>
+                            <input
+                                type="number"
+                                name="prodUnitweight"
+                                value={formData.prodUnitweight || ''}
+                                onChange={handleInputChange}
+                                placeholder="Unit Weight (kg)"
+                                className="w-full p-2 border rounded"
+                            />
+                            <input
+                                type="number"
+                                name="prodGrossweight"
+                                value={formData.prodGrossweight || ''}
+                                onChange={handleInputChange}
+                                placeholder="Gross Weight (kg)"
+                                className="w-full p-2 border rounded"
+                            />
+                            <input
+                                type="number"
+                                name="prodNettweight"
+                                value={formData.prodNettweight || ''}
+                                onChange={handleInputChange}
+                                placeholder="Net Weight (kg)"
+                                className="w-full p-2 border rounded"
+                            />
+                        </div>
                     </div>
                 </div>
 

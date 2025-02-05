@@ -15,7 +15,7 @@ const Sidebar = () => {
                 <li><Link to="/payments">Payment Tracking</Link></li>
                 <li><Link to="/roles">User Role Management</Link></li>
                 <li><Link to="/products">Product Management</Link></li>
-                <li><Link to="/product-display">Product Display</Link></li>
+                <li><Link to="/products">Product Display</Link></li>
                 <li><Link to="/product-bulk-manage">Product Bulk Manage</Link></li>
             </ul>
         </div>

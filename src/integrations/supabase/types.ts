@@ -380,6 +380,38 @@ export type Database = {
           },
         ]
       }
+      FeaturePermissions: {
+        Row: {
+          created_at: string | null
+          feature_name: string
+          id: string
+          parent_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          feature_name: string
+          id?: string
+          parent_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          feature_name?: string
+          id?: string
+          parent_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "FeaturePermissions_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "FeaturePermissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoice_table_config: {
         Row: {
           column_order: string[] | null

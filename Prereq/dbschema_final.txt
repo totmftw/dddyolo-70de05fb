@@ -1,37 +1,164 @@
-CustomerMaster Table:
-- id: String (Primary Key)
-- name: String
-- email: String
-- phone: String
-- address: String
+| table_name              | column_name           | data_type                |
+| ----------------------- | --------------------- | ------------------------ |
+| Accounts                | id                    | integer                  |
+| Accounts                | account_id            | character varying        |
+| Accounts                | financials            | text                     |
+| Accounts                | contracts             | text                     |
+| Accounts                | created_at            | timestamp with time zone |
+| Accounts                | updated_at            | timestamp with time zone |
+| Campaigns               | id                    | integer                  |
+| Campaigns               | campaign_name         | character varying        |
+| Campaigns               | target_audience       | text                     |
+| Campaigns               | content               | text                     |
+| Campaigns               | created_at            | timestamp with time zone |
+| Campaigns               | updated_at            | timestamp with time zone |
+| CustomerMaster          | id                    | bigint                   |
+| CustomerMaster          | name                  | character varying        |
+| CustomerMaster          | email                 | character varying        |
+| CustomerMaster          | phone                 | character varying        |
+| CustomerMaster          | address               | text                     |
+| CustomerMaster          | created_at            | timestamp with time zone |
+| CustomerMaster          | updated_at            | timestamp with time zone |
+| FeaturePermissions      | id                    | uuid                     |
+| FeaturePermissions      | feature_name          | character varying        |
+| FeaturePermissions      | parent_id             | uuid                     |
+| FeaturePermissions      | created_at            | timestamp with time zone |
+| FeaturePermissions      | updated_at            | timestamp with time zone |
+| custom_permissions      | id                    | uuid                     |
+| custom_permissions      | role                  | USER-DEFINED             |
+| custom_permissions      | resource              | text                     |
+| custom_permissions      | permission_name       | text                     |
+| custom_permissions      | permission_value      | boolean                  |
+| custom_permissions      | created_by            | uuid                     |
+| custom_permissions      | created_at            | timestamp with time zone |
+| custom_permissions      | updated_at            | timestamp with time zone |
+| customerMaster          | id                    | bigint                   |
+| customerMaster          | custBusinessname      | text                     |
+| customerMaster          | custOwnername         | text                     |
+| customerMaster          | custPhone             | bigint                   |
+| customerMaster          | custWhatsapp          | bigint                   |
+| customerMaster          | custOwnerphone        | bigint                   |
+| customerMaster          | custOwnerwhatsapp     | bigint                   |
+| customerMaster          | custEmail             | text                     |
+| customerMaster          | custOwneremail        | text                     |
+| customerMaster          | custType              | character varying        |
+| customerMaster          | custAddress           | text                     |
+| customerMaster          | custProvince          | text                     |
+| customerMaster          | custCity              | text                     |
+| customerMaster          | custPincode           | bigint                   |
+| customerMaster          | custGST               | text                     |
+| customerMaster          | custRemarks           | text                     |
+| customerMaster          | custStatus            | character varying        |
+| customerMaster          | custCreditperiod      | bigint                   |
+| customer_ledger         | id                    | integer                  |
+| customer_ledger         | customer_id           | integer                  |
+| customer_ledger         | fiscal_year           | character varying        |
+| customer_ledger         | transaction_type      | character varying        |
+| customer_ledger         | amount                | numeric                  |
+| customer_ledger         | balance               | numeric                  |
+| customer_ledger_balance | custId                | bigint                   |
+| customer_ledger_balance | custBusinessname      | text                     |
+| customer_ledger_balance | custWhatsapp          | bigint                   |
+| customer_ledger_balance | balance               | numeric                  |
+| customer_ledger_balance | last_transaction_date | timestamp with time zone |
+| dashboard_config        | id                    | integer                  |
+| dashboard_config        | user_id               | text                     |
+| dashboard_config        | layout                | jsonb                    |
+| dashboard_config        | widgets               | jsonb                    |
+| dashboard_layouts       | id                    | uuid                     |
+| dashboard_layouts       | layout                | jsonb                    |
+| dashboard_layouts       | created_by            | uuid                     |
+| dashboard_layouts       | is_active             | boolean                  |
+| dashboard_layouts       | created_at            | timestamp with time zone |
+| dashboard_layouts       | updated_at            | timestamp with time zone |
+| dashboard_metrics       | id                    | integer                  |
+| dashboard_metrics       | metric_name           | text                     |
+| dashboard_metrics       | metric_value          | numeric                  |
+| dashboard_metrics       | metric_type           | text                     |
+| dashboard_metrics       | metric_status         | text                     |
+| dashboard_metrics       | created_at            | timestamp with time zone |
+| dashboard_metrics       | updated_at            | timestamp with time zone |
+| expenses                | expenseid             | uuid                     |
+| expenses                | date                  | date                     |
+| expenses                | amount                | integer                  |
+| expenses                | description           | text                     |
+| feature_permissions     | id                    | uuid                     |
+| feature_permissions     | role                  | USER-DEFINED             |
+| feature_permissions     | feature_path          | text                     |
+| feature_permissions     | feature_name          | text                     |
+| feature_permissions     | parent_id             | uuid                     |
+| feature_permissions     | is_enabled            | boolean                  |
+| feature_permissions     | created_at            | timestamp with time zone |
+| feature_permissions     | updated_at            | timestamp with time zone |
+| financial_year_ranges   | financial_year        | text                     |
+| financial_year_ranges   | year_start            | timestamp with time zone |
+| financial_year_ranges   | year_end              | timestamp with time zone |
+| invoiceTable            | invId                 | bigint                   |
+| invoiceTable            | invCustid             | bigint                   |
+| invoiceTable            | invNumber             | text                     |
+| invoiceTable            | invDate               | date                     |
+| invoiceTable            | invDuedate            | date                     |
+| invoiceTable            | invValue              | numeric                  |
+| invoiceTable            | invGst                | numeric                  |
 
-InvoiceTable:
-- invId: String (Primary Key)
-- invCustid: String (Foreign Key referencing CustomerMaster.id)
-- amount: Double
-- date: Timestamp
-- status: String (e.g., "Paid", "Pending")
 
-PaymentLedger Table:
-- paymentId: String (Primary Key)
-- custId: String (Foreign Key referencing CustomerMaster.id)
-- invId: String (Foreign Key referencing InvoiceTable.invId)
-- amount: Double
-- date: Timestamp
 
-PaymentTransactions Table:
-- transactionId: String (Primary Key)
-- invId: String (Foreign Key referencing InvoiceTable.invId)
-- amount: Double
-- date: Timestamp
 
-FeaturePermissions Table:
-- id: String (Primary Key)
-- parent_id: String (Foreign Key referencing itself)
-- feature_name: String
 
-UserProfiles Table:
-- id: String (Primary Key)
-- name: String
-- email: String
-- reports_to: String (Foreign Key referencing UserProfiles.id)
+Relationships:
+[
+  {
+    "child_table": "feature_permissions",
+    "child_column": "parent_id",
+    "parent_table": "feature_permissions",
+    "parent_column": "id"
+  },
+  {
+    "child_table": "FeaturePermissions",
+    "child_column": "parent_id",
+    "parent_table": "FeaturePermissions",
+    "parent_column": "id"
+  },
+  {
+    "child_table": "invoiceTable",
+    "child_column": "invCustid",
+    "parent_table": "customerMaster",
+    "parent_column": "id"
+  },
+  {
+    "child_table": "user_profiles",
+    "child_column": "reports_to",
+    "parent_table": "user_profiles",
+    "parent_column": "id"
+  },
+  {
+    "child_table": "paymentLedger",
+    "child_column": "custId",
+    "parent_table": "customerMaster",
+    "parent_column": "id"
+  },
+  {
+    "child_table": "paymentLedger",
+    "child_column": "invId",
+    "parent_table": "invoiceTable",
+    "parent_column": "invId"
+  },
+  {
+    "child_table": "customer_ledger",
+    "child_column": "customer_id",
+    "parent_table": "customerMaster",
+    "parent_column": "id"
+  },
+  {
+    "child_table": "paymentTransactions",
+    "child_column": "invId",
+    "parent_table": "invoiceTable",
+    "parent_column": "invId"
+  },
+  {
+    "child_table": "invoiceTable",
+    "child_column": "invCustid",
+    "parent_table": "customerMaster",
+    "parent_column": "id"
+  }
+]

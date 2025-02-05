@@ -1,12 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
+import * as XLSX from 'xlsx';
 
 const CustomerManagement = () => {
     const [customers, setCustomers] = useState([]);
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [phone, setPhone] = useState('');
-    const [address, setAddress] = useState('');
+    const [custBusinessname, setCustBusinessname] = useState('');
+    const [custOwnername, setCustOwnername] = useState('');
+    const [custPhone, setCustPhone] = useState('');
+    const [custWhatsapp, setCustWhatsapp] = useState('');
+    const [custOwnerphone, setCustOwnerphone] = useState('');
+    const [custOwnerwhatsapp, setCustOwnerwhatsapp] = useState('');
+    const [custEmail, setCustEmail] = useState('');
+    const [custOwneremail, setCustOwneremail] = useState('');
+    const [custType, setCustType] = useState('');
+    const [custAddress, setCustAddress] = useState('');
+    const [custProvince, setCustProvince] = useState('');
+    const [custCity, setCustCity] = useState('');
+    const [custPincode, setCustPincode] = useState('');
+    const [custGST, setCustGST] = useState('');
+    const [custRemarks, setCustRemarks] = useState('');
+    const [custStatus, setCustStatus] = useState('');
+    const [custCreditperiod, setCustCreditperiod] = useState('');
     const [selectedCustomerId, setSelectedCustomerId] = useState(null);
     const [userRole, setUserRole] = useState('');
     const [campaigns, setCampaigns] = useState([]);
@@ -16,6 +30,7 @@ const CustomerManagement = () => {
     const [filterCriteria, setFilterCriteria] = useState('');
     const [filteredCustomers, setFilteredCustomers] = useState([]);
     const [followUps, setFollowUps] = useState([]);
+    const [showAddCustomerForm, setShowAddCustomerForm] = useState(false);
 
     useEffect(() => {
         fetchCustomers();
@@ -55,11 +70,32 @@ const CustomerManagement = () => {
     const addCustomer = async () => {
         const { error } = await supabase
             .from('CustomerMaster')
-            .insert([{ name, email, phone, address }]);
+            .insert([
+                {
+                    businessname: custBusinessname,
+                    ownername: custOwnername,
+                    phone: custPhone,
+                    whatsapp: custWhatsapp,
+                    ownerphone: custOwnerphone,
+                    ownerwhatsapp: custOwnerwhatsapp,
+                    email: custEmail,
+                    owneremail: custOwneremail,
+                    type: custType,
+                    address: custAddress,
+                    province: custProvince,
+                    city: custCity,
+                    pincode: custPincode,
+                    gst: custGST,
+                    remarks: custRemarks,
+                    status: custStatus,
+                    creditperiod: custCreditperiod,
+                },
+            ]);
         if (error) console.error('Error adding customer:', error);
         else {
             fetchCustomers();
             clearFields();
+            setShowAddCustomerForm(false);
         }
     };
 
@@ -72,17 +108,48 @@ const CustomerManagement = () => {
         if (error) console.error('Error fetching customer:', error);
         else {
             setSelectedCustomerId(id);
-            setName(data.name);
-            setEmail(data.email);
-            setPhone(data.phone);
-            setAddress(data.address);
+            setCustBusinessname(data.businessname);
+            setCustOwnername(data.ownername);
+            setCustPhone(data.phone);
+            setCustWhatsapp(data.whatsapp);
+            setCustOwnerphone(data.ownerphone);
+            setCustOwnerwhatsapp(data.ownerwhatsapp);
+            setCustEmail(data.email);
+            setCustOwneremail(data.owneremail);
+            setCustType(data.type);
+            setCustAddress(data.address);
+            setCustProvince(data.province);
+            setCustCity(data.city);
+            setCustPincode(data.pincode);
+            setCustGST(data.gst);
+            setCustRemarks(data.remarks);
+            setCustStatus(data.status);
+            setCustCreditperiod(data.creditperiod);
         }
     };
 
     const updateCustomer = async () => {
         const { error } = await supabase
             .from('CustomerMaster')
-            .update({ name, email, phone, address })
+            .update({
+                businessname: custBusinessname,
+                ownername: custOwnername,
+                phone: custPhone,
+                whatsapp: custWhatsapp,
+                ownerphone: custOwnerphone,
+                ownerwhatsapp: custOwnerwhatsapp,
+                email: custEmail,
+                owneremail: custOwneremail,
+                type: custType,
+                address: custAddress,
+                province: custProvince,
+                city: custCity,
+                pincode: custPincode,
+                gst: custGST,
+                remarks: custRemarks,
+                status: custStatus,
+                creditperiod: custCreditperiod,
+            })
             .eq('id', selectedCustomerId);
         if (error) console.error('Error updating customer:', error);
         else {
@@ -152,10 +219,23 @@ const CustomerManagement = () => {
     };
 
     const clearFields = () => {
-        setName('');
-        setEmail('');
-        setPhone('');
-        setAddress('');
+        setCustBusinessname('');
+        setCustOwnername('');
+        setCustPhone('');
+        setCustWhatsapp('');
+        setCustOwnerphone('');
+        setCustOwnerwhatsapp('');
+        setCustEmail('');
+        setCustOwneremail('');
+        setCustType('');
+        setCustAddress('');
+        setCustProvince('');
+        setCustCity('');
+        setCustPincode('');
+        setCustGST('');
+        setCustRemarks('');
+        setCustStatus('');
+        setCustCreditperiod('');
     };
 
     const clearCampaignFields = () => {
@@ -163,16 +243,110 @@ const CustomerManagement = () => {
         setNewCampaignContent('');
     };
 
+    const downloadTemplate = () => {
+        const templateData = [
+            ["Business Name", "Owner Name", "Phone", "WhatsApp", "Owner Phone", "Owner WhatsApp", "Email", "Owner Email", "Customer Type", "Address", "Province", "City", "Pincode", "GST", "Remarks", "Status", "Credit Period"],
+            // Add empty rows for user to fill in
+        ];
+        const ws = XLSX.utils.aoa_to_sheet(templateData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Customer Template");
+        XLSX.writeFile(wb, "customer_template.xlsx");
+    };
+
+    const handleFileUpload = async (event) => {
+        const file = event.target.files[0];
+        const data = await file.arrayBuffer();
+        const workbook = XLSX.read(data);
+        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+        // Fetch existing customers from the database
+        const { data: existingCustomers, error: fetchError } = await supabase
+            .from('CustomerMaster')
+            .select('*');
+        if (fetchError) {
+            console.error('Error fetching existing customers:', fetchError);
+            return;
+        }
+
+        const existingCustomerEmails = new Set(existingCustomers.map(customer => customer.email));
+        const existingCustomerNames = new Set(existingCustomers.map(customer => customer.name));
+
+        const duplicates = jsonData.filter(customer => 
+            existingCustomerEmails.has(customer.Email) || existingCustomerNames.has(customer.OwnerName)
+        );
+
+        if (duplicates.length > 0) {
+            alert(`The following customers already exist in the database:\n${duplicates.map(c => c.OwnerName).join(', ')}`);
+        }
+
+        // Insert new customers into the database
+        const newCustomers = jsonData.filter(customer => 
+            !existingCustomerEmails.has(customer.Email) && !existingCustomerNames.has(customer.OwnerName)
+        );
+
+        for (const customer of newCustomers) {
+            const { error: insertError } = await supabase
+                .from('CustomerMaster')
+                .insert([{ 
+                    businessname: customer.BusinessName,
+                    ownername: customer.OwnerName,
+                    phone: customer.Phone,
+                    whatsapp: customer.WhatsApp,
+                    ownerphone: customer.OwnerPhone,
+                    ownerwhatsapp: customer.OwnerWhatsApp,
+                    email: customer.Email,
+                    owneremail: customer.OwnerEmail,
+                    type: customer.CustomerType,
+                    address: customer.Address,
+                    province: customer.Province,
+                    city: customer.City,
+                    pincode: customer.Pincode,
+                    gst: customer.GST,
+                    remarks: customer.Remarks,
+                    status: customer.Status,
+                    creditperiod: customer.CreditPeriod,
+                }]);
+            if (insertError) {
+                console.error('Error inserting new customer:', insertError);
+            }
+        }
+    };
+
     return (
         <div>
             <h2>Customer Management</h2>
-            <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Customer Name" />
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
-            <input type="text" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone" />
-            <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Address" />
             {userRole === 'Admin' ? (
-                <button onClick={addCustomer}>Add Customer</button>
+                <button onClick={() => setShowAddCustomerForm(true)}>Add Customer</button>
             ) : null}
+            {showAddCustomerForm && (
+                <div className="customer-form">
+                    <h3>Add Customer</h3>
+                    <input type="text" value={custBusinessname} onChange={(e) => setCustBusinessname(e.target.value)} placeholder="Business Name" required />
+                    <input type="text" value={custOwnername} onChange={(e) => setCustOwnername(e.target.value)} placeholder="Owner Name" required />
+                    <input type="tel" value={custPhone} onChange={(e) => setCustPhone(e.target.value)} placeholder="Phone" required />
+                    <input type="tel" value={custWhatsapp} onChange={(e) => setCustWhatsapp(e.target.value)} placeholder="WhatsApp" required />
+                    <input type="tel" value={custOwnerphone} onChange={(e) => setCustOwnerphone(e.target.value)} placeholder="Owner Phone" required />
+                    <input type="tel" value={custOwnerwhatsapp} onChange={(e) => setCustOwnerwhatsapp(e.target.value)} placeholder="Owner WhatsApp" required />
+                    <input type="email" value={custEmail} onChange={(e) => setCustEmail(e.target.value)} placeholder="Email" required />
+                    <input type="text" value={custOwneremail} onChange={(e) => setCustOwneremail(e.target.value)} placeholder="Owner Email" required />
+                    <input type="text" value={custType} onChange={(e) => setCustType(e.target.value)} placeholder="Customer Type" required />
+                    <input type="text" value={custAddress} onChange={(e) => setCustAddress(e.target.value)} placeholder="Address" required />
+                    <input type="text" value={custProvince} onChange={(e) => setCustProvince(e.target.value)} placeholder="Province" required />
+                    <input type="text" value={custCity} onChange={(e) => setCustCity(e.target.value)} placeholder="City" required />
+                    <input type="tel" value={custPincode} onChange={(e) => setCustPincode(e.target.value)} placeholder="Pincode" required />
+                    <input type="text" value={custGST} onChange={(e) => setCustGST(e.target.value)} placeholder="GST" />
+                    <textarea value={custRemarks} onChange={(e) => setCustRemarks(e.target.value)} placeholder="Remarks"></textarea>
+                    <select value={custStatus} onChange={(e) => setCustStatus(e.target.value)}>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                    <input type="number" value={custCreditperiod} onChange={(e) => setCustCreditperiod(e.target.value)} placeholder="Credit Period" />
+                    <button onClick={addCustomer}>Submit</button>
+                    <button onClick={() => setShowAddCustomerForm(false)}>Cancel</button>
+                </div>
+            )}
             {selectedCustomerId && userRole === 'Admin' ? (
                 <button onClick={updateCustomer}>Update Customer</button>
             ) : null}
@@ -219,13 +393,18 @@ const CustomerManagement = () => {
                 <ul>
                     {customers.map((customer) => (
                         <li key={customer.id}>
-                            {customer.name} - {customer.email} 
+                            {customer.businessname} - {customer.email} 
                             {userRole === 'Admin' ? (
                                 <button onClick={() => editCustomer(customer.id)}>Edit</button>
                             ) : null}
                         </li>
                     ))}
                 </ul>
+            </div>
+            <div>
+                <h3>Import Customers</h3>
+                <button onClick={downloadTemplate}>Download Excel Template</button>
+                <input type="file" accept=".xlsx" onChange={handleFileUpload} />
             </div>
         </div>
     );

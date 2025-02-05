@@ -696,7 +696,7 @@ export type Database = {
           prodSlabprice3: number | null
           prodSlabprice4: number | null
           prodSlabprice5: number | null
-          prodStatus: boolean | null
+          prodStatus: string | null
           prodSubcategory: string | null
           prodType: string | null
           prodUnitweight: number | null
@@ -736,7 +736,7 @@ export type Database = {
           prodSlabprice3?: number | null
           prodSlabprice4?: number | null
           prodSlabprice5?: number | null
-          prodStatus?: boolean | null
+          prodStatus?: string | null
           prodSubcategory?: string | null
           prodType?: string | null
           prodUnitweight?: number | null
@@ -776,7 +776,7 @@ export type Database = {
           prodSlabprice3?: number | null
           prodSlabprice4?: number | null
           prodSlabprice5?: number | null
-          prodStatus?: boolean | null
+          prodStatus?: string | null
           prodSubcategory?: string | null
           prodType?: string | null
           prodUnitweight?: number | null

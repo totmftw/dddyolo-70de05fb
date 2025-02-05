@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { Package } from 'lucide-react';
@@ -107,19 +108,28 @@ const ProductManagement = () => {
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-        const { name, value, type } = e.target as HTMLInputElement;
-        let parsedValue: string | number | boolean = value;
+        const { name, value, type } = e.target;
+        
+        if (type === 'checkbox') {
+            const target = e.target as HTMLInputElement;
+            setFormData(prev => ({
+                ...prev,
+                [name]: target.checked
+            }));
+            return;
+        }
         
         if (type === 'number') {
-            parsedValue = value === '' ? '' : Number(value);
-        } else if (type === 'checkbox') {
-            parsedValue = e.target.checked;
+            setFormData(prev => ({
+                ...prev,
+                [name]: value === '' ? '' : Number(value)
+            }));
+            return;
         }
 
-        const valueToSet = typeof parsedValue === 'boolean' ? parsedValue : String(parsedValue);
         setFormData(prev => ({
             ...prev,
-            [name]: valueToSet
+            [name]: value
         }));
     };
 

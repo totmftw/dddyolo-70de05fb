@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
-import { LuFilter, LuPlus, LuUpload, LuDownload } from 'react-icons/lucent';
+import { Filter, Plus, Upload, Download } from 'lucide-react';
 
 interface Customer {
   id: number;
@@ -219,13 +219,13 @@ const CustomerManagement = () => {
             onClick={() => setShowAddForm(true)} 
             className="btn-primary"
           >
-            <LuPlus className="mr-2" /> Add Customer
+            <Plus className="mr-2" /> Add Customer
           </button>
           <button 
             onClick={() => console.log('Implement export logic')}
             className="btn-secondary"
           >
-            <LuDownload className="mr-2" /> Export
+            <Download className="mr-2" /> Export
           </button>
         </div>
       </header>
@@ -253,7 +253,7 @@ const CustomerManagement = () => {
             onClick={() => console.log('Implement advanced filter')}
             className="btn-tertiary p-3 rounded-lg"
           >
-            <LuFilter className="text-lg" />
+            <Filter className="text-lg" />
           </button>
         </div>
       </section>

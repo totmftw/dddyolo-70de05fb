@@ -1,8 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { Package } from 'lucide-react';
 import { toast } from "sonner";
+import CustomerManagement from '../pages/CustomerManagement';
+import AccountManagement from '../pages/AccountManagement';
 
 interface Product {
     prodId: string;
@@ -108,31 +109,23 @@ const ProductManagement = () => {
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-        const { name, value, type } = e.target;
-        
-        // Handle checkbox separately since it needs special handling for boolean values
+        const { name, type, value } = e.target;
+        let parsedValue: string | number | boolean;
+
         if (type === 'checkbox') {
-            const target = e.target as HTMLInputElement;
-            setFormData(prev => ({
-                ...prev,
-                [name]: target.checked
-            }));
-            return;
-        }
-        
-        // Handle number inputs
-        if (type === 'number') {
-            setFormData(prev => ({
-                ...prev,
-                [name]: value === '' ? '' : Number(value)
-            }));
-            return;
+            const target = e.target as HTMLInputElement; // Type assertion here
+            parsedValue = target.checked; // This will be a boolean
+        } else if (type === 'number') {
+            parsedValue = value === '' ? '' : Number(value); // This will be a number
+        } else {
+            parsedValue = value; // This will be a string for other input types
         }
 
-        // Handle all other inputs (including select elements)
+        // Ensure only compatible types are assigned
+        const valueToSet = typeof parsedValue === 'boolean' ? parsedValue : String(parsedValue);
         setFormData(prev => ({
             ...prev,
-            [name]: value
+            [name]: valueToSet
         }));
     };
 

@@ -3,6 +3,8 @@ import { supabase } from '../supabaseClient';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Filter, Plus, Upload, Download } from 'lucide-react';
+import ProductManagement from '../pages/ProductManagement';
+import AccountManagement from '../pages/AccountManagement';
 
 interface Customer {
   id: number;

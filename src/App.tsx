@@ -2,18 +2,18 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import React from 'react';
 import Sidebar from './components/Dashboard/Sidebar';
 import DashboardGrid from './components/Dashboard/DashboardGrid';
-import ProductManagement from './components/ProductManagement';
-import CustomerManagement from './components/CustomerManagement';
-import InventoryManagement from './components/InventoryManagement';
+import ProductManagement from './pages/ProductManagement';
+import CustomerManagement from './pages/CustomerManagement';
+import InventoryManagement from './pages/InventoryManagement';
 import PaymentTracking from './components/PaymentTracking';
 import UserRoleManagement from './components/UserRoleManagement';
-import AccountManagement from './components/AccountManagement';
+import AccountManagement from './pages/AccountManagement';
 import './App.css'; // Add any global styles
 
 const queryClient = new QueryClient();

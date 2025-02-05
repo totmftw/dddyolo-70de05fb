@@ -1,4 +1,5 @@
 import React from 'react';
+import ProductManagement from '../pages/ProductManagement';
 
 const ProductDisplay = () => {
     return (

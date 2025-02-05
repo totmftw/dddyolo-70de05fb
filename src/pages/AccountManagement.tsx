@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
+import ProductManagement from '../pages/ProductManagement';
+import CustomerManagement from '../pages/CustomerManagement';
 
 const AccountManagement = () => {
     const [accounts, setAccounts] = useState([]);

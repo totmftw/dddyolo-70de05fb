@@ -1,4 +1,5 @@
 import Hero from "../components/Hero";
+import ProductManagement from '../pages/ProductManagement';
 
 const Index = () => {
   return (

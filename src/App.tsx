@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,7 +12,7 @@ import DashboardGrid from './components/Dashboard/DashboardGrid';
 import ProductManagement from './pages/ProductManagement';
 import CustomerManagement from './pages/CustomerManagement';
 import InventoryManagement from './pages/InventoryManagement';
-import PaymentTracking from './components/PaymentTracking';
+import PaymentTracking from './pages/PaymentTracking';
 import UserRoleManagement from './components/UserRoleManagement';
 import AccountManagement from './pages/AccountManagement';
 import './App.css'; // Add any global styles

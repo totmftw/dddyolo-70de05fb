@@ -2,6 +2,26 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import * as XLSX from 'xlsx';
 
+interface CustomerExcelData {
+    BusinessName: string;
+    OwnerName: string;
+    Phone: string;
+    WhatsApp: string;
+    OwnerPhone: string;
+    OwnerWhatsApp: string;
+    Email: string;
+    OwnerEmail: string;
+    CustomerType: string;
+    Address: string;
+    Province: string;
+    City: string;
+    Pincode: string;
+    GST: string;
+    Remarks: string;
+    Status: string;
+    CreditPeriod: string;
+}
+
 const CustomerManagement = () => {
     const [customers, setCustomers] = useState([]);
     const [custBusinessname, setCustBusinessname] = useState('');
@@ -171,7 +191,6 @@ const CustomerManagement = () => {
     };
 
     const runABTest = async () => {
-        // Implement A/B testing logic
         const { data, error } = await supabase
             .from('CustomerMaster')
             .select('*');
@@ -179,15 +198,12 @@ const CustomerManagement = () => {
         else {
             const testGroup = data.filter(customer => customer.id % 2 === 0);
             const controlGroup = data.filter(customer => customer.id % 2 !== 0);
-            // Send campaign to test group
             await sendCampaign(testGroup, newCampaignName, newCampaignContent);
-            // Send A/B test content to control group
             await sendCampaign(controlGroup, 'A/B Test', abTestContent);
         }
     };
 
     const filterCustomers = async () => {
-        // Implement customer filtering logic
         const { data, error } = await supabase
             .from('CustomerMaster')
             .select('*')
@@ -197,23 +213,19 @@ const CustomerManagement = () => {
     };
 
     const setupFollowUps = async () => {
-        // Implement automated follow-ups logic
         const { data, error } = await supabase
             .from('CustomerMaster')
             .select('*');
         if (error) console.error('Error fetching customers for follow-ups:', error);
         else {
             const followUpCustomers = data.filter(customer => customer.id % 2 === 0);
-            // Send follow-up campaign to customers
             await sendCampaign(followUpCustomers, 'Follow-up', 'This is a follow-up campaign.');
             setFollowUps(followUpCustomers);
         }
     };
 
     const sendCampaign = async (customers, campaignName, campaignContent) => {
-        // Implement campaign sending logic
         customers.forEach(customer => {
-            // Send campaign to customer
             console.log(`Sending campaign to ${customer.name}: ${campaignName} - ${campaignContent}`);
         });
     };
@@ -246,7 +258,6 @@ const CustomerManagement = () => {
     const downloadTemplate = () => {
         const templateData = [
             ["Business Name", "Owner Name", "Phone", "WhatsApp", "Owner Phone", "Owner WhatsApp", "Email", "Owner Email", "Customer Type", "Address", "Province", "City", "Pincode", "GST", "Remarks", "Status", "Credit Period"],
-            // Add empty rows for user to fill in
         ];
         const ws = XLSX.utils.aoa_to_sheet(templateData);
         const wb = XLSX.utils.book_new();
@@ -254,14 +265,15 @@ const CustomerManagement = () => {
         XLSX.writeFile(wb, "customer_template.xlsx");
     };
 
-    const handleFileUpload = async (event) => {
-        const file = event.target.files[0];
+    const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        
         const data = await file.arrayBuffer();
         const workbook = XLSX.read(data);
         const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+        const jsonData = XLSX.utils.sheet_to_json(worksheet) as CustomerExcelData[];
 
-        // Fetch existing customers from the database
         const { data: existingCustomers, error: fetchError } = await supabase
             .from('CustomerMaster')
             .select('*');
@@ -281,7 +293,6 @@ const CustomerManagement = () => {
             alert(`The following customers already exist in the database:\n${duplicates.map(c => c.OwnerName).join(', ')}`);
         }
 
-        // Insert new customers into the database
         const newCustomers = jsonData.filter(customer => 
             !existingCustomerEmails.has(customer.Email) && !existingCustomerNames.has(customer.OwnerName)
         );

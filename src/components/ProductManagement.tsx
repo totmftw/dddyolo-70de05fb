@@ -108,9 +108,17 @@ const ProductManagement = () => {
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value, type } = e.target;
+        let parsedValue: string | number | boolean = value;
+        
+        if (type === 'number') {
+            parsedValue = value === '' ? '' : Number(value);
+        } else if (type === 'checkbox') {
+            parsedValue = (e.target as HTMLInputElement).checked;
+        }
+        
         setFormData(prev => ({
             ...prev,
-            [name]: type === 'number' ? Number(value) : value
+            [name]: parsedValue
         }));
     };
 
@@ -443,11 +451,11 @@ const ProductManagement = () => {
                                     className="w-full h-48 object-cover rounded mb-4"
                                 />
                             )}
-                            <h4 className="font-semibold">{product.prodName}</h4>
+                            <h4 className="font-semibold">{String(product.prodName)}</h4>
                             <p className="text-sm text-gray-600">Brand: {product.prodBrand || 'N/A'}</p>
                             <p className="text-sm text-gray-600">Collection: {product.prodCollection || 'N/A'}</p>
                             <p className="text-sm text-gray-600">Subcategory: {product.prodSubcategory || 'N/A'}</p>
-                            <p className="text-sm text-gray-600">Stock: {product.prodPiecestock || 0} pieces</p>
+                            <p className="text-sm text-gray-600">Stock: {String(product.prodPiecestock || 0)} pieces</p>
                             <div className="mt-2 flex gap-2">
                                 {[1, 2, 3, 4, 5].map(num => {
                                     const colorName = product[`prodColor${num}` as keyof Product];

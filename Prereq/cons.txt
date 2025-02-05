@@ -1,0 +1,96 @@
+[{
+	"resource": "/home/dante/CascadeProjects/flutter_firebase_app/lib/transactions_page.dart",
+	"owner": "_generated_diagnostic_collection_name_#1",
+	"code": {
+		"value": "instantiate_abstract_class",
+		"target": {
+			"$mid": 1,
+			"path": "/diagnostics/instantiate_abstract_class",
+			"scheme": "https",
+			"authority": "dart.dev"
+		}
+	},
+	"severity": 8,
+	"message": "Abstract classes can't be instantiated.\nTry creating an instance of a concrete subtype.",
+	"source": "dart",
+	"startLineNumber": 276,
+	"startColumn": 7,
+	"endLineNumber": 276,
+	"endColumn": 16
+},{
+	"resource": "/home/dante/CascadeProjects/flutter_firebase_app/lib/transactions_page.dart",
+	"owner": "_generated_diagnostic_collection_name_#1",
+	"code": {
+		"value": "extra_positional_arguments",
+		"target": {
+			"$mid": 1,
+			"path": "/diagnostics/extra_positional_arguments",
+			"scheme": "https",
+			"authority": "dart.dev"
+		}
+	},
+	"severity": 8,
+	"message": "Too many positional arguments: 0 expected, but 1 found.\nTry removing the extra arguments.",
+	"source": "dart",
+	"startLineNumber": 276,
+	"startColumn": 17,
+	"endLineNumber": 276,
+	"endColumn": 31
+},{
+	"resource": "/home/dante/CascadeProjects/flutter_firebase_app/lib/transactions_page.dart",
+	"owner": "_generated_diagnostic_collection_name_#1",
+	"code": {
+		"value": "instantiate_abstract_class",
+		"target": {
+			"$mid": 1,
+			"path": "/diagnostics/instantiate_abstract_class",
+			"scheme": "https",
+			"authority": "dart.dev"
+		}
+	},
+	"severity": 8,
+	"message": "Abstract classes can't be instantiated.\nTry creating an instance of a concrete subtype.",
+	"source": "dart",
+	"startLineNumber": 504,
+	"startColumn": 7,
+	"endLineNumber": 504,
+	"endColumn": 16
+},{
+	"resource": "/home/dante/CascadeProjects/flutter_firebase_app/lib/transactions_page.dart",
+	"owner": "_generated_diagnostic_collection_name_#1",
+	"code": {
+		"value": "extra_positional_arguments",
+		"target": {
+			"$mid": 1,
+			"path": "/diagnostics/extra_positional_arguments",
+			"scheme": "https",
+			"authority": "dart.dev"
+		}
+	},
+	"severity": 8,
+	"message": "Too many positional arguments: 0 expected, but 1 found.\nTry removing the extra arguments.",
+	"source": "dart",
+	"startLineNumber": 504,
+	"startColumn": 17,
+	"endLineNumber": 504,
+	"endColumn": 31
+},{
+	"resource": "/home/dante/CascadeProjects/flutter_firebase_app/lib/transactions_page.dart",
+	"owner": "_generated_diagnostic_collection_name_#1",
+	"code": {
+		"value": "undefined_method",
+		"target": {
+			"$mid": 1,
+			"path": "/diagnostics/undefined_method",
+			"scheme": "https",
+			"authority": "dart.dev"
+		}
+	},
+	"severity": 8,
+	"message": "The method 'convertExcelSerialToDate' isn't defined for the type 'PaymentsTabState'.\nTry correcting the name to the name of an existing method, or defining a method named 'convertExcelSerialToDate'.",
+	"source": "dart",
+	"startLineNumber": 531,
+	"startColumn": 25,
+	"endLineNumber": 531,
+	"endColumn": 49
+}]

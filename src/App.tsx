@@ -13,6 +13,7 @@ import CustomerManagement from './components/CustomerManagement';
 import InventoryManagement from './components/InventoryManagement';
 import PaymentTracking from './components/PaymentTracking';
 import UserRoleManagement from './components/UserRoleManagement';
+import AccountManagement from './components/AccountManagement';
 import './App.css'; // Add any global styles
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<DashboardGrid />} />
             <Route path="/products" element={<ProductManagement />} />
+            <Route path="/account-management" element={<AccountManagement />} />
             <Route path="/customers" element={<CustomerManagement />} />
             <Route path="/inventory" element={<InventoryManagement />} />
             <Route path="/payments" element={<PaymentTracking />} />

@@ -12,6 +12,10 @@ const CustomerManagement = () => {
     const [campaigns, setCampaigns] = useState([]);
     const [newCampaignName, setNewCampaignName] = useState('');
     const [newCampaignContent, setNewCampaignContent] = useState('');
+    const [abTestContent, setAbTestContent] = useState('');
+    const [filterCriteria, setFilterCriteria] = useState('');
+    const [filteredCustomers, setFilteredCustomers] = useState([]);
+    const [followUps, setFollowUps] = useState([]);
 
     useEffect(() => {
         fetchCustomers();
@@ -97,6 +101,54 @@ const CustomerManagement = () => {
         }
     };
 
+    const runABTest = async () => {
+        // Implement A/B testing logic
+        const { data, error } = await supabase
+            .from('CustomerMaster')
+            .select('*');
+        if (error) console.error('Error fetching customers for A/B test:', error);
+        else {
+            const testGroup = data.filter(customer => customer.id % 2 === 0);
+            const controlGroup = data.filter(customer => customer.id % 2 !== 0);
+            // Send campaign to test group
+            await sendCampaign(testGroup, newCampaignName, newCampaignContent);
+            // Send A/B test content to control group
+            await sendCampaign(controlGroup, 'A/B Test', abTestContent);
+        }
+    };
+
+    const filterCustomers = async () => {
+        // Implement customer filtering logic
+        const { data, error } = await supabase
+            .from('CustomerMaster')
+            .select('*')
+            .ilike('name', `%${filterCriteria}%`);
+        if (error) console.error('Error filtering customers:', error);
+        else setFilteredCustomers(data);
+    };
+
+    const setupFollowUps = async () => {
+        // Implement automated follow-ups logic
+        const { data, error } = await supabase
+            .from('CustomerMaster')
+            .select('*');
+        if (error) console.error('Error fetching customers for follow-ups:', error);
+        else {
+            const followUpCustomers = data.filter(customer => customer.id % 2 === 0);
+            // Send follow-up campaign to customers
+            await sendCampaign(followUpCustomers, 'Follow-up', 'This is a follow-up campaign.');
+            setFollowUps(followUpCustomers);
+        }
+    };
+
+    const sendCampaign = async (customers, campaignName, campaignContent) => {
+        // Implement campaign sending logic
+        customers.forEach(customer => {
+            // Send campaign to customer
+            console.log(`Sending campaign to ${customer.name}: ${campaignName} - ${campaignContent}`);
+        });
+    };
+
     const clearFields = () => {
         setName('');
         setEmail('');
@@ -123,10 +175,36 @@ const CustomerManagement = () => {
                 <button onClick={updateCustomer}>Update Customer</button>
             ) : null}
             <div>
-                <h3>Campaign Management</h3>
+                <h3>Marketing Automation</h3>
+                <h4>Campaign Management</h4>
                 <input type="text" value={newCampaignName} onChange={(e) => setNewCampaignName(e.target.value)} placeholder="Campaign Name" />
                 <textarea value={newCampaignContent} onChange={(e) => setNewCampaignContent(e.target.value)} placeholder="Campaign Content" />
-                <button onClick={addCampaign}>Add Campaign</button>
+                <button onClick={addCampaign}>Schedule Campaign</button>
+                <h4>A/B Testing</h4>
+                <input type="text" value={abTestContent} onChange={(e) => setAbTestContent(e.target.value)} placeholder="A/B Test Content" />
+                <button onClick={runABTest}>Run A/B Test</button>
+            </div>
+            <div>
+                <h3>Segmentation & Targeting</h3>
+                <input type="text" value={filterCriteria} onChange={(e) => setFilterCriteria(e.target.value)} placeholder="Filter by behavior, demographics, etc." />
+                <button onClick={filterCustomers}>Filter Customers</button>
+                <ul>
+                    {filteredCustomers.map((customer) => (
+                        <li key={customer.id}>{customer.name} - {customer.email}</li>
+                    ))}
+                </ul>
+            </div>
+            <div>
+                <h3>Lead Nurturing</h3>
+                <button onClick={setupFollowUps}>Setup Automated Follow-Ups</button>
+                <ul>
+                    {followUps.map((customer) => (
+                        <li key={customer.id}>{customer.name} - {customer.email}</li>
+                    ))}
+                </ul>
+            </div>
+            <div>
+                <h3>Campaign Management</h3>
                 <h4>Existing Campaigns</h4>
                 <ul>
                     {campaigns.map((campaign) => (

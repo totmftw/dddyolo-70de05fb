@@ -110,6 +110,7 @@ const ProductManagement = () => {
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value, type } = e.target;
         
+        // Handle checkbox separately since it needs special handling for boolean values
         if (type === 'checkbox') {
             const target = e.target as HTMLInputElement;
             setFormData(prev => ({
@@ -119,6 +120,7 @@ const ProductManagement = () => {
             return;
         }
         
+        // Handle number inputs
         if (type === 'number') {
             setFormData(prev => ({
                 ...prev,
@@ -127,6 +129,7 @@ const ProductManagement = () => {
             return;
         }
 
+        // Handle all other inputs (including select elements)
         setFormData(prev => ({
             ...prev,
             [name]: value
@@ -426,7 +429,7 @@ const ProductManagement = () => {
                         <input
                             type="checkbox"
                             name="prodStatus"
-                            checked={formData.prodStatus}
+                            checked={formData.prodStatus || false}
                             onChange={handleInputChange}
                             className="form-checkbox"
                         />

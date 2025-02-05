@@ -28,18 +28,20 @@ const CustomerManagement = () => {
             .from('CustomerMaster')
             .select('*');
         if (error) console.error('Error fetching customers:', error);
-        else setCustomers(data);
+        else setCustomers(data || []);
     };
 
     const fetchUserRole = async () => {
-        const session = supabase.auth.session();
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+        
         const { data, error } = await supabase
             .from('UserProfiles')
             .select('role')
             .eq('id', session.user.id)
             .single();
         if (error) console.error('Error fetching user role:', error);
-        else setUserRole(data.role);
+        else setUserRole(data?.role || '');
     };
 
     const fetchCampaigns = async () => {
@@ -47,7 +49,7 @@ const CustomerManagement = () => {
             .from('Campaigns')
             .select('*');
         if (error) console.error('Error fetching campaigns:', error);
-        else setCampaigns(data);
+        else setCampaigns(data || []);
     };
 
     const addCustomer = async () => {

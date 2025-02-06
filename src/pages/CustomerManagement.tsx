@@ -235,8 +235,46 @@ const CustomerManagement = () => {
   ];
 
   const downloadTemplate = () => {
+    const headers = [
+        "Business Name",
+        "Owner Name",
+        "Email",
+        "Type",
+        "Status",
+        "Phone",
+        "WhatsApp",
+        "Owner Phone",
+        "Owner WhatsApp",
+        "Owner Email",
+        "Address",
+        "Province",
+        "City",
+        "Pincode",
+        "GST",
+        "Remarks",
+        "Credit Period",
+    ];
+
     const csvContent = "data:text/csv;charset=utf-8," 
-        + customerTemplate.map(e => Object.values(e).join(",")).join("\n");
+        + [headers, ...customers.map(e => [
+            e.businessName,
+            e.ownerName,
+            e.email,
+            e.type,
+            e.status,
+            e.phone,
+            e.whatsapp,
+            e.ownerPhone,
+            e.ownerWhatsapp,
+            e.ownerEmail,
+            e.address,
+            e.province,
+            e.city,
+            e.pincode,
+            e.gst,
+            e.remarks,
+            e.creditPeriod,
+        ].join(","))].join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);

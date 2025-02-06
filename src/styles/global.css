@@ -1,0 +1,143 @@
+/* Global styles for the application */
+
+/* 
+    The following global styles are designed to provide a consistent visual identity 
+    across the application. They define the base layout, typography, and color scheme.
+*/
+
+/* Define root variables for light and dark themes */
+:root {
+    /* 
+        These variables define the color palette for light and dark themes. 
+        They can be used throughout the application to maintain consistency.
+    */
+    --light-background: #F0F8E7;
+    --light-primary-text: #2E4B2D;
+    --light-secondary-text: #6B8E23;
+
+    --dark-background: #2E4B2D;
+    --dark-primary-text: #F0F8E7;
+    --dark-secondary-text: #B0C4A1;
+}
+
+/* Base styles for the body of the application */
+body {
+    /* 
+        Set the font family to a sans-serif font for better readability. 
+        Arial is a widely supported font and provides a clean look.
+    */
+    font-family: Arial, sans-serif;
+    
+    /* 
+        Remove default margin and padding for a clean layout. 
+        This ensures that the content is displayed without any unnecessary spacing.
+    */
+    margin: 0;
+    padding: 0;
+    
+    /* 
+        Set the background color to a light gray tone for better readability. 
+        This provides a neutral background that does not distract from the content.
+    */
+    background-color: #f0f0f0;
+}
+
+/* Styles for headings */
+h1, h2, h3, h4, h5, h6 {
+    /* 
+        Set the color of headings to a dark gray tone for better contrast. 
+        This helps headings stand out from regular text.
+    */
+    color: #333;
+}
+
+/* Styles for buttons */
+.btn {
+    /* 
+        Add padding for a comfortable click area. 
+        This ensures that buttons are easy to click and provide a good user experience.
+    */
+    padding: 10px 15px;
+    
+    /* 
+        Remove default border for a cleaner look. 
+        This helps buttons blend in with the surrounding content.
+    */
+    border: none;
+    
+    /* 
+        Add a border radius for a rounded corner effect. 
+        This provides a visually appealing effect and helps buttons stand out.
+    */
+    border-radius: 5px;
+    
+    /* 
+        Change the cursor shape to a pointer for visual feedback. 
+        This indicates to the user that the button is clickable.
+    */
+    cursor: pointer;
+}
+
+/* Styles for links */
+a {
+    /* 
+        Set the color of links to a blue tone for visual distinction. 
+        This helps links stand out from regular text and provides a clear indication of clickable content.
+    */
+    color: #007bff;
+    
+    /* 
+        Remove default text decoration for a cleaner look. 
+        This helps links blend in with the surrounding content.
+    */
+    text-decoration: none;
+}
+
+/* Hover effect for links */
+a:hover {
+    /* 
+        Add a text decoration underline on hover for visual feedback. 
+        This provides a clear indication that the link is clickable and helps with accessibility.
+    */
+    text-decoration: underline;
+}
+
+/* Hover effect for buttons */
+.btn:hover {
+    /* 
+        Set the background color to a lighter tone on hover for visual feedback. 
+        This provides a clear indication that the button is clickable and helps with accessibility.
+    */
+    background-color: #333333;
+}
+
+/* Ensure contrast for other backgrounds */
+.sidebar {
+    /* 
+        Set the background color of the sidebar to a slightly lighter tone for better contrast. 
+        This helps the sidebar stand out from the surrounding content.
+    */
+    background-color: #1e1e1e;
+    
+    /* 
+        Set the text color of the sidebar to white for better readability. 
+        This provides a clear indication of the sidebar's content.
+    */
+    color: #ffffff;
+}
+
+.main-content {
+    /* 
+        Set the background color of the main content to a darker tone for better contrast. 
+        This helps the main content stand out from the surrounding content.
+    */
+    background-color: #181818;
+    
+    /* 
+        Set the text color of the main content to a light tone for better readability. 
+        This provides a clear indication of the main content.
+    */
+    color: #e0e0e0;
+}
+
+/* Additional specific styles can be added as needed */

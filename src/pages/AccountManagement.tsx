@@ -3,16 +3,20 @@ import { supabase } from '../supabaseClient';
 import ProductManagement from '../pages/ProductManagement';
 import CustomerManagement from '../pages/CustomerManagement';
 
+// AccountManagement component handles the management of user accounts.
 const AccountManagement = () => {
+    // State to hold the list of accounts and form inputs.
     const [accounts, setAccounts] = useState([]);
     const [accountId, setAccountId] = useState('');
     const [financials, setFinancials] = useState('');
     const [contracts, setContracts] = useState('');
 
+    // useEffect hook to fetch accounts when the component mounts.
     useEffect(() => {
         fetchAccounts();
     }, []);
 
+    // Function to fetch accounts from Supabase.
     const fetchAccounts = async () => {
         const { data, error } = await supabase
             .from('Accounts')
@@ -21,17 +25,19 @@ const AccountManagement = () => {
         else setAccounts(data);
     };
 
+    // Function to add a new account to Supabase.
     const addAccount = async () => {
         const { error } = await supabase
             .from('Accounts')
             .insert([{ account_id: accountId, financials, contracts }]);
         if (error) console.error('Error adding account:', error);
         else {
-            fetchAccounts();
-            clearFields();
+            fetchAccounts(); // Refresh the list after adding.
+            clearFields(); // Clear form fields after adding.
         }
     };
 
+    // Function to clear form fields.
     const clearFields = () => {
         setAccountId('');
         setFinancials('');

@@ -168,6 +168,10 @@ function toast({ ...props }: Toast) {
   }
 }
 
+/**
+ * useToast hook provides a way to manage toast notifications in the application.
+ * It provides functions to show and hide notifications, as well as to manage their content and duration.
+ */
 function useToast() {
   const [state, setState] = React.useState<State>(memoryState)
 
@@ -181,10 +185,54 @@ function useToast() {
     }
   }, [state])
 
+  /**
+   * toast function creates a new toast notification.
+   * It takes a message and duration as parameters to customize the notification.
+   * The toast will automatically disappear after the specified duration.
+   * @param {Toast} props - The properties of the toast notification.
+   * @returns {object} An object containing the toast ID, dismiss function, and update function.
+   */
+  const toast = (props: Toast) => {
+    const id = genId()
+
+    const update = (props: ToasterToast) =>
+      dispatch({
+        type: "UPDATE_TOAST",
+        toast: { ...props, id },
+      })
+    const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
+
+    dispatch({
+      type: "ADD_TOAST",
+      toast: {
+        ...props,
+        id,
+        open: true,
+        onOpenChange: (open) => {
+          if (!open) dismiss()
+        },
+      },
+    })
+
+    return {
+      id: id,
+      dismiss,
+      update,
+    }
+  }
+
+  /**
+   * dismiss function dismisses a toast notification.
+   * It takes an optional toast ID as a parameter to specify which toast to dismiss.
+   * If no ID is provided, all toasts will be dismissed.
+   * @param {string} toastId - The ID of the toast to dismiss.
+   */
+  const dismiss = (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId })
+
   return {
     ...state,
     toast,
-    dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
+    dismiss,
   }
 }
 

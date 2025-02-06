@@ -1,16 +1,29 @@
+// MarketingAutomation component handles marketing automation features.
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 
+/**
+ * MarketingAutomation component is responsible for managing marketing automation campaigns.
+ * It allows users to add new campaigns, view existing campaigns, and fetch campaigns from the database.
+ */
 const MarketingAutomation = () => {
-    const [campaigns, setCampaigns] = useState([]);
-    const [campaignName, setCampaignName] = useState('');
-    const [targetAudience, setTargetAudience] = useState('');
-    const [content, setContent] = useState('');
+    // State variables to store campaign data
+    const [campaigns, setCampaigns] = useState([]); // Array to store all campaigns
+    const [campaignName, setCampaignName] = useState(''); // Input field for campaign name
+    const [targetAudience, setTargetAudience] = useState(''); // Input field for target audience
+    const [content, setContent] = useState(''); // Input field for campaign content
 
+    /**
+     * useEffect hook is used to fetch campaigns from the database when the component mounts.
+     */
     useEffect(() => {
         fetchCampaigns();
     }, []);
 
+    /**
+     * fetchCampaigns function is used to retrieve all campaigns from the database.
+     * It uses the supabase client to query the 'Campaigns' table and fetch all records.
+     */
     const fetchCampaigns = async () => {
         const { data, error } = await supabase
             .from('Campaigns')
@@ -19,6 +32,11 @@ const MarketingAutomation = () => {
         else setCampaigns(data);
     };
 
+    /**
+     * addCampaign function is used to add a new campaign to the database.
+     * It uses the supabase client to insert a new record into the 'Campaigns' table.
+     * If the insertion is successful, it fetches the updated campaigns list and clears the input fields.
+     */
     const addCampaign = async () => {
         const { error } = await supabase
             .from('Campaigns')
@@ -30,6 +48,9 @@ const MarketingAutomation = () => {
         }
     };
 
+    /**
+     * clearFields function is used to reset the input fields after adding a new campaign.
+     */
     const clearFields = () => {
         setCampaignName('');
         setTargetAudience('');

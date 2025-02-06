@@ -1,14 +1,20 @@
-import * as React from "react"
-import * as TooltipPrimitive from "@radix-ui/react-tooltip"
+// Tooltip component provides a customizable tooltip UI element using Radix UI.
+import * as React from "react";
+import * as TooltipPrimitive from "@radix-ui/react-tooltip";
+import { cn } from "@/lib/utils";
 
-import { cn } from "@/lib/utils"
+// The TooltipProvider component wraps the tooltip elements and provides context for the tooltip.
+const TooltipProvider = TooltipPrimitive.Provider;
 
-const TooltipProvider = TooltipPrimitive.Provider
+// The Tooltip component is the root element of the tooltip and manages its state.
+const Tooltip = TooltipPrimitive.Root;
 
-const Tooltip = TooltipPrimitive.Root
+// The TooltipTrigger component is used to trigger the display of the tooltip.
+const TooltipTrigger = TooltipPrimitive.Trigger;
 
-const TooltipTrigger = TooltipPrimitive.Trigger
-
+// TooltipContent component displays the tooltip content with customizable styles.
+// It accepts a className prop to apply custom styles and a sideOffset prop to adjust the tooltip's position.
+// The component also accepts any additional props that can be passed to the underlying Radix UI Content component.
 const TooltipContent = React.forwardRef<
   React.ElementRef<typeof TooltipPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>
@@ -22,7 +28,10 @@ const TooltipContent = React.forwardRef<
     )}
     {...props}
   />
-))
-TooltipContent.displayName = TooltipPrimitive.Content.displayName
+));
 
+// Set the display name of the TooltipContent component to match the underlying Radix UI Content component.
+TooltipContent.displayName = TooltipPrimitive.Content.displayName;
+
+// Export the tooltip components for use in other parts of the application.
 export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider }

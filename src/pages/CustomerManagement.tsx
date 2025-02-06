@@ -211,6 +211,96 @@ const CustomerManagement = () => {
     }));
   };
 
+  const customerTemplate = [
+    {
+        id: '',
+        businessName: '',
+        ownerName: '',
+        email: '',
+        type: '',
+        status: 'active',
+        phone: '',
+        whatsapp: '',
+        ownerPhone: '',
+        ownerWhatsapp: '',
+        ownerEmail: '',
+        address: '',
+        province: '',
+        city: '',
+        pincode: '',
+        gst: '',
+        remarks: '',
+        creditPeriod: '',
+    }
+  ];
+
+  const downloadTemplate = () => {
+    const csvContent = "data:text/csv;charset=utf-8," 
+        + customerTemplate.map(e => Object.values(e).join(",")).join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "customerMasterTemplate.csv");
+    document.body.appendChild(link); // Required for FF
+
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const text = e.target?.result as string;
+        const rows = text.split('\n').map(row => row.split(','));
+        await checkForDuplicates(rows);
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  const checkForDuplicates = async (rows: string[][]) => {
+    const existingCustomers = new Set(customers.map(customer => customer.email)); // Assuming email is unique
+    const duplicates = rows.filter(row => existingCustomers.has(row[3])); // Assuming email is in the 4th column
+
+    if (duplicates.length > 0) {
+      toast.error('Duplicate entries found!');
+    } else {
+      await uploadCustomers(rows);
+    }
+  };
+
+  const uploadCustomers = async (rows: string[][]) => {
+    const newCustomers = rows.map(row => ({
+      businessname: row[0],
+      ownername: row[1],
+      phone: row[2],
+      email: row[3],
+      type: row[4],
+      status: row[5],
+      whatsapp: row[6],
+      ownerphone: row[7],
+      ownerwhatsapp: row[8],
+      owneremail: row[9],
+      address: row[10],
+      province: row[11],
+      city: row[12],
+      pincode: row[13],
+      gst: row[14],
+      remarks: row[15],
+      creditperiod: row[16],
+    }));
+
+    const { error } = await supabase.from('CustomerMaster').insert(newCustomers);
+    if (error) {
+      toast.error('Failed to upload customers');
+    } else {
+      toast.success('Customers uploaded successfully');
+      fetchCustomers(); // Refresh the customer list
+    }
+  };
+
   return (
     <div className="customer-management-container">
       {/* Page Header */}
@@ -224,11 +314,17 @@ const CustomerManagement = () => {
             <Plus className="mr-2" /> Add Customer
           </button>
           <button 
-            onClick={() => console.log('Implement export logic')}
-            className="btn-secondary"
+            onClick={downloadTemplate} 
+            className="btn btn-download"
           >
-            <Download className="mr-2" /> Export
+            <Download className="mr-2" /> Download Template
           </button>
+          <input 
+            type="file" 
+            accept="text/csv" 
+            onChange={handleFileChange} 
+            className="btn btn-upload"
+          />
         </div>
       </header>
 
@@ -498,6 +594,12 @@ const CustomerManagement = () => {
                 onChange={handleInputChange}
                 placeholder="Credit Period"
               />
+              <input 
+                type="file" 
+    accept="text/csv" 
+    onChange={handleFileChange} 
+    className="btn btn-upload" 
+/>
               <div className="flex items-center gap-4 mt-6">
                 <button 
                   type="submit" 

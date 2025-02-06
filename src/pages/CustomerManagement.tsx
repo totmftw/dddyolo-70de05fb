@@ -3,7 +3,8 @@ import { supabase } from '../supabaseClient';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Filter, Plus, Upload, Download } from 'lucide-react';
-import CustomerForm from '../components/CustomerForm';
+import ProductManagement from '../pages/ProductManagement';
+import AccountManagement from '../pages/AccountManagement';
 
 interface Customer {
   id: number;
@@ -52,21 +53,8 @@ const CustomerManagement = () => {
     status: '',
     creditPeriod: '',
   });
-  const [selectedColumns, setSelectedColumns] = useState<string[]>(['businessName', 'ownerName', 'email', 'phone']);
-
-  const verifyConnection = async () => {
-    const { data, error } = await supabase.from('CustomerMaster').select('*').limit(1);
-    if (error) {
-      console.error('Error fetching sample customer:', error);
-      toast.error('Failed to connect to Supabase');
-    } else {
-      console.log('Sample customer data:', data);
-      toast.success('Successfully connected to Supabase!');
-    }
-  };
 
   useEffect(() => {
-    verifyConnection();
     fetchCustomers();
   }, []);
 
@@ -313,90 +301,156 @@ const CustomerManagement = () => {
     }
   };
 
-  const handleColumnSelection = (column: string) => {
-    setSelectedColumns((prev) => {
-      if (prev.includes(column)) {
-        return prev.filter((col) => col !== column);
-      } else {
-        return [...prev, column];
-      }
-    });
-  };
-
-  const handleEditCustomer = (customer: Customer) => {
-    setSelectedCustomer(customer);
-    setShowAddForm(true); // Show the form to edit customer
-  };
-
   return (
-    <div>
-      <h1>Customer Management</h1>
-      <input
-        type="text"
-        placeholder="Search by invoice ID, name, or phone"
-        value={searchTerm}
-        onChange={handleSearch}
-      />
-      <button onClick={() => setShowAddForm(true)}>Add Customer</button>
-      <div>
-        <h2>Select Columns to Display</h2>
-        <label>
-          <input
-            type="checkbox"
-            checked={selectedColumns.includes('businessName')}
-            onChange={() => handleColumnSelection('businessName')}
+    <div className="customer-management-container">
+      {/* Page Header */}
+      <header className="page-header">
+        <h1 className="text-2xl font-bold">Customer Management</h1>
+        <div className="header-actions flex items-center gap-4">
+          <button 
+            onClick={() => setShowAddForm(true)} 
+            className="btn-primary"
+          >
+            <Plus className="mr-2" /> Add Customer
+          </button>
+          <button 
+            onClick={downloadTemplate} 
+            className="btn btn-download"
+          >
+            <Download className="mr-2" /> Download Template
+          </button>
+          <input 
+            type="file" 
+            accept="text/csv" 
+            onChange={handleFileChange} 
+            className="btn btn-upload"
           />
-          Business Name
-        </label>
-        <label>
+        </div>
+      </header>
+
+      {/* Search & Filter Section */}
+      <section className="search-filter-section mt-8 p-6 bg-white rounded-lg shadow-md">
+        <div className="flex items-center gap-4">
           <input
-            type="checkbox"
-            checked={selectedColumns.includes('ownerName')}
-            onChange={() => handleColumnSelection('ownerName')}
+            type="text"
+            placeholder="Search customers..."
+            value={searchTerm}
+            onChange={handleSearch}
+            className="w-full p-3 border rounded-lg flex-1"
           />
-          Owner Name
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            checked={selectedColumns.includes('email')}
-            onChange={() => handleColumnSelection('email')}
-          />
-          Email
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            checked={selectedColumns.includes('phone')}
-            onChange={() => handleColumnSelection('phone')}
-          />
-          Phone
-        </label>
-      </div>
-      <table>
-        <thead>
-          <tr>
-            {selectedColumns.map((col) => (
-              <th key={col}>{col}</th>
-            ))}
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredCustomers.map((customer) => (
-            <tr key={customer.id}>
-              {selectedColumns.includes('businessName') && <td>{customer.businessName}</td>}
-              {selectedColumns.includes('ownerName') && <td>{customer.ownerName}</td>}
-              {selectedColumns.includes('email') && <td>{customer.email}</td>}
-              {selectedColumns.includes('phone') && <td>{customer.phone}</td>}
-              <td>
-                <button onClick={() => handleEditCustomer(customer)}>Edit</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      {showAddForm && <CustomerForm customer={selectedCustomer} onClose={() => setShowAddForm(false)} />}
+          <select
+            value={statusFilter}
+            onChange={handleStatusFilter}
+            className="w-40 p-3 border rounded-lg"
+          >
+            <option value="">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+          <button 
+            onClick={() => console.log('Implement advanced filter')}
+            className="btn-tertiary p-3 rounded-lg"
+          >
+            <Filter className="text-lg" />
+          </button>
+        </div>
+      </section>
+
+      {/* Customer List Table */}
+      <section className="customer-table-section mt-8">
+        <div className="table-container">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="py-3 px-4">Name</th>
+                <th className="py-3 px-4">Email</th>
+                <th className="py-3 px-4">Type</th>
+                <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredCustomers.map(customer => (
+                <tr key={customer.id} className="hover:bg-gray-100">
+                  <td className="py-3 px-4">{customer.businessName}</td>
+                  <td className="py-3 px-4">{customer.email}</td>
+                  <td className="py-3 px-4">{customer.type}</td>
+                  <td className="py-3 px-4">
+                    <span 
+                      className={`inline-block px-3 py-1 rounded-full ${
+                        customer.status === 'active' 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-red-100 text-red-800'
+                      }`}
+                    >
+                      {customer.status}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4">
+                    <button 
+                      onClick={() => {
+                        setSelectedCustomer(customer);
+                        setFormData({
+                          businessName: customer.businessName,
+                          ownerName: customer.ownerName,
+                          phone: customer.phone,
+                          whatsapp: customer.whatsapp,
+                          ownerPhone: customer.ownerPhone,
+                          ownerWhatsapp: customer.ownerWhatsapp,
+                          email: customer.email,
+                          ownerEmail: customer.ownerEmail,
+                          type: customer.type,
+                          address: customer.address,
+                          province: customer.province,
+                          city: customer.city,
+                          pincode: customer.pincode,
+                          gst: customer.gst,
+                          remarks: customer.remarks,
+                          status: customer.status,
+                          creditPeriod: customer.creditPeriod,
+                        });
+                        setShowAddForm(true);
+                      }}
+                      className="text-blue-500 hover:underline"
+                    >
+                      Edit
+                    </button>
+                    <button 
+                      onClick={() => console.log('Implement delete')}
+                      className="ml-4 text-red-500 hover:underline"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* Marketing Automation Section */}
+      <section className="marketing-section mt-12 p-6 bg-white rounded-lg shadow-md">
+        <h2 className="text-xl font-semibold mb-6">Marketing Automation</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="campaign-card bg-gray-50 p-6 rounded-lg">
+            <h3 className="text-lg font-semibold mb-4">Campaigns</h3>
+            <button className="w-full btn-primary mb-4">Create Campaign</button>
+            <div className="campaign-list">
+              {/* Campaign items */}
+            </div>
+          </div>
+          <div className="ab-test-card bg-gray-50 p-6 rounded-lg">
+            <h3 className="text-lg font-semibold mb-4">A/B Testing</h3>
+            <button className="w-full btn-primary mb-4">Run A/B Test</button>
+            <div className="test-config">
+              {/* Test configuration */}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Add/Edit Customer Modal */}
       {showAddForm && (
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
@@ -542,10 +596,10 @@ const CustomerManagement = () => {
               />
               <input 
                 type="file" 
-                accept="text/csv" 
-                onChange={handleFileChange} 
-                className="btn btn-upload" 
-              />
+    accept="text/csv" 
+    onChange={handleFileChange} 
+    className="btn btn-upload" 
+/>
               <div className="flex items-center gap-4 mt-6">
                 <button 
                   type="submit" 

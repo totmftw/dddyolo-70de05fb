@@ -7,18 +7,20 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import React from 'react';
-import Sidebar from './components/Dashboard/Sidebar';
-import DashboardGrid from './components/Dashboard/DashboardGrid';
+import DashboardGrid from './pages/Dashboard';
 import ProductManagement from './pages/ProductManagement';
 import CustomerManagement from './pages/CustomerManagement';
 import InventoryManagement from './pages/InventoryManagement';
 import PaymentTracking from './pages/PaymentTracking';
-import UserRoleManagement from './components/UserRoleManagement';
+import UserRoleManagement from './components/reused/UserRoleManagement';
 import AccountManagement from './pages/AccountManagement';
 import SalesOpportunities from './pages/SalesOpportunities';
+import SalesOpportunityManagement from './pages/SalesOpportunityManagement';
+import ProductBulkManage from './pages/ProductBulkManage';
 import { ThemeProvider } from './theme/ThemeContext';
 import './App.css'; // Add any global styles
 import { SidebarProvider } from './context/SidebarContext';
+import UnifiedSidebar from './components/UnifiedSidebar'; // Import the new UnifiedSidebar component
 
 // Create a new instance of QueryClient to manage data fetching and caching.
 const queryClient = new QueryClient();
@@ -48,10 +50,9 @@ const App = () => (
               v7_relativeSplatPath: true,
             }}
           >
-            {/* Render the Sidebar component for navigation. */}
-            <Sidebar />
             {/* Define the main content area for the app. */}
             <div className="main-content">
+              <UnifiedSidebar /> // Integrate the new UnifiedSidebar component
               {/* Define routes for different pages. */}
               <Routes>
                 {/* Route for the dashboard grid. */}
@@ -70,6 +71,10 @@ const App = () => (
                 <Route path="/roles" element={<UserRoleManagement />} />
                 {/* Route for sales opportunities. */}
                 <Route path="/sales-opportunities" element={<SalesOpportunities />} />
+                {/* Route for sales opportunity management. */}
+                <Route path="/sales-opportunity-management" element={<SalesOpportunityManagement />} />
+                {/* Route for product bulk management. */}
+                <Route path="/product-bulk-manage" element={<ProductBulkManage />} />
                 {/* Catch-all route for 404 errors. */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

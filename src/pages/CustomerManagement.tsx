@@ -250,7 +250,6 @@ const CustomerManagement = () => {
         "Province",
         "City",
         "Pincode",
-        "GST",
         "Remarks",
         "Credit Period",
     ];
@@ -271,7 +270,6 @@ const CustomerManagement = () => {
             e.province,
             e.city,
             e.pincode,
-            e.gst,
             e.remarks,
             e.creditPeriod,
         ].join(","))].join("\n");

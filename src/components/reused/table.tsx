@@ -1,19 +1,22 @@
 import * as React from "react"
-
+import { useTheme } from '../../context/ThemeContext';
 import { cn } from "@/lib/utils"
 
 const Table = React.forwardRef<
   HTMLTableElement,
   React.HTMLAttributes<HTMLTableElement>
->(({ className, ...props }, ref) => (
-  <div className="relative w-full overflow-auto">
-    <table
-      ref={ref}
-      className={cn("w-full caption-bottom text-sm", className)}
-      {...props}
-    />
-  </div>
-))
+>(({ className, ...props }, ref) => {
+  const { theme } = useTheme();
+  return (
+    <div className={`relative w-full overflow-auto ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-black'}`}> 
+      <table
+        ref={ref}
+        className={cn(`w-full caption-bottom text-sm`, className)}
+        {...props}
+      />
+    </div>
+  );
+})
 Table.displayName = "Table"
 
 const TableHeader = React.forwardRef<

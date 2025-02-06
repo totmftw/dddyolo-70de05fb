@@ -1,12 +1,14 @@
 // QuotationOrderProcessing component handles the processing of quotations and orders.
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { supabase } from '../supabaseClient';
+import { useTheme } from '../../context/ThemeContext';
 
 /**
  * QuotationOrderProcessing component is responsible for generating quotes and orders.
  * It uses the Supabase client to interact with the database.
  */
 const QuotationOrderProcessing = () => {
+    const { theme } = useTheme();
     // State variables to store product details, pricing, order ID, and quote ID
     const [productDetails, setProductDetails] = useState('');
     const [pricing, setPricing] = useState('');
@@ -47,8 +49,8 @@ const QuotationOrderProcessing = () => {
     };
 
     return (
-        <div>
-            <h2>Quotation & Order Processing</h2>
+        <div className={`p-4 ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-black'}`}>
+            <h2 className={`text-lg ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>Quotation & Order Processing</h2>
             <input type="text" value={productDetails} onChange={(e) => setProductDetails(e.target.value)} placeholder="Product Details" />
             <input type="text" value={pricing} onChange={(e) => setPricing(e.target.value)} placeholder="Pricing" />
             <button onClick={generateQuote}>Generate Quote</button>

@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import DashboardCard from '../components/dash/DashboardCard';
 import ThemeToggle from '../components/reused/ThemeToggle';
+import { ThemeContext } from '../context/ThemeContext'; 
 
 const Dashboard = () => {
+  const { theme } = useContext(ThemeContext);
+
   return (
-    <div className="flex flex-col gap-4 p-6">
+    <div className={`flex flex-col gap-4 p-6 ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-black'}`}> 
       <ThemeToggle />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* KPI Metrics */}

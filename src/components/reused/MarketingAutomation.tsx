@@ -1,12 +1,14 @@
 // MarketingAutomation component handles marketing automation features.
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { supabase } from '../supabaseClient';
+import { useTheme } from '../../context/ThemeContext';
 
 /**
  * MarketingAutomation component is responsible for managing marketing automation campaigns.
  * It allows users to add new campaigns, view existing campaigns, and fetch campaigns from the database.
  */
 const MarketingAutomation = () => {
+    const { theme } = useTheme();
     // State variables to store campaign data
     const [campaigns, setCampaigns] = useState([]); // Array to store all campaigns
     const [campaignName, setCampaignName] = useState(''); // Input field for campaign name
@@ -58,8 +60,8 @@ const MarketingAutomation = () => {
     };
 
     return (
-        <div>
-            <h2>Marketing Automation</h2>
+        <div className={`p-4 ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-black'}`}>
+            <h2 className={`text-lg ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>Marketing Automation</h2>
             <input type="text" value={campaignName} onChange={(e) => setCampaignName(e.target.value)} placeholder="Campaign Name" />
             <input type="text" value={targetAudience} onChange={(e) => setTargetAudience(e.target.value)} placeholder="Target Audience" />
             <textarea value={content} onChange={(e) => setContent(e.target.value)} placeholder="Campaign Content" />

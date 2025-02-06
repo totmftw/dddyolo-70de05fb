@@ -1,5 +1,6 @@
 // Hero component displays the hero section of the application.
-import React from 'react';
+import React, { useContext } from 'react';
+import { useTheme } from '../../context/ThemeContext';
 import { motion } from "framer-motion";
 
 /**
@@ -8,6 +9,8 @@ import { motion } from "framer-motion";
  * The component uses Framer Motion for animations.
  */
 const Hero = () => {
+  const { theme } = useTheme();
+
   return (
     /**
      * The motion.div element is used to animate the hero section.
@@ -18,18 +21,18 @@ const Hero = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="flex flex-col items-center justify-center min-h-[80vh] px-4 text-center"
+      className={`flex flex-col items-center justify-center min-h-[80vh] px-4 text-center ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-black'}`}
     >
       /**
        * The heading displays the main title of the application.
        */
-      <h1 className="text-4xl md:text-6xl font-bold text-slate-900 mb-6">
+      <h1 className={`text-4xl md:text-6xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'} mb-6`}>
         Welcome to Your New Project
       </h1>
       /**
        * The paragraph provides a brief description of the application.
        */
-      <p className="text-lg md:text-xl text-slate-600 max-w-2xl mb-8">
+      <p className={`text-lg md:text-xl ${theme === 'dark' ? 'text-gray-400' : 'text-slate-600'} max-w-2xl mb-8`}>
         Start building something amazing with this clean, modern foundation. Your journey to creating an exceptional web application begins here.
       </p>
       /**

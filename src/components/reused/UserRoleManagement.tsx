@@ -1,12 +1,14 @@
 // UserRoleManagement component manages user roles and permissions.
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { supabase } from '../supabaseClient';
+import { useTheme } from '../../context/ThemeContext';
 
 /**
  * UserRoleManagement component is responsible for managing user roles and permissions.
  * It fetches existing roles from the database, allows adding new roles, and displays the list of existing roles.
  */
 const UserRoleManagement = () => {
+    const { theme } = useTheme();
     // State to store the list of existing roles
     const [roles, setRoles] = useState([]);
     
@@ -49,16 +51,16 @@ const UserRoleManagement = () => {
     };
 
     return (
-        <div className="user-role-management">
-            <h2>User Role Management</h2>
-            <p>Manage user roles and permissions within the application.</p>
-            <input type="text" value={newRole} onChange={(e) => setNewRole(e.target.value)} placeholder="New Role" />
-            <button onClick={addRole}>Add Role</button>
+        <div className={`p-4 ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-black'}`}> 
+            <h2 className={`text-lg ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>User Role Management</h2>
+            <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Manage user roles and permissions within the application.</p>
+            <input type="text" value={newRole} onChange={(e) => setNewRole(e.target.value)} placeholder="New Role" className={`py-2 pl-10 text-sm text-gray-700 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent`} />
+            <button onClick={addRole} className={`py-2 px-4 text-sm text-white bg-gray-600 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent ${theme === 'dark' ? 'bg-gray-500' : 'bg-gray-600'}`}>Add Role</button>
             <div>
-                <h3>Existing Roles</h3>
+                <h3 className={`text-lg ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>Existing Roles</h3>
                 <ul>
                     {roles.map((role) => (
-                        <li key={role.id}>{role.feature_name}</li>
+                        <li key={role.id} className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>{role.feature_name}</li>
                     ))}
                 </ul>
             </div>

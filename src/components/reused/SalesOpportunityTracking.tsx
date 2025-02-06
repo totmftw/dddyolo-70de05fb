@@ -1,6 +1,7 @@
 // SalesOpportunityTracking component tracks sales opportunities over time.
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { supabase } from '../supabaseClient';
+import { useTheme } from '../../context/ThemeContext';
 
 /**
  * SalesOpportunityTracking component is responsible for managing sales opportunities.
@@ -8,6 +9,7 @@ import { supabase } from '../supabaseClient';
  * and displays the list of opportunities.
  */
 const SalesOpportunityTracking = () => {
+    const { theme } = useTheme();
     // State variables to store opportunities, lead name, status, and assigned to
     const [opportunities, setOpportunities] = useState([]);
     const [leadName, setLeadName] = useState('');
@@ -58,18 +60,18 @@ const SalesOpportunityTracking = () => {
     };
 
     return (
-        <div>
-            <h2>Sales Opportunity Tracking</h2>
-            <p>Track your sales opportunities and their progress.</p>
-            <input type="text" value={leadName} onChange={(e) => setLeadName(e.target.value)} placeholder="Lead Name" />
-            <input type="text" value={status} onChange={(e) => setStatus(e.target.value)} placeholder="Status" />
-            <input type="text" value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)} placeholder="Assigned To" />
-            <button onClick={addOpportunity}>Add Opportunity</button>
+        <div className={`p-4 ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-black'}`}>
+            <h2 className={`text-lg ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>Sales Opportunity Tracking</h2>
+            <p className={`text-sm ${theme === 'dark' ? 'text-white' : 'text-gray-600'}`}>Track your sales opportunities and their progress.</p>
+            <input type="text" value={leadName} onChange={(e) => setLeadName(e.target.value)} placeholder="Lead Name" className={`p-2 ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-white text-black'}`} />
+            <input type="text" value={status} onChange={(e) => setStatus(e.target.value)} placeholder="Status" className={`p-2 ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-white text-black'}`} />
+            <input type="text" value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)} placeholder="Assigned To" className={`p-2 ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-white text-black'}`} />
+            <button onClick={addOpportunity} className={`p-2 ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-white text-black'}`}>Add Opportunity</button>
             <div>
-                <h3>Opportunity List</h3>
+                <h3 className={`text-lg ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>Opportunity List</h3>
                 <ul>
                     {opportunities.map((opportunity) => (
-                        <li key={opportunity.id}>{opportunity.lead_name} - {opportunity.status}</li>
+                        <li key={opportunity.id} className={`text-sm ${theme === 'dark' ? 'text-white' : 'text-gray-600'}`}>{opportunity.lead_name} - {opportunity.status}</li>
                     ))}
                 </ul>
             </div>

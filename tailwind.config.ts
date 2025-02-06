@@ -19,22 +19,23 @@ export default {
 		},
 		extend: {
 			colors: {
-				border: 'hsl(var(--border))',
-				input: 'hsl(var(--input))',
-				ring: 'hsl(var(--ring))',
-				background: 'hsl(var(--background))',
-				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					DEFAULT: '#6a53ff',
+					foreground: '#ffffff'
 				},
 				secondary: {
-					DEFAULT: 'hsl(var(--secondary))',
-					foreground: 'hsl(var(--secondary-foreground))'
+					DEFAULT: '#00bcd4',
+					foreground: '#ffffff'
 				},
-				destructive: {
-					DEFAULT: 'hsl(var(--destructive))',
-					foreground: 'hsl(var(--destructive-foreground))'
+				background: '#f5f5f5',
+				foreground: '#333333',
+				border: '#e0e0e0',
+				input: '#ffffff',
+				ring: '#6a53ff',
+				dark: {
+					background: '#1a1a1a',
+					foreground: '#ffffff',
+					border: '#333333'
 				},
 				muted: {
 					DEFAULT: 'hsl(var(--muted))',
@@ -62,10 +63,6 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				primary: '#ffffff',
-				secondary: '#1976d2',
-				background: '#1a1a1a',
-				text: '#ffffff',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Filter, Plus, Upload, Download } from 'lucide-react';
 import ProductManagement from '../pages/ProductManagement';
 import AccountManagement from '../pages/AccountManagement';
+import ThemeToggle from '../components/ThemeToggle';
 
 interface Customer {
   id: number;
@@ -59,11 +60,16 @@ const CustomerManagement = () => {
   }, []);
 
   const fetchCustomers = async () => {
-    const { data, error } = await supabase.from('CustomerMaster').select('*');
-    if (error) toast.error('Failed to load customers');
-    else {
+    try {
+      const { data, error } = await supabase.from('CustomerMaster').select('*');
+      if (error) {
+        throw error;
+      }
       setCustomers(data);
       setFilteredCustomers(data);
+    } catch (error) {
+      toast.error('Failed to load customers');
+      console.error('Error fetching customers:', error);
     }
   };
 
@@ -364,9 +370,23 @@ const CustomerManagement = () => {
   };
 
   return (
-    <div className="customer-management-container">
+    <div className={`flex flex-col p-4 bg-background dark:bg-gray-800`}>
+      <header className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold text-navy-700 dark:text-white">Customer Management</h1>
+        <ThemeToggle />
+      </header>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filteredCustomers.map(customer => (
+          <div key={customer.id} className="bg-white p-6 rounded-lg shadow-md">
+            <h2 className="text-lg font-bold">{customer.businessName}</h2>
+            <p className="text-sm">{customer.email}</p>
+            <p className="text-sm">{customer.type}</p>
+            <p className="text-sm">{customer.status}</p>
+          </div>
+        ))}
+      </div>
       {/* Page Header */}
-      <header className="page-header">
+      {/* <header className="page-header">
         <h1 className="text-2xl font-bold">Customer Management</h1>
         <div className="header-actions flex items-center gap-4">
           <button 
@@ -388,10 +408,10 @@ const CustomerManagement = () => {
             <Upload className="mr-2" /> Upload Customers
           </button>
         </div>
-      </header>
+      </header> */}
 
       {/* Search & Filter Section */}
-      <section className="search-filter-section mt-8 p-6 bg-white rounded-lg shadow-md">
+      {/* <section className="search-filter-section mt-8 p-6 bg-white rounded-lg shadow-md">
         <div className="flex items-center gap-4">
           <input
             type="text"
@@ -416,83 +436,24 @@ const CustomerManagement = () => {
             <Filter className="text-lg" />
           </button>
         </div>
-      </section>
+      </section> */}
 
-      {/* Customer List Table */}
-      <section className="customer-table-section mt-8">
-        <div className="table-container">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="py-3 px-4">Name</th>
-                <th className="py-3 px-4">Email</th>
-                <th className="py-3 px-4">Type</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredCustomers.map(customer => (
-                <tr key={customer.id} className="hover:bg-gray-100">
-                  <td className="py-3 px-4">{customer.businessName}</td>
-                  <td className="py-3 px-4">{customer.email}</td>
-                  <td className="py-3 px-4">{customer.type}</td>
-                  <td className="py-3 px-4">
-                    <span 
-                      className={`inline-block px-3 py-1 rounded-full ${
-                        customer.status === 'active' 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
-                      }`}
-                    >
-                      {customer.status}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4">
-                    <button 
-                      onClick={() => {
-                        setSelectedCustomer(customer);
-                        setFormData({
-                          businessName: customer.businessName,
-                          ownerName: customer.ownerName,
-                          phone: customer.phone,
-                          whatsapp: customer.whatsapp,
-                          ownerPhone: customer.ownerPhone,
-                          ownerWhatsapp: customer.ownerWhatsapp,
-                          email: customer.email,
-                          ownerEmail: customer.ownerEmail,
-                          type: customer.type,
-                          address: customer.address,
-                          province: customer.province,
-                          city: customer.city,
-                          pincode: customer.pincode,
-                          gst: customer.gst,
-                          remarks: customer.remarks,
-                          status: customer.status,
-                          creditPeriod: customer.creditPeriod,
-                        });
-                        setShowAddForm(true);
-                      }}
-                      className="text-blue-500 hover:underline"
-                    >
-                      Edit
-                    </button>
-                    <button 
-                      onClick={() => console.log('Implement delete')}
-                      className="ml-4 text-red-500 hover:underline"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* Customer Grid */}
+      {/* <section className="customer-grid-section mt-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredCustomers.map(customer => (
+            <div key={customer.id} className="bg-white p-6 rounded-lg shadow-md">
+              <h2 className="text-lg font-bold">{customer.businessName}</h2>
+              <p className="text-sm">{customer.email}</p>
+              <p className="text-sm">{customer.type}</p>
+              <p className="text-sm">{customer.status}</p>
+            </div>
+          ))}
         </div>
-      </section>
+      </section> */}
 
       {/* Marketing Automation Section */}
-      <section className="marketing-section mt-12 p-6 bg-white rounded-lg shadow-md">
+      {/* <section className="marketing-section mt-12 p-6 bg-white rounded-lg shadow-md">
         <h2 className="text-xl font-semibold mb-6">Marketing Automation</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="campaign-card bg-gray-50 p-6 rounded-lg">
@@ -500,17 +461,17 @@ const CustomerManagement = () => {
             <button className="w-full btn-primary mb-4">Create Campaign</button>
             <div className="campaign-list">
               {/* Campaign items */}
-            </div>
+            {/* </div>
           </div>
           <div className="ab-test-card bg-gray-50 p-6 rounded-lg">
             <h3 className="text-lg font-semibold mb-4">A/B Testing</h3>
             <button className="w-full btn-primary mb-4">Run A/B Test</button>
             <div className="test-config">
               {/* Test configuration */}
-            </div>
+            {/* </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Add/Edit Customer Modal */}
       {showAddForm && (

@@ -3,64 +3,42 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts'
 import DashboardCard from '../components/dash/DashboardCard';
 import ThemeToggle from '../components/reused/ThemeToggle';
 import { ThemeContext } from '../context/ThemeContext'; 
+import AdminOneLayout from '../layouts/AdminOneLayout'; // Import the AdminOne layout
 
 const Dashboard = () => {
   const { theme } = useContext(ThemeContext);
 
   return (
-    <div className={`flex flex-col gap-4 p-6 ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-black'}`}> 
-      <ThemeToggle />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* KPI Metrics */}
-        <DashboardCard
-          title="Net Revenue"
-          value="$503,450"
-          footer="24% this month"
-        />
-        <DashboardCard
-          title="Total Users"
-          value="1,200"
-          footer="10% increase"
-        />
-        <DashboardCard
-          title="Sales"
-          value="$50,000"
-          footer="15% this month"
-        />
-        <DashboardCard
-          title="New Signups"
-          value="300"
-          footer="5% increase"
-        />
-        <DashboardCard
-          title="Active Subscriptions"
-          value="800"
-          footer="20% increase"
-        />
-        <DashboardCard
-          title="Average Order Value"
-          value="$120"
-          footer="5% increase"
-        />
-      </div>
+    <AdminOneLayout>
+      <div className={`flex flex-col p-4 bg-background dark:bg-gray-800`}>
+        <header className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl font-bold text-navy-700 dark:text-white">Dashboard</h1>
+          <ThemeToggle />
+        </header>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <DashboardCard title="Net Revenue" />
+          <DashboardCard title="Total Users" />
+          <DashboardCard title="Active Sessions" />
+        </div>
 
-      <LineChart
-        width={500}
-        height={300}
-        data={[
-          { name: 'Apr', uv: 400 },
-          { name: 'May', uv: 600 },
-          { name: 'Jun', uv: 800 },
-          // Add more data
-        ]}
-      >
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="name" />
-        <YAxis />
-        <Tooltip />
-        <Line type="monotone" dataKey="uv" stroke="#8884d8" />
-      </LineChart>
-    </div>
+        <LineChart
+          width={500}
+          height={300}
+          data={[
+            { name: 'Apr', uv: 400 },
+            { name: 'May', uv: 600 },
+            { name: 'Jun', uv: 800 },
+            // Add more data
+          ]}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip />
+          <Line type="monotone" dataKey="uv" stroke="#8884d8" />
+        </LineChart>
+      </div>
+    </AdminOneLayout>
   );
 };
 

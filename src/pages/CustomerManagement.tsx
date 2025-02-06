@@ -296,15 +296,41 @@ const CustomerManagement = () => {
     }
   };
 
+  const handleFileUpload = async () => {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.csv';
+    fileInput.onchange = async (event) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const text = e.target?.result as string;
+                const rows = text.split('\n').map(row => row.split(','));
+                await checkForDuplicates(rows);
+            };
+            reader.readAsText(file);
+        }
+    };
+    fileInput.click();
+  };
+
   const checkForDuplicates = async (rows: string[][]) => {
     const existingCustomers = new Set(customers.map(customer => customer.email)); // Assuming email is unique
     const duplicates = rows.filter(row => existingCustomers.has(row[3])); // Assuming email is in the 4th column
 
     if (duplicates.length > 0) {
       toast.error('Duplicate entries found!');
+      // Display duplicates in a popup
+      showDuplicatePopup(duplicates);
     } else {
       await uploadCustomers(rows);
     }
+  };
+
+  const showDuplicatePopup = (duplicates: string[][]) => {
+    // Logic to display duplicates in a popup
+    // This could be a modal or an alert with the duplicate rows
   };
 
   const uploadCustomers = async (rows: string[][]) => {
@@ -355,12 +381,12 @@ const CustomerManagement = () => {
           >
             <Download className="mr-2" /> Download Template
           </button>
-          <input 
-            type="file" 
-            accept="text/csv" 
-            onChange={handleFileChange} 
+          <button 
+            onClick={handleFileUpload} 
             className="btn btn-upload"
-          />
+          >
+            <Upload className="mr-2" /> Upload Customers
+          </button>
         </div>
       </header>
 
@@ -630,12 +656,6 @@ const CustomerManagement = () => {
                 onChange={handleInputChange}
                 placeholder="Credit Period"
               />
-              <input 
-                type="file" 
-    accept="text/csv" 
-    onChange={handleFileChange} 
-    className="btn btn-upload" 
-/>
               <div className="flex items-center gap-4 mt-6">
                 <button 
                   type="submit" 

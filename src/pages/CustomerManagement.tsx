@@ -284,7 +284,7 @@ const CustomerManagement = () => {
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+    const file = (event.target as HTMLInputElement).files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = async (e) => {
@@ -301,7 +301,7 @@ const CustomerManagement = () => {
     fileInput.type = 'file';
     fileInput.accept = '.csv';
     fileInput.onchange = async (event) => {
-        const file = event.target.files?.[0];
+        const file = (event.target as HTMLInputElement).files?.[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = async (e) => {

@@ -42,12 +42,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           {/* Set up the BrowserRouter for client-side routing. */}
-          <BrowserRouter
-            future={{
-              v7_startTransition: true,
-              v7_relativeSplatPath: true,
-            }}
-          >
+          <BrowserRouter>
             {/* Render the Sidebar component for navigation. */}
             <Sidebar />
             {/* Define the main content area for the app. */}
@@ -56,20 +51,18 @@ const App = () => (
               <Routes>
                 {/* Route for the dashboard grid. */}
                 <Route path="/" element={<DashboardGrid />} />
-                {/* Route for product management. */}
-                <Route path="/products" element={<ProductManagement />} />
-                {/* Route for account management. */}
-                <Route path="/account-management" element={<AccountManagement />} />
                 {/* Route for customer management. */}
                 <Route path="/customers" element={<CustomerManagement />} />
+                {/* Route for product management. */}
+                <Route path="/products" element={<ProductManagement />} />
                 {/* Route for inventory management. */}
                 <Route path="/inventory" element={<InventoryManagement />} />
                 {/* Route for payment tracking. */}
                 <Route path="/payments" element={<PaymentTracking />} />
-                {/* Route for user role management. */}
-                <Route path="/roles" element={<UserRoleManagement />} />
+                {/* Route for account management. */}
+                <Route path="/accounts" element={<AccountManagement />} />
                 {/* Route for sales opportunities. */}
-                <Route path="/sales-opportunities" element={<SalesOpportunities />} />
+                <Route path="/sales" element={<SalesOpportunities />} />
                 {/* Catch-all route for 404 errors. */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

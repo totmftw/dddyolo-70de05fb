@@ -16,9 +16,9 @@ const Dashboard = () => {
           <ThemeToggle />
         </header>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <DashboardCard title="Net Revenue" />
-          <DashboardCard title="Total Users" />
-          <DashboardCard title="Active Sessions" />
+          <DashboardCard title="Net Revenue" value="$500,000" footer="24% increase" />
+          <DashboardCard title="Total Users" value="1,200" footer="10% increase" />
+          <DashboardCard title="Active Sessions" value="300" footer="5% increase" />
         </div>
 
         <LineChart
@@ -28,7 +28,8 @@ const Dashboard = () => {
             { name: 'Apr', uv: 400 },
             { name: 'May', uv: 600 },
             { name: 'Jun', uv: 800 },
-            // Add more data
+            { name: 'Jul', uv: 500 },
+            { name: 'Aug', uv: 700 },
           ]}
         >
           <CartesianGrid strokeDasharray="3 3" />

@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { Filter, Plus, Upload, Download } from 'lucide-react';
 import ProductManagement from '../pages/ProductManagement';
 import AccountManagement from '../pages/AccountManagement';
-import ThemeToggle from '../components/ThemeToggle';
+import ThemeToggle from '../components/reused/ThemeToggle';
 
 interface Customer {
   id: number;

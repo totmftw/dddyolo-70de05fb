@@ -1,4 +1,6 @@
 // App component serves as the main entry point for the application.
+import React from 'react';
+import { ThemeProvider } from './theme/ThemeContext';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,7 +8,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import React from 'react';
 import DashboardGrid from './pages/Dashboard';
 import ProductManagement from './pages/ProductManagement';
 import CustomerManagement from './pages/CustomerManagement';
@@ -17,7 +18,6 @@ import AccountManagement from './pages/AccountManagement';
 import SalesOpportunities from './pages/SalesOpportunities';
 import SalesOpportunityManagement from './pages/SalesOpportunityManagement';
 import ProductBulkManage from './pages/ProductBulkManage';
-import { ThemeProvider } from './theme/ThemeContext';
 import './App.css'; // Add any global styles
 import { SidebarProvider } from './context/SidebarContext';
 import UnifiedSidebar from './components/UnifiedSidebar'; // Import the new UnifiedSidebar component
@@ -56,9 +56,9 @@ const App = () => (
               {/* Define routes for different pages. */}
               <Routes>
                 {/* Route for the dashboard grid. */}
-                <Route path="/" element={<DashboardGrid />} />
+                <Route path="/" element={<Index />} />
                 {/* Route for product management. */}
-                <Route path="/products" element={<ProductManagement />} />
+                <Route path="/dashboard" element={<DashboardGrid />} />
                 {/* Route for account management. */}
                 <Route path="/account-management" element={<AccountManagement />} />
                 {/* Route for customer management. */}

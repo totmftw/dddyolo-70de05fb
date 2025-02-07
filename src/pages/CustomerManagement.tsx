@@ -608,7 +608,7 @@ const CustomerManagement = () => {
                 onChange={handleInputChange}
                 placeholder="Credit Period"
               />
-              <div className="flex items-center gap-4 mt-6">
+                <div className="flex items-center gap-4 mt-6">
                 <button 
                   type="submit" 
                   className="btn-primary flex-1"

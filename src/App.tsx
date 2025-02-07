@@ -18,9 +18,9 @@ import AccountManagement from './pages/AccountManagement';
 import SalesOpportunities from './pages/SalesOpportunities';
 import SalesOpportunityManagement from './pages/SalesOpportunityManagement';
 import ProductBulkManage from './pages/ProductBulkManage';
-import './App.css';
 import { SidebarProvider } from './context/SidebarContext';
 import UnifiedSidebar from './components/UnifiedSidebar';
+import './App.css';
 
 const queryClient = new QueryClient();
 
@@ -37,21 +37,27 @@ const App = () => (
               v7_relativeSplatPath: true,
             }}
           >
-            <div className="main-content">
+            <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
               <UnifiedSidebar />
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/dashboard" element={<DashboardGrid />} />
-                <Route path="/account-management" element={<AccountManagement />} />
-                <Route path="/customers" element={<CustomerManagement />} />
-                <Route path="/inventory" element={<InventoryManagement />} />
-                <Route path="/payments" element={<PaymentTracking />} />
-                <Route path="/roles" element={<UserRoleManagement />} />
-                <Route path="/sales-opportunities" element={<SalesOpportunities />} />
-                <Route path="/sales-opportunity-management" element={<SalesOpportunityManagement />} />
-                <Route path="/product-bulk-manage" element={<ProductBulkManage />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+              <div className="flex flex-col flex-1 overflow-y-auto">
+                <main className="h-full pb-16 overflow-y-auto">
+                  <div className="container px-6 mx-auto">
+                    <Routes>
+                      <Route path="/" element={<Index />} />
+                      <Route path="/dashboard" element={<DashboardGrid />} />
+                      <Route path="/account-management" element={<AccountManagement />} />
+                      <Route path="/customers" element={<CustomerManagement />} />
+                      <Route path="/inventory" element={<InventoryManagement />} />
+                      <Route path="/payments" element={<PaymentTracking />} />
+                      <Route path="/roles" element={<UserRoleManagement />} />
+                      <Route path="/sales-opportunities" element={<SalesOpportunities />} />
+                      <Route path="/sales-opportunity-management" element={<SalesOpportunityManagement />} />
+                      <Route path="/product-bulk-manage" element={<ProductBulkManage />} />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </div>
+                </main>
+              </div>
             </div>
           </BrowserRouter>
         </SidebarProvider>

@@ -6,6 +6,7 @@ import { Filter, Plus, Upload, Download } from 'lucide-react';
 import ProductManagement from '../pages/ProductManagement';
 import AccountManagement from '../pages/AccountManagement';
 import ThemeToggle from '../components/reused/ThemeToggle';
+import CustomerCard from '../components/reused/CustomerCard';
 
 interface Customer {
   id: number;
@@ -377,12 +378,7 @@ const CustomerManagement = () => {
       </header>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredCustomers.map(customer => (
-          <div key={customer.id} className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-lg font-bold">{customer.businessName}</h2>
-            <p className="text-sm">{customer.email}</p>
-            <p className="text-sm">{customer.type}</p>
-            <p className="text-sm">{customer.status}</p>
-          </div>
+          <CustomerCard key={customer.id} customer={customer} />
         ))}
       </div>
       {/* Page Header */}
@@ -442,12 +438,7 @@ const CustomerManagement = () => {
       {/* <section className="customer-grid-section mt-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredCustomers.map(customer => (
-            <div key={customer.id} className="bg-white p-6 rounded-lg shadow-md">
-              <h2 className="text-lg font-bold">{customer.businessName}</h2>
-              <p className="text-sm">{customer.email}</p>
-              <p className="text-sm">{customer.type}</p>
-              <p className="text-sm">{customer.status}</p>
-            </div>
+            <CustomerCard key={customer.id} customer={customer} />
           ))}
         </div>
       </section> */}
@@ -656,6 +647,18 @@ const CustomerManagement = () => {
           </div>
         </motion.div>
       )}
+      <button 
+        onClick={handleFileUpload} 
+        className="btn btn-upload"
+      >
+        <Upload className="mr-2" /> Upload Customers
+        <input 
+          type="file" 
+          accept="text/csv" 
+          onChange={handleFileChange} 
+          className="btn btn-upload" 
+        />
+      </button>
     </div>
   );
 };

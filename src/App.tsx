@@ -52,7 +52,7 @@ const App = () => (
           >
             {/* Define the main content area for the app. */}
             <div className="main-content">
-              <UnifiedSidebar /> // Integrate the new UnifiedSidebar component
+              <UnifiedSidebar /> 
               {/* Define routes for different pages. */}
               <Routes>
                 {/* Route for the dashboard grid. */}

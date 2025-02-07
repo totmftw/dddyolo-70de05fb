@@ -70,7 +70,7 @@ const CustomerManagement = () => {
       setFilteredCustomers(data);
     } catch (error) {
       toast.error('Failed to load customers');
-      console.error('Error fetching customers:', error);
+      console.error('Error fetching customers:', error.message || error);
     }
   };
 

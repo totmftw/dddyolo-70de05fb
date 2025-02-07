@@ -1,9 +1,10 @@
-import React, { useContext } from 'react';
+
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { useTheme } from '../context/ThemeContext'; 
+import { useTheme } from '../theme/ThemeContext';
 
 const UnifiedSidebar = () => {
-    const { theme } = useTheme(); 
+    const { theme } = useTheme();
 
     return (
         <div className={`sidebar w-64 h-screen ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} text-${theme === 'dark' ? 'white' : 'black'} shadow-lg`}> 

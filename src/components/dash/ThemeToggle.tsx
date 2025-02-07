@@ -1,9 +1,9 @@
 
-import React, { useContext } from 'react';
-import { ThemeContext } from '../../context/ThemeContext';
+import React from 'react';
+import { useTheme } from '../../theme/ThemeContext';
 
 const ThemeToggle = () => {
-  const { theme, setTheme } = useContext(ThemeContext);
+  const { theme, setTheme } = useTheme();
 
   const handleToggle = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
@@ -17,4 +17,3 @@ const ThemeToggle = () => {
 };
 
 export default ThemeToggle;
-

@@ -1,13 +1,13 @@
 
-import React, { useContext } from 'react';
-import { ThemeContext } from '../../context/ThemeContext';
-import Switch from '../themeComponents/switch'; // Changed from named import to default import
+import React from 'react';
+import { useTheme } from '../../theme/ThemeContext';
+import Switch from '../themeComponents/switch';
 
 const ThemeToggle = () => {
-    const { theme, setTheme } = useContext(ThemeContext);
+    const { theme, setTheme } = useTheme();
 
     const toggleTheme = () => {
-        setTheme((prevTheme) => (prevTheme === 'dark' ? 'light' : 'dark'));
+        setTheme(theme === 'dark' ? 'light' : 'dark');
     };
 
     return (

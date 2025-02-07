@@ -1,12 +1,13 @@
-import React, { useContext } from 'react';
+
+import React from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import DashboardCard from '../components/dash/DashboardCard';
 import ThemeToggle from '../components/reused/ThemeToggle';
-import { ThemeContext } from '../context/ThemeContext'; 
-import AdminOneLayout from '../layouts/AdminOneLayout'; // Import the AdminOne layout
+import { useTheme } from '../theme/ThemeContext';
+import AdminOneLayout from '../layouts/AdminOneLayout';
 
 const Dashboard = () => {
-  const { theme } = useContext(ThemeContext);
+  const { theme } = useTheme();
 
   return (
     <AdminOneLayout>

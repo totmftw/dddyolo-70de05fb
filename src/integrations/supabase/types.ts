@@ -537,6 +537,45 @@ export type Database = {
           },
         ]
       }
+      opportunities: {
+        Row: {
+          assigned_to: string | null
+          created_at: string | null
+          expected_value: number | null
+          id: string
+          lead_name: string
+          notes: string | null
+          probability: number | null
+          source: string | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string | null
+          expected_value?: number | null
+          id?: string
+          lead_name: string
+          notes?: string | null
+          probability?: number | null
+          source?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string | null
+          expected_value?: number | null
+          id?: string
+          lead_name?: string
+          notes?: string | null
+          probability?: number | null
+          source?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       paymentLedger: {
         Row: {
           amount: number

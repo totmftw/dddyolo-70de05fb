@@ -1,4 +1,5 @@
-import Hero from "../components/Hero";
+
+import Hero from "../components/reused/Hero";
 import ProductManagement from '../pages/ProductManagement';
 
 const Index = () => {
@@ -10,3 +11,4 @@ const Index = () => {
 };
 
 export default Index;
+

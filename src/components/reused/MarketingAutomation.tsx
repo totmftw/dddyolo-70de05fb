@@ -1,6 +1,5 @@
-// MarketingAutomation component handles marketing automation features.
 import React, { useState, useEffect, useContext } from 'react';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../../supabaseClient';
 import { useTheme } from '../../context/ThemeContext';
 
 /**

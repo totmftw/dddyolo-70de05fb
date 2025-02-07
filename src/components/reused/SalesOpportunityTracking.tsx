@@ -1,6 +1,5 @@
-// SalesOpportunityTracking component tracks sales opportunities over time.
 import React, { useState, useEffect, useContext } from 'react';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../../supabaseClient';
 import { useTheme } from '../../context/ThemeContext';
 
 /**

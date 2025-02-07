@@ -1,6 +1,7 @@
+
 import React, { useContext } from 'react';
 import { ThemeContext } from '../../context/ThemeContext';
-import { Switch } from '../themeComponents/switch';
+import Switch from '../themeComponents/switch'; // Changed from named import to default import
 
 const ThemeToggle = () => {
     const { theme, setTheme } = useContext(ThemeContext);

@@ -956,6 +956,24 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          description: string | null
+          id: number
+          role_name: string
+        }
+        Insert: {
+          description?: string | null
+          id?: number
+          role_name: string
+        }
+        Update: {
+          description?: string | null
+          id?: number
+          role_name?: string
+        }
+        Relationships: []
+      }
       userFavoriteCategories: {
         Row: {
           category: string

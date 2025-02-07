@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ThemeProvider } from './theme/ThemeContext';
 import { Toaster } from "@/components/ui/toaster";
@@ -49,6 +48,7 @@ const App = () => (
                       <Route path="/customers" element={<CustomerManagement />} />
                       <Route path="/inventory" element={<InventoryManagement />} />
                       <Route path="/payments" element={<PaymentTracking />} />
+                      <Route path="/products" element={<ProductManagement />} />
                       <Route path="/roles" element={<UserRoleManagement />} />
                       <Route path="/sales-opportunities" element={<SalesOpportunities />} />
                       <Route path="/sales-opportunity-management" element={<SalesOpportunityManagement />} />

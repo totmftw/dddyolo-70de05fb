@@ -1,6 +1,6 @@
 // Hero component displays the hero section of the application.
 import React, { useContext } from 'react';
-import { useTheme } from '../../context/ThemeContext';
+import { useTheme } from '../../theme/ThemeContext';
 import { motion } from "framer-motion";
 
 /**

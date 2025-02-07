@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { useTheme } from '../../context/ThemeContext';
+import { useTheme } from '../../theme/ThemeContext';
 
 const DashboardCard = ({ title, value, footer }) => {
   const { theme } = useTheme(); // Access the theme context

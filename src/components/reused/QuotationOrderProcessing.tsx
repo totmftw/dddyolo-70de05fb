@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { supabase } from '../../supabaseClient';
-import { useTheme } from '../../context/ThemeContext';
+import { useTheme } from '../../theme/ThemeContext';
 
 /**
  * QuotationOrderProcessing component is responsible for generating quotes and orders.

@@ -1,7 +1,7 @@
 // This file will contain the Opportunities component for tracking leads and opportunities.
 // Opportunities component displays a list of sales opportunities.
 import React, { useContext } from 'react';
-import { useTheme } from '../../context/ThemeContext';
+import { useTheme } from '../../theme/ThemeContext';
 
 /**
  * The Opportunities component is a functional React component that displays a list of sales opportunities.

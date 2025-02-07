@@ -1,5 +1,6 @@
+
 import * as React from "react"
-import { useTheme } from '../../context/ThemeContext';
+import { useTheme } from '../../theme/ThemeContext';
 import { cn } from "@/lib/utils"
 
 const Table = React.forwardRef<

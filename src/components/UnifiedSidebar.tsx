@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from '../theme/ThemeContext';
@@ -30,7 +29,7 @@ const UnifiedSidebar = () => {
     { path: '/payments', name: 'Payment Tracking', icon: CreditCard },
     { path: '/roles', name: 'User Role Management', icon: UserCog },
     { path: '/sales-opportunity-management', name: 'Sales Management', icon: ClipboardList },
-    { path: '/product-bulk-manage', name: 'Product Management', icon: FileStack }
+    { path: '/products', name: 'Product Management', icon: FileStack }
   ];
 
   const isActive = (path: string) => location.pathname === path;

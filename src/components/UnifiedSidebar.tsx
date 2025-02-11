@@ -2,6 +2,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from '../theme/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 import {
   LayoutDashboard,
   Users,
@@ -15,12 +16,15 @@ import {
   Upload,
   ChevronRight,
   Plus,
-  Eye
+  Eye,
+  LogOut
 } from 'lucide-react';
+import { Button } from './ui/button';
 
 const UnifiedSidebar = () => {
   const { theme } = useTheme();
   const location = useLocation();
+  const { signOut } = useAuth();
 
   const menuItems = [
     { path: '/dashboard', name: 'Dashboard', icon: LayoutDashboard },
@@ -45,8 +49,12 @@ const UnifiedSidebar = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
+  const handleSignOut = async () => {
+    await signOut();
+  };
+
   return (
-    <aside className={`z-20 hidden w-64 overflow-y-auto bg-white dark:bg-gray-800 md:block flex-shrink-0`}>
+    <aside className="z-20 hidden w-64 overflow-y-auto bg-white dark:bg-gray-800 md:block flex-shrink-0">
       <div className="py-4 text-gray-500 dark:text-gray-400">
         <Link to="/" className="ml-6 text-lg font-bold text-gray-800 dark:text-gray-200">
           Admin Dashboard
@@ -93,6 +101,16 @@ const UnifiedSidebar = () => {
             </li>
           ))}
         </ul>
+        <div className="px-6 my-6">
+          <Button
+            onClick={handleSignOut}
+            className="w-full flex items-center justify-center gap-2"
+            variant="outline"
+          >
+            <LogOut className="w-4 h-4" />
+            Sign Out
+          </Button>
+        </div>
       </div>
     </aside>
   );

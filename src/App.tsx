@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ThemeProvider } from './theme/ThemeContext';
 import { Toaster } from "@/components/ui/toaster";
@@ -9,6 +10,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import DashboardGrid from './pages/Dashboard';
 import ProductManagement from './pages/ProductManagement';
+import ViewProducts from './pages/ViewProducts';
 import CustomerManagement from './pages/CustomerManagement';
 import InventoryManagement from './pages/InventoryManagement';
 import PaymentTracking from './pages/PaymentTracking';
@@ -49,6 +51,7 @@ const App = () => (
                       <Route path="/inventory" element={<InventoryManagement />} />
                       <Route path="/payments" element={<PaymentTracking />} />
                       <Route path="/products" element={<ProductManagement />} />
+                      <Route path="/products/view" element={<ViewProducts />} />
                       <Route path="/roles" element={<UserRoleManagement />} />
                       <Route path="/sales-opportunities" element={<SalesOpportunities />} />
                       <Route path="/sales-opportunity-management" element={<SalesOpportunityManagement />} />

@@ -196,7 +196,7 @@ const ProductManagement = () => {
         <div className="p-6 max-w-7xl mx-auto">
             <div className="flex items-center gap-2 mb-6">
                 <Package className="h-6 w-6" />
-                <h2 className="text-2xl font-bold">Product Management</h2>
+                <h2 className="text-2xl font-bold">Add New Product</h2>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-lg shadow-md">

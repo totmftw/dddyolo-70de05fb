@@ -71,7 +71,6 @@ export type Database = {
           permission_name: string
           permission_value: boolean | null
           resource: string
-          role: Database["public"]["Enums"]["app_role"]
           updated_at: string | null
         }
         Insert: {
@@ -81,7 +80,6 @@ export type Database = {
           permission_name: string
           permission_value?: boolean | null
           resource: string
-          role: Database["public"]["Enums"]["app_role"]
           updated_at?: string | null
         }
         Update: {
@@ -91,18 +89,9 @@ export type Database = {
           permission_name?: string
           permission_value?: boolean | null
           resource?: string
-          role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "custom_permissions_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_management"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       customer_ledger: {
         Row: {
@@ -278,15 +267,7 @@ export type Database = {
           layout?: Json
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "dashboard_layouts_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_management"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       dashboard_metrics: {
         Row: {
@@ -347,7 +328,6 @@ export type Database = {
           id: string
           is_enabled: boolean | null
           parent_id: string | null
-          role: Database["public"]["Enums"]["app_role"]
           updated_at: string | null
         }
         Insert: {
@@ -357,7 +337,6 @@ export type Database = {
           id?: string
           is_enabled?: boolean | null
           parent_id?: string | null
-          role: Database["public"]["Enums"]["app_role"]
           updated_at?: string | null
         }
         Update: {
@@ -367,7 +346,6 @@ export type Database = {
           id?: string
           is_enabled?: boolean | null
           parent_id?: string | null
-          role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string | null
         }
         Relationships: [
@@ -437,15 +415,7 @@ export type Database = {
           user_id?: string | null
           visible_columns?: string[] | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "invoice_table_config_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_management"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       invoiceTable: {
         Row: {
@@ -679,13 +649,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "paymentTransactions_createdBy_fkey"
-            columns: ["createdBy"]
-            isOneToOne: false
-            referencedRelation: "user_management"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "paymentTransactions_invId_fkey"
             columns: ["invId"]
             isOneToOne: false
@@ -863,7 +826,6 @@ export type Database = {
           created_at: string
           id: string
           resource: string
-          role: Database["public"]["Enums"]["app_role"]
           updated_at: string
         }
         Insert: {
@@ -874,7 +836,6 @@ export type Database = {
           created_at?: string
           id?: string
           resource: string
-          role: Database["public"]["Enums"]["app_role"]
           updated_at?: string
         }
         Update: {
@@ -885,7 +846,6 @@ export type Database = {
           created_at?: string
           id?: string
           resource?: string
-          role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string
         }
         Relationships: []
@@ -911,7 +871,6 @@ export type Database = {
           preferences: Json | null
           profile_image_url: string | null
           reports_to: string | null
-          role: Database["public"]["Enums"]["app_role"]
           skills: string[] | null
           social_links: Json | null
           status: string | null
@@ -940,7 +899,6 @@ export type Database = {
           preferences?: Json | null
           profile_image_url?: string | null
           reports_to?: string | null
-          role?: Database["public"]["Enums"]["app_role"]
           skills?: string[] | null
           social_links?: Json | null
           status?: string | null
@@ -969,7 +927,6 @@ export type Database = {
           preferences?: Json | null
           profile_image_url?: string | null
           reports_to?: string | null
-          role?: Database["public"]["Enums"]["app_role"]
           skills?: string[] | null
           social_links?: Json | null
           status?: string | null
@@ -979,13 +936,6 @@ export type Database = {
           work_schedule?: Json | null
         }
         Relationships: [
-          {
-            foreignKeyName: "user_profiles_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "user_management"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "user_profiles_reports_to_fkey"
             columns: ["reports_to"]
@@ -1035,15 +985,7 @@ export type Database = {
           subcategory?: string | null
           userId?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "userFavoriteCategories_userId_fkey"
-            columns: ["userId"]
-            isOneToOne: false
-            referencedRelation: "user_management"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       whatsapp_config: {
         Row: {
@@ -1115,17 +1057,6 @@ export type Database = {
         }
         Relationships: []
       }
-      user_management: {
-        Row: {
-          created_at: string | null
-          email: string | null
-          full_name: string | null
-          id: string | null
-          role: Database["public"]["Enums"]["app_role"] | null
-          updated_at: string | null
-        }
-        Relationships: []
-      }
     }
     Functions: {
       check_duplicate_payments: {
@@ -1142,38 +1073,6 @@ export type Database = {
           existing_payment_date: string
           existing_amount: number
         }[]
-      }
-      create_new_user_with_profile: {
-        Args: {
-          user_email: string
-          user_password: string
-          user_full_name: string
-          user_role: Database["public"]["Enums"]["app_role"]
-          user_phone: string
-          user_designation: string
-          user_department: string
-          user_emergency_contact: string
-          user_address: string
-        }
-        Returns: string
-      }
-      create_user_with_profile: {
-        Args: {
-          email: string
-          password: string
-          full_name: string
-          role: Database["public"]["Enums"]["app_role"]
-          phone: string
-          designation: string
-          department: string
-          employee_id: string
-          team: string
-          location: string
-          bio: string
-          emergency_contact: string
-          address: string
-        }
-        Returns: string
       }
       generate_unique_invoice_number: {
         Args: Record<PropertyKey, never>
@@ -1264,10 +1163,10 @@ export type Database = {
     Enums: {
       app_role:
         | "business_owner"
+        | "catalog_builder"
+        | "sales_manager"
         | "business_manager"
-        | "order_manager"
         | "it_admin"
-        | "team_member"
     }
     CompositeTypes: {
       [_ in never]: never

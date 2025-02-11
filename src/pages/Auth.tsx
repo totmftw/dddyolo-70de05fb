@@ -103,7 +103,7 @@ const Auth = () => {
       return;
     }
 
-    const { error } = await supabase.auth.signUp({
+    const { data: { user }, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -120,6 +120,23 @@ const Auth = () => {
         description: error.message,
       });
     } else {
+      // Create user profile with default role
+      if (user) {
+        const { error: profileError } = await supabase
+          .from('user_profiles')
+          .insert([
+            {
+              id: user.id,
+              full_name: fullName,
+              role: 'business_manager' // Default role
+            }
+          ]);
+
+        if (profileError) {
+          console.error('Error creating user profile:', profileError);
+        }
+      }
+
       toast({
         title: "Success",
         description: "Please check your email to confirm your account.",

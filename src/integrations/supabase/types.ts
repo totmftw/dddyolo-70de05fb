@@ -871,6 +871,7 @@ export type Database = {
           preferences: Json | null
           profile_image_url: string | null
           reports_to: string | null
+          role: Database["public"]["Enums"]["app_role"] | null
           skills: string[] | null
           social_links: Json | null
           status: string | null
@@ -899,6 +900,7 @@ export type Database = {
           preferences?: Json | null
           profile_image_url?: string | null
           reports_to?: string | null
+          role?: Database["public"]["Enums"]["app_role"] | null
           skills?: string[] | null
           social_links?: Json | null
           status?: string | null
@@ -927,6 +929,7 @@ export type Database = {
           preferences?: Json | null
           profile_image_url?: string | null
           reports_to?: string | null
+          role?: Database["public"]["Enums"]["app_role"] | null
           skills?: string[] | null
           social_links?: Json | null
           status?: string | null

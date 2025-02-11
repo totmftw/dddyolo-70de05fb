@@ -13,6 +13,8 @@ const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = React.useState(false);
+  const [password, setPassword] = React.useState('');
+  const [passwordError, setPasswordError] = React.useState('');
 
   useEffect(() => {
     // Check if user is already logged in
@@ -33,6 +35,32 @@ const Auth = () => {
 
     return () => subscription.unsubscribe();
   }, [navigate]);
+
+  const validatePassword = (password: string) => {
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};:'"|,.<>?/`~]/.test(password);
+    const isLongEnough = password.length >= 8;
+
+    const missingCriteria = [];
+    if (!hasLowerCase) missingCriteria.push('lowercase letter');
+    if (!hasUpperCase) missingCriteria.push('uppercase letter');
+    if (!hasNumber) missingCriteria.push('number');
+    if (!hasSpecialChar) missingCriteria.push('special character');
+    if (!isLongEnough) missingCriteria.push('minimum length of 8 characters');
+
+    if (missingCriteria.length > 0) {
+      return `Password must include: ${missingCriteria.join(', ')}`;
+    }
+    return '';
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newPassword = e.target.value;
+    setPassword(newPassword);
+    setPasswordError(validatePassword(newPassword));
+  };
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -63,6 +91,17 @@ const Auth = () => {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
     const fullName = formData.get('fullName') as string;
+
+    const passwordValidationError = validatePassword(password);
+    if (passwordValidationError) {
+      toast({
+        variant: "destructive",
+        title: "Invalid Password",
+        description: passwordValidationError,
+      });
+      setLoading(false);
+      return;
+    }
 
     const { error } = await supabase.auth.signUp({
       email,
@@ -157,10 +196,15 @@ const Auth = () => {
                     name="password"
                     type="password"
                     autoComplete="new-password"
+                    value={password}
+                    onChange={handlePasswordChange}
                     required
                   />
+                  {passwordError && (
+                    <p className="text-sm text-red-500 mt-1">{passwordError}</p>
+                  )}
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
+                <Button type="submit" className="w-full" disabled={loading || !!passwordError}>
                   {loading ? "Loading..." : "Sign up"}
                 </Button>
               </form>

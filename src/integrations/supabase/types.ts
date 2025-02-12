@@ -757,6 +757,65 @@ export type Database = {
         }
         Relationships: []
       }
+      productquantitydiscounts: {
+        Row: {
+          created_at: string
+          id: string
+          prodId: string | null
+          tierfivediscount: number | null
+          tierfivequantity: number | null
+          tierfourdiscount: number | null
+          tierfourquantity: number | null
+          tieronediscount: number | null
+          tieronequantity: number | null
+          tierthreediscount: number | null
+          tierthreequantity: number | null
+          tiertwodiscount: number | null
+          tiertwoquantity: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          prodId?: string | null
+          tierfivediscount?: number | null
+          tierfivequantity?: number | null
+          tierfourdiscount?: number | null
+          tierfourquantity?: number | null
+          tieronediscount?: number | null
+          tieronequantity?: number | null
+          tierthreediscount?: number | null
+          tierthreequantity?: number | null
+          tiertwodiscount?: number | null
+          tiertwoquantity?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          prodId?: string | null
+          tierfivediscount?: number | null
+          tierfivequantity?: number | null
+          tierfourdiscount?: number | null
+          tierfourquantity?: number | null
+          tieronediscount?: number | null
+          tieronequantity?: number | null
+          tierthreediscount?: number | null
+          tierthreequantity?: number | null
+          tiertwodiscount?: number | null
+          tiertwoquantity?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "productquantitydiscounts_prodId_fkey"
+            columns: ["prodId"]
+            isOneToOne: false
+            referencedRelation: "productManagement"
+            referencedColumns: ["prodId"]
+          },
+        ]
+      }
       products: {
         Row: {
           category: string | null

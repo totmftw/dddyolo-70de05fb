@@ -222,8 +222,46 @@ const ProductManagement = () => {
                 const worksheet = workbook.Sheets[sheetName];
                 const data = XLSX.utils.sheet_to_json(worksheet);
                 
+                // Check for duplicates in the uploaded data
+                const duplicates = data.filter((item, index, self) =>
+                    index !== self.findIndex((t) => (
+                        t['SKU'] === item['SKU'] ||
+                        t['Product Name'] === item['Product Name']
+                    ))
+                );
+
+                if (duplicates.length > 0) {
+                    toast.error(
+                        <div>
+                            <p>Duplicate products found:</p>
+                            <ul className="mt-2 list-disc list-inside">
+                                {duplicates.map((dup: any, index) => (
+                                    <li key={index}>
+                                        {dup['Product Name']} (SKU: {dup['SKU']})
+                                    </li>
+                                ))}
+                            </ul>
+                            <p className="mt-2">Please remove duplicates and try again.</p>
+                        </div>,
+                        { duration: 5000 }
+                    );
+                    return;
+                }
+
                 // Process and upload each product
                 for (const row of data) {
+                    // Check if product already exists in database
+                    const { data: existingProduct } = await supabase
+                        .from('productManagement')
+                        .select('prodId')
+                        .or(`prodSku.eq.${row['SKU']},prodName.eq.${row['Product Name']}`)
+                        .single();
+
+                    if (existingProduct) {
+                        toast.error(`Product already exists: ${row['Product Name']} (SKU: ${row['SKU']})`);
+                        continue;
+                    }
+
                     const productData = {
                         prodId: `PROD-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
                         prodName: row['Product Name'],

@@ -662,7 +662,7 @@ export type Database = {
           prodPromo2: string | null
           prodRestockDate: string | null
           prodShortName: string | null
-          prodSku: string | null
+          prodSku: string
           prodSlaborice1: number | null
           prodSlabprice2: number | null
           prodSlabprice3: number | null
@@ -702,7 +702,7 @@ export type Database = {
           prodPromo2?: string | null
           prodRestockDate?: string | null
           prodShortName?: string | null
-          prodSku?: string | null
+          prodSku: string
           prodSlaborice1?: number | null
           prodSlabprice2?: number | null
           prodSlabprice3?: number | null
@@ -742,7 +742,7 @@ export type Database = {
           prodPromo2?: string | null
           prodRestockDate?: string | null
           prodShortName?: string | null
-          prodSku?: string | null
+          prodSku?: string
           prodSlaborice1?: number | null
           prodSlabprice2?: number | null
           prodSlabprice3?: number | null

@@ -7,6 +7,7 @@ import ProductManagement from '../pages/ProductManagement';
 import AccountManagement from '../pages/AccountManagement';
 import ThemeToggle from '../components/reused/ThemeToggle';
 import CustomerCard from '../components/reused/CustomerCard';
+import * as XLSX from 'xlsx';
 
 interface Customer {
   id: number;
@@ -117,6 +118,75 @@ const CustomerManagement = () => {
       filtered = filtered.filter(customer => customer.status === statusFilter);
     }
     setFilteredCustomers(filtered);
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      const file = event.target.files?.[0];
+      if (!file) {
+        toast.error('No file selected');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const data = new Uint8Array(e.target?.result as ArrayBuffer);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+          // Process and upload each customer
+          for (const row of jsonData) {
+            const customerData = {
+              custBusinessname: row['Business Name'] || '',
+              custOwnername: row['Owner Name'] || '',
+              custPhone: row['Phone'] || '',
+              custWhatsapp: row['WhatsApp'] || '',
+              custOwnerphone: row['Owner Phone'] || '',
+              custOwnerwhatsapp: row['Owner WhatsApp'] || '',
+              custEmail: row['Email'] || '',
+              custOwneremail: row['Owner Email'] || '',
+              custType: row['Type'] || '',
+              custAddress: row['Address'] || '',
+              custProvince: row['Province'] || '',
+              custCity: row['City'] || '',
+              custPincode: row['Pincode'] || '',
+              custGST: row['GST'] || '',
+              custRemarks: row['Remarks'] || '',
+              custStatus: row['Status'] || 'active',
+              custCreditperiod: row['Credit Period'] || '',
+            };
+
+            const { error } = await supabase
+              .from('customerMaster')
+              .insert([customerData]);
+
+            if (error) {
+              console.error('Error uploading customer:', error);
+              toast.error(`Failed to upload customer: ${row['Business Name']}`);
+            }
+          }
+
+          toast.success('Customers uploaded successfully');
+          fetchCustomers(); // Refresh the customer list
+        } catch (error) {
+          console.error('Error processing file:', error);
+          toast.error('Failed to process file');
+        }
+      };
+
+      reader.readAsArrayBuffer(file);
+    } catch (error) {
+      console.error('Error handling file:', error);
+      toast.error('Failed to handle file');
+    }
+  };
+
+  const handleFileUpload = () => {
+    // This function is intentionally empty as it's just a click handler for the file input
+    // The actual file handling is done in handleFileChange
   };
 
   const handleAddCustomer = async () => {
@@ -440,18 +510,22 @@ const CustomerManagement = () => {
           </div>
         </motion.div>
       )}
-      <button 
-        onClick={handleFileUpload} 
-        className="btn btn-upload"
-      >
-        <Upload className="mr-2" /> Upload Customers
-        <input 
-          type="file" 
-          accept="text/csv" 
-          onChange={handleFileChange} 
-          className="btn btn-upload" 
-        />
-      </button>
+      <div className="mt-4 flex justify-end">
+        <button 
+          onClick={handleFileUpload} 
+          className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+        >
+          <Upload className="h-4 w-4" />
+          Upload Customers
+          <input 
+            type="file" 
+            accept=".xlsx,.xls,.csv" 
+            onChange={handleFileChange} 
+            className="hidden" 
+            id="fileInput"
+          />
+        </button>
+      </div>
     </div>
   );
 };

@@ -23,6 +23,7 @@ import SalesOpportunities from './pages/SalesOpportunities';
 import SalesOpportunityManagement from './pages/SalesOpportunityManagement';
 import { SidebarProvider } from './context/SidebarContext';
 import UnifiedSidebar from './components/UnifiedSidebar';
+import QuantityDiscount from './pages/QuantityDiscount';
 import './App.css';
 
 const queryClient = new QueryClient();
@@ -57,6 +58,7 @@ const App = () => (
                                                                 <Route path="products" element={<ProductManagement />} />
                                                                 <Route path="products/manage" element={<ManageProducts />} />
                                                                 <Route path="products/view" element={<ViewProducts />} />
+                                                                <Route path="quantity-discounts" element={<QuantityDiscount />} />
                                                                 <Route path="roles" element={<UserRoleManagement />} />
                                                                 <Route path="sales-opportunities" element={<SalesOpportunities />} />
                                                                 <Route path="sales-management" element={<SalesOpportunityManagement />} />

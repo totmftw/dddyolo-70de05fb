@@ -10,7 +10,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../components/ui/table";
+} from "@/components/ui/table";
 
 interface QuantityDiscount {
   id: string;
@@ -81,15 +81,49 @@ const QuantityDiscount = () => {
       console.error('Error fetching discounts:', error);
       return;
     }
-    setDiscounts(data || []);
+
+    // Map database column names to interface properties
+    const mappedDiscounts: QuantityDiscount[] = (data || []).map(d => ({
+      id: d.id,
+      prodId: d.prodId,
+      tierOneQuantity: d.tieronequantity,
+      tierOneDiscount: d.tieronediscount,
+      tierTwoQuantity: d.tiertwoquantity,
+      tierTwoDiscount: d.tiertwodiscount,
+      tierThreeQuantity: d.tierthreequantity,
+      tierThreeDiscount: d.tierthreediscount,
+      tierFourQuantity: d.tierfourquantity,
+      tierFourDiscount: d.tierfourdiscount,
+      tierFiveQuantity: d.tierfivequantity,
+      tierFiveDiscount: d.tierfivediscount
+    }));
+    
+    setDiscounts(mappedDiscounts);
   };
 
   const handleDiscountChange = async (prodId: string, field: keyof QuantityDiscount, value: number) => {
+    // Map interface property names back to database column names
+    const dbFieldMap: Record<string, string> = {
+      tierOneQuantity: 'tieronequantity',
+      tierOneDiscount: 'tieronediscount',
+      tierTwoQuantity: 'tiertwoquantity',
+      tierTwoDiscount: 'tiertwodiscount',
+      tierThreeQuantity: 'tierthreequantity',
+      tierThreeDiscount: 'tierthreediscount',
+      tierFourQuantity: 'tierfourquantity',
+      tierFourDiscount: 'tierfourdiscount',
+      tierFiveQuantity: 'tierfivequantity',
+      tierFiveDiscount: 'tierfivediscount'
+    };
+
+    const dbField = dbFieldMap[field];
+    if (!dbField) return;
+
     const { error } = await supabase
       .from('productquantitydiscounts')
       .upsert({
         prodId,
-        [field]: value,
+        [dbField]: value,
       }, {
         onConflict: 'prodId'
       });

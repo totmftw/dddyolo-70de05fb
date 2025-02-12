@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
-import { Package } from 'lucide-react';
+import { Package, Download, Upload, Database } from 'lucide-react';
 import { toast } from "sonner";
-import CustomerManagement from '../pages/CustomerManagement';
-import AccountManagement from '../pages/AccountManagement';
+import * as XLSX from 'xlsx';
 
 interface Product {
     prodId: string;
@@ -192,16 +191,139 @@ const ProductManagement = () => {
         setLoading(false);
     };
 
+    const handleTemplateDownload = () => {
+        const headers = [
+            'Product Name', 'Brand', 'SKU', 'Collection', 'Subcategory',
+            'Material', 'Type', 'Variant', 'Color 1', 'Color 2', 'Color 3', 'Color 4', 'Color 5',
+            'Base Price', 'Landing Cost', 'Variable Price',
+            'MOQ', 'Box Stock', 'Piece Stock',
+            'Unit Weight (kg)', 'Gross Weight (kg)', 'Net Weight (kg)',
+            'Box Length (cm)', 'Box Width (cm)', 'Box Height (cm)',
+            'Product Length (cm)', 'Product Width (cm)', 'Product Height (cm)',
+            'Status'
+        ];
+
+        const ws = XLSX.utils.aoa_to_sheet([headers]);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Products Template');
+        XLSX.writeFile(wb, 'products_template.xlsx');
+    };
+
+    const handleBulkUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files || e.target.files.length === 0) return;
+        
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        
+        reader.onload = async (event) => {
+            try {
+                const workbook = XLSX.read(event.target?.result, { type: 'binary' });
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+                const data = XLSX.utils.sheet_to_json(worksheet);
+                
+                // Process and upload each product
+                for (const row of data) {
+                    const productData = {
+                        prodId: `PROD-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                        prodName: row['Product Name'],
+                        prodBrand: row['Brand'] || 'Black Gold',
+                        prodSku: row['SKU'],
+                        prodCollection: row['Collection'],
+                        prodSubcategory: row['Subcategory'],
+                        prodMaterial: row['Material'],
+                        prodType: row['Type'],
+                        prodVariant: row['Variant'],
+                        prodColor1: row['Color 1'],
+                        prodColor2: row['Color 2'],
+                        prodColor3: row['Color 3'],
+                        prodColor4: row['Color 4'],
+                        prodColor5: row['Color 5'],
+                        prodBasePrice: row['Base Price'],
+                        prodLandingcost: row['Landing Cost'],
+                        prodVariableprice: row['Variable Price'],
+                        prodMoq: row['MOQ'],
+                        prodBoxstock: row['Box Stock'],
+                        prodPiecestock: row['Piece Stock'],
+                        prodUnitweight: row['Unit Weight (kg)'],
+                        prodGrossweight: row['Gross Weight (kg)'],
+                        prodNettweight: row['Net Weight (kg)'],
+                        prodStatus: row['Status'] === 'Active'
+                    };
+
+                    const { error } = await supabase
+                        .from('productManagement')
+                        .insert([productData]);
+
+                    if (error) {
+                        toast.error(`Error uploading product: ${row['Product Name']}`);
+                        console.error('Error:', error);
+                    }
+                }
+                toast.success('Bulk upload completed successfully');
+                fetchProducts();
+            } catch (error) {
+                toast.error('Error processing file');
+                console.error('Error:', error);
+            }
+        };
+
+        reader.readAsBinaryString(file);
+    };
+
+    const handleDownloadAllProducts = async () => {
+        const { data, error } = await supabase
+            .from('productManagement')
+            .select('*');
+
+        if (error) {
+            toast.error('Error downloading products');
+            return;
+        }
+
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'All Products');
+        XLSX.writeFile(wb, 'all_products.xlsx');
+    };
+
     return (
         <div className="p-6 max-w-7xl mx-auto">
-            <div className="flex items-center gap-2 mb-6">
-                <Package className="h-6 w-6" />
-                <h2 className="text-2xl font-bold">Add New Product</h2>
+            <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2">
+                    <Package className="h-6 w-6" />
+                    <h2 className="text-2xl font-bold">Add New Product</h2>
+                </div>
+                <div className="flex gap-2">
+                    <button
+                        onClick={handleTemplateDownload}
+                        className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                    >
+                        <Download className="h-4 w-4" />
+                        Template Download
+                    </button>
+                    <label className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 cursor-pointer">
+                        <Upload className="h-4 w-4" />
+                        Files Upload
+                        <input
+                            type="file"
+                            accept=".xlsx,.xls"
+                            onChange={handleBulkUpload}
+                            className="hidden"
+                        />
+                    </label>
+                    <button
+                        onClick={handleDownloadAllProducts}
+                        className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                    >
+                        <Database className="h-4 w-4" />
+                        Download All Products
+                    </button>
+                </div>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-lg shadow-md">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {/* Basic Information */}
                     <div className="space-y-4">
                         <h3 className="font-semibold text-lg">Basic Information</h3>
                         <input
@@ -255,7 +377,6 @@ const ProductManagement = () => {
                         </select>
                     </div>
 
-                    {/* Color Options */}
                     <div className="space-y-4">
                         <h3 className="font-semibold text-lg">Color Options</h3>
                         {[1, 2, 3, 4, 5].map((num) => (
@@ -283,7 +404,6 @@ const ProductManagement = () => {
                         ))}
                     </div>
 
-                    {/* Images Upload */}
                     <div className="space-y-4">
                         <h3 className="font-semibold text-lg">Product Images</h3>
                         <div className="border-2 border-dashed border-gray-300 p-4 rounded-lg">
@@ -300,7 +420,6 @@ const ProductManagement = () => {
                         </div>
                     </div>
 
-                    {/* Specifications */}
                     <div className="space-y-4">
                         <h3 className="font-semibold text-lg">Specifications</h3>
                         <input
@@ -329,7 +448,6 @@ const ProductManagement = () => {
                         />
                     </div>
 
-                    {/* Pricing */}
                     <div className="space-y-4">
                         <h3 className="font-semibold text-lg">Pricing</h3>
                         <input
@@ -358,7 +476,6 @@ const ProductManagement = () => {
                         />
                     </div>
 
-                    {/* Inventory */}
                     <div className="space-y-4">
                         <h3 className="font-semibold text-lg">Inventory</h3>
                         <input
@@ -387,7 +504,6 @@ const ProductManagement = () => {
                         />
                     </div>
 
-                    {/* Measurements */}
                     <div className="space-y-4">
                         <h3 className="font-semibold text-lg">Measurements</h3>
                         <div className="grid grid-cols-1 gap-4">

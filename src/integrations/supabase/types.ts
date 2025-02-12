@@ -9,7 +9,7 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      Accounts: {
+      custAccounts: {
         Row: {
           account_id: string
           contracts: string | null
@@ -32,33 +32,6 @@ export type Database = {
           created_at?: string | null
           financials?: string | null
           id?: number
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      Campaigns: {
-        Row: {
-          campaign_name: string
-          content: string | null
-          created_at: string | null
-          id: number
-          target_audience: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          campaign_name: string
-          content?: string | null
-          created_at?: string | null
-          id?: number
-          target_audience?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          campaign_name?: string
-          content?: string | null
-          created_at?: string | null
-          id?: number
-          target_audience?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -188,36 +161,6 @@ export type Database = {
           custType?: string
           custWhatsapp?: number
           id?: number
-        }
-        Relationships: []
-      }
-      CustomerMaster: {
-        Row: {
-          address: string | null
-          created_at: string | null
-          email: string
-          id: number
-          name: string
-          phone: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          address?: string | null
-          created_at?: string | null
-          email: string
-          id: number
-          name: string
-          phone?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          address?: string | null
-          created_at?: string | null
-          email?: string
-          id?: number
-          name?: string
-          phone?: string | null
-          updated_at?: string | null
         }
         Relationships: []
       }
@@ -358,7 +301,7 @@ export type Database = {
           },
         ]
       }
-      FeaturePermissions: {
+      featurePermissions: {
         Row: {
           created_at: string | null
           feature_name: string
@@ -385,7 +328,7 @@ export type Database = {
             foreignKeyName: "FeaturePermissions_parent_id_fkey"
             columns: ["parent_id"]
             isOneToOne: false
-            referencedRelation: "FeaturePermissions"
+            referencedRelation: "featurePermissions"
             referencedColumns: ["id"]
           },
         ]
@@ -506,6 +449,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      mrktCampaigns: {
+        Row: {
+          campaign_name: string
+          content: string | null
+          created_at: string | null
+          id: number
+          target_audience: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          campaign_name: string
+          content?: string | null
+          created_at?: string | null
+          id?: number
+          target_audience?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          campaign_name?: string
+          content?: string | null
+          created_at?: string | null
+          id?: number
+          target_audience?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       opportunities: {
         Row: {

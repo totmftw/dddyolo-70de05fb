@@ -9,7 +9,6 @@ import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import AuthGuard from './components/AuthGuard';
 import Auth from './pages/Auth';
-import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import DashboardGrid from './pages/Dashboard';
 import ProductManagement from './pages/ProductManagement';
@@ -21,7 +20,6 @@ import UserRoleManagement from './components/reused/UserRoleManagement';
 import AccountManagement from './pages/AccountManagement';
 import SalesOpportunities from './pages/SalesOpportunities';
 import SalesOpportunityManagement from './pages/SalesOpportunityManagement';
-import ProductBulkManage from './pages/ProductBulkManage';
 import { SidebarProvider } from './context/SidebarContext';
 import UnifiedSidebar from './components/UnifiedSidebar';
 import './App.css';
@@ -39,7 +37,7 @@ const App = () => (
             <BrowserRouter>
               <Routes>
                 <Route path="/auth" element={<Auth />} />
-                <Route path="/" element={<Index />} />
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
                 <Route
                   path="/dashboard/*"
                   element={
@@ -60,7 +58,6 @@ const App = () => (
                                 <Route path="roles" element={<UserRoleManagement />} />
                                 <Route path="sales-opportunities" element={<SalesOpportunities />} />
                                 <Route path="sales-management" element={<SalesOpportunityManagement />} />
-                                <Route path="product-bulk" element={<ProductBulkManage />} />
                                 <Route path="*" element={<NotFound />} />
                               </Routes>
                             </div>

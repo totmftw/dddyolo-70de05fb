@@ -13,11 +13,10 @@ import {
   Target,
   FileStack,
   Settings,
-  Upload,
-  ChevronRight,
   Plus,
   Eye,
-  LogOut
+  LogOut,
+  Edit
 } from 'lucide-react';
 import { Button } from './ui/button';
 
@@ -29,7 +28,6 @@ const UnifiedSidebar = () => {
   const menuItems = [
     { path: '/dashboard', name: 'Dashboard', icon: LayoutDashboard, permission: { resource: 'dashboard', action: 'view' as const } },
     { path: '/dashboard/customers', name: 'Customer Management', icon: Users, permission: { resource: 'customers', action: 'view' as const } },
-    { path: '/dashboard/product-bulk', name: 'Product Bulk Upload', icon: Upload, permission: { resource: 'products', action: 'create' as const } },
     { path: '/dashboard/inventory', name: 'Inventory Management', icon: Package, permission: { resource: 'inventory', action: 'view' as const } },
     { path: '/dashboard/sales-opportunities', name: 'Sales Opportunities', icon: Target, permission: { resource: 'sales', action: 'view' as const } },
     { path: '/dashboard/account', name: 'Account Management', icon: Settings, permission: { resource: 'settings', action: 'view' as const } },
@@ -43,6 +41,7 @@ const UnifiedSidebar = () => {
       permission: { resource: 'products', action: 'view' as const },
       subItems: [
         { path: '/dashboard/products', name: 'Add Product', icon: Plus, permission: { resource: 'products', action: 'create' as const } },
+        { path: '/dashboard/products/manage', name: 'Manage Products', icon: Edit, permission: { resource: 'products', action: 'view' as const } },
         { path: '/dashboard/products/view', name: 'View Products', icon: Eye, permission: { resource: 'products', action: 'view' as const } }
       ]
     }
@@ -78,7 +77,6 @@ const UnifiedSidebar = () => {
                   >
                     <item.icon className="w-5 h-5" />
                     <span className="ml-4">{item.name}</span>
-                    {isActive(item.path) && <ChevronRight className="w-4 h-4 ml-auto" />}
                   </Link>
                 </div>
                 {item.subItems && (

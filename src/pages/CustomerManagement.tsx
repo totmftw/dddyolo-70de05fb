@@ -62,15 +62,40 @@ const CustomerManagement = () => {
 
   const fetchCustomers = async () => {
     try {
-      const { data, error } = await supabase.from('CustomerMaster').select('*');
+      const { data, error } = await supabase.from('customerMaster').select('*');
       if (error) {
+        toast.error('Failed to load customers');
+        console.error('Error fetching customers:', error.message || error);
         throw error;
       }
-      setCustomers(data);
-      setFilteredCustomers(data);
+      
+      // Map database fields to interface fields
+      const mappedCustomers: Customer[] = data.map(customer => ({
+        id: customer.id,
+        businessName: customer.custBusinessname,
+        ownerName: customer.custOwnername,
+        email: customer.custEmail,
+        type: customer.custType,
+        status: customer.custStatus,
+        phone: customer.custPhone?.toString() || '',
+        whatsapp: customer.custWhatsapp?.toString() || '',
+        ownerPhone: customer.custOwnerphone?.toString() || '',
+        ownerWhatsapp: customer.custOwnerwhatsapp?.toString() || '',
+        ownerEmail: customer.custOwneremail || '',
+        address: customer.custAddress || '',
+        province: customer.custProvince || '',
+        city: customer.custCity || '',
+        pincode: customer.custPincode?.toString() || '',
+        gst: customer.custGST || '',
+        remarks: customer.custRemarks || '',
+        creditPeriod: customer.custCreditperiod?.toString() || '',
+      }));
+
+      setCustomers(mappedCustomers);
+      setFilteredCustomers(mappedCustomers);
     } catch (error) {
       toast.error('Failed to load customers');
-      console.error('Error fetching customers:', error.message || error);
+      console.error('Error fetching customers:', error);
     }
   };
 
@@ -96,30 +121,32 @@ const CustomerManagement = () => {
 
   const handleAddCustomer = async () => {
     const { error } = await supabase
-      .from('CustomerMaster')
+      .from('customerMaster')
       .insert([
         {
-          businessname: formData.businessName,
-          ownername: formData.ownerName,
-          phone: formData.phone,
-          whatsapp: formData.whatsapp,
-          ownerphone: formData.ownerPhone,
-          ownerwhatsapp: formData.ownerWhatsapp,
-          email: formData.email,
-          owneremail: formData.ownerEmail,
-          type: formData.type,
-          address: formData.address,
-          province: formData.province,
-          city: formData.city,
-          pincode: formData.pincode,
-          gst: formData.gst,
-          remarks: formData.remarks,
-          status: formData.status,
-          creditperiod: formData.creditPeriod,
+          custBusinessname: formData.businessName,
+          custOwnername: formData.ownerName,
+          custPhone: formData.phone,
+          custWhatsapp: formData.whatsapp,
+          custOwnerphone: formData.ownerPhone,
+          custOwnerwhatsapp: formData.ownerWhatsapp,
+          custEmail: formData.email,
+          custOwneremail: formData.ownerEmail,
+          custType: formData.type,
+          custAddress: formData.address,
+          custProvince: formData.province,
+          custCity: formData.city,
+          custPincode: formData.pincode,
+          custGST: formData.gst,
+          custRemarks: formData.remarks,
+          custStatus: formData.status,
+          custCreditperiod: formData.creditPeriod,
         },
       ]);
-    if (error) toast.error('Failed to add customer');
-    else {
+    if (error) {
+      toast.error('Failed to add customer');
+      console.error('Error adding customer:', error);
+    } else {
       toast.success('Customer added successfully');
       setShowAddForm(false);
       fetchCustomers();
@@ -147,29 +174,31 @@ const CustomerManagement = () => {
 
   const handleUpdateCustomer = async () => {
     const { error } = await supabase
-      .from('CustomerMaster')
+      .from('customerMaster')
       .update({
-        businessname: formData.businessName,
-        ownername: formData.ownerName,
-        phone: formData.phone,
-        whatsapp: formData.whatsapp,
-        ownerphone: formData.ownerPhone,
-        ownerwhatsapp: formData.ownerWhatsapp,
-        email: formData.email,
-        owneremail: formData.ownerEmail,
-        type: formData.type,
-        address: formData.address,
-        province: formData.province,
-        city: formData.city,
-        pincode: formData.pincode,
-        gst: formData.gst,
-        remarks: formData.remarks,
-        status: formData.status,
-        creditperiod: formData.creditPeriod,
+        custBusinessname: formData.businessName,
+        custOwnername: formData.ownerName,
+        custPhone: formData.phone,
+        custWhatsapp: formData.whatsapp,
+        custOwnerphone: formData.ownerPhone,
+        custOwnerwhatsapp: formData.ownerWhatsapp,
+        custEmail: formData.email,
+        custOwneremail: formData.ownerEmail,
+        custType: formData.type,
+        custAddress: formData.address,
+        custProvince: formData.province,
+        custCity: formData.city,
+        custPincode: formData.pincode,
+        custGST: formData.gst,
+        custRemarks: formData.remarks,
+        custStatus: formData.status,
+        custCreditperiod: formData.creditPeriod,
       })
       .eq('id', selectedCustomer?.id);
-    if (error) toast.error('Failed to update customer');
-    else {
+    if (error) {
+      toast.error('Failed to update customer');
+      console.error('Error updating customer:', error);
+    } else {
       toast.success('Customer updated successfully');
       setSelectedCustomer(null);
       setShowAddForm(false);
@@ -218,158 +247,6 @@ const CustomerManagement = () => {
     }));
   };
 
-  const customerTemplate = [
-    {
-        id: '',
-        businessName: '',
-        ownerName: '',
-        email: '',
-        type: '',
-        status: 'active',
-        phone: '',
-        whatsapp: '',
-        ownerPhone: '',
-        ownerWhatsapp: '',
-        ownerEmail: '',
-        address: '',
-        province: '',
-        city: '',
-        pincode: '',
-        gst: '',
-        remarks: '',
-        creditPeriod: '',
-    }
-  ];
-
-  const downloadTemplate = () => {
-    const headers = [
-        "Business Name",
-        "Owner Name",
-        "Email",
-        "Type",
-        "Status",
-        "Phone",
-        "WhatsApp",
-        "Owner Phone",
-        "Owner WhatsApp",
-        "Owner Email",
-        "Address",
-        "Province",
-        "City",
-        "Pincode",
-        "Remarks",
-        "Credit Period",
-    ];
-
-    const csvContent = "data:text/csv;charset=utf-8," 
-        + [headers, ...customers.map(e => [
-            e.businessName,
-            e.ownerName,
-            e.email,
-            e.type,
-            e.status,
-            e.phone,
-            e.whatsapp,
-            e.ownerPhone,
-            e.ownerWhatsapp,
-            e.ownerEmail,
-            e.address,
-            e.province,
-            e.city,
-            e.pincode,
-            e.remarks,
-            e.creditPeriod,
-        ].join(","))].join("\n");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "customerMasterTemplate.csv");
-    document.body.appendChild(link); // Required for FF
-
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        const text = e.target?.result as string;
-        const rows = text.split('\n').map(row => row.split(','));
-        await checkForDuplicates(rows);
-      };
-      reader.readAsText(file);
-    }
-  };
-
-  const handleFileUpload = async () => {
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = '.csv';
-    fileInput.onchange = async (event) => {
-        const file = (event.target as HTMLInputElement).files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                const text = e.target?.result as string;
-                const rows = text.split('\n').map(row => row.split(','));
-                await checkForDuplicates(rows);
-            };
-            reader.readAsText(file);
-        }
-    };
-    fileInput.click();
-  };
-
-  const checkForDuplicates = async (rows: string[][]) => {
-    const existingCustomers = new Set(customers.map(customer => customer.email)); // Assuming email is unique
-    const duplicates = rows.filter(row => existingCustomers.has(row[3])); // Assuming email is in the 4th column
-
-    if (duplicates.length > 0) {
-      toast.error('Duplicate entries found!');
-      // Display duplicates in a popup
-      showDuplicatePopup(duplicates);
-    } else {
-      await uploadCustomers(rows);
-    }
-  };
-
-  const showDuplicatePopup = (duplicates: string[][]) => {
-    // Logic to display duplicates in a popup
-    // This could be a modal or an alert with the duplicate rows
-  };
-
-  const uploadCustomers = async (rows: string[][]) => {
-    const newCustomers = rows.map(row => ({
-      businessname: row[0],
-      ownername: row[1],
-      phone: row[2],
-      email: row[3],
-      type: row[4],
-      status: row[5],
-      whatsapp: row[6],
-      ownerphone: row[7],
-      ownerwhatsapp: row[8],
-      owneremail: row[9],
-      address: row[10],
-      province: row[11],
-      city: row[12],
-      pincode: row[13],
-      gst: row[14],
-      remarks: row[15],
-      creditperiod: row[16],
-    }));
-
-    const { error } = await supabase.from('CustomerMaster').insert(newCustomers);
-    if (error) {
-      toast.error('Failed to upload customers');
-    } else {
-      toast.success('Customers uploaded successfully');
-      fetchCustomers(); // Refresh the customer list
-    }
-  };
-
   return (
     <div className={`flex flex-col p-4 bg-background dark:bg-gray-800`}>
       <header className="flex justify-between items-center mb-4">
@@ -381,90 +258,6 @@ const CustomerManagement = () => {
           <CustomerCard key={customer.id} customer={customer} />
         ))}
       </div>
-      {/* Page Header */}
-      {/* <header className="page-header">
-        <h1 className="text-2xl font-bold">Customer Management</h1>
-        <div className="header-actions flex items-center gap-4">
-          <button 
-            onClick={() => setShowAddForm(true)} 
-            className="btn-primary"
-          >
-            <Plus className="mr-2" /> Add Customer
-          </button>
-          <button 
-            onClick={downloadTemplate} 
-            className="btn btn-download"
-          >
-            <Download className="mr-2" /> Download Template
-          </button>
-          <button 
-            onClick={handleFileUpload} 
-            className="btn btn-upload"
-          >
-            <Upload className="mr-2" /> Upload Customers
-          </button>
-        </div>
-      </header> */}
-
-      {/* Search & Filter Section */}
-      {/* <section className="search-filter-section mt-8 p-6 bg-white rounded-lg shadow-md">
-        <div className="flex items-center gap-4">
-          <input
-            type="text"
-            placeholder="Search customers..."
-            value={searchTerm}
-            onChange={handleSearch}
-            className="w-full p-3 border rounded-lg flex-1"
-          />
-          <select
-            value={statusFilter}
-            onChange={handleStatusFilter}
-            className="w-40 p-3 border rounded-lg"
-          >
-            <option value="">All Statuses</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
-          <button 
-            onClick={() => console.log('Implement advanced filter')}
-            className="btn-tertiary p-3 rounded-lg"
-          >
-            <Filter className="text-lg" />
-          </button>
-        </div>
-      </section> */}
-
-      {/* Customer Grid */}
-      {/* <section className="customer-grid-section mt-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredCustomers.map(customer => (
-            <CustomerCard key={customer.id} customer={customer} />
-          ))}
-        </div>
-      </section> */}
-
-      {/* Marketing Automation Section */}
-      {/* <section className="marketing-section mt-12 p-6 bg-white rounded-lg shadow-md">
-        <h2 className="text-xl font-semibold mb-6">Marketing Automation</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="campaign-card bg-gray-50 p-6 rounded-lg">
-            <h3 className="text-lg font-semibold mb-4">Campaigns</h3>
-            <button className="w-full btn-primary mb-4">Create Campaign</button>
-            <div className="campaign-list">
-              {/* Campaign items */}
-            {/* </div>
-          </div>
-          <div className="ab-test-card bg-gray-50 p-6 rounded-lg">
-            <h3 className="text-lg font-semibold mb-4">A/B Testing</h3>
-            <button className="w-full btn-primary mb-4">Run A/B Test</button>
-            <div className="test-config">
-              {/* Test configuration */}
-            {/* </div>
-          </div>
-        </div>
-      </section> */}
-
-      {/* Add/Edit Customer Modal */}
       {showAddForm && (
         <motion.div 
           initial={{ opacity: 0, y: 20 }}

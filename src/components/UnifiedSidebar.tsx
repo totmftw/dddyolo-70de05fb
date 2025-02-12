@@ -16,7 +16,8 @@ import {
   Plus,
   Eye,
   LogOut,
-  Edit
+  Edit,
+  Percent
 } from 'lucide-react';
 import { Button } from './ui/button';
 
@@ -34,6 +35,7 @@ const UnifiedSidebar = () => {
     { path: '/dashboard/payments', name: 'Payment Tracking', icon: CreditCard, permission: { resource: 'payments', action: 'view' as const } },
     { path: '/dashboard/roles', name: 'User Role Management', icon: UserCog, permission: { resource: 'roles', action: 'view' as const } },
     { path: '/dashboard/sales-management', name: 'Sales Management', icon: ClipboardList, permission: { resource: 'sales', action: 'view' as const } },
+    { path: '/dashboard/quantity-discounts', name: 'Quantity Discounts', icon: Percent, permission: { resource: 'products', action: 'view' as const } },
     {
       path: '/dashboard/products',
       name: 'Product Management',

@@ -12,7 +12,10 @@ const ManageProducts = () => {
             const { data, error } = await supabase
                 .from('productManagement')
                 .select('*');
-            if (error) throw error;
+            if (error) {
+                toast.error('Failed to fetch products');
+                throw error;
+            }
             return data;
         },
     });

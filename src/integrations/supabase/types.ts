@@ -242,6 +242,30 @@ export type Database = {
         }
         Relationships: []
       }
+      discount_templates: {
+        Row: {
+          created_at: string | null
+          id: string
+          template_data: Json
+          template_name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          template_data: Json
+          template_name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          template_data?: Json
+          template_name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       expenses: {
         Row: {
           amount: number | null

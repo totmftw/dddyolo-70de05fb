@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { Search, Save, FileDown, FileUp } from 'lucide-react';
@@ -36,12 +37,25 @@ interface Product {
   prodCategory: string;
   prodSubcategory: string;
   prodBasePrice: number;
+  by_use: string[];
 }
 
 interface DiscountTemplate {
   id: string;
   template_name: string;
-  template_data: QuantityDiscount;
+  tier_structure: {
+    tier1: { quantity: number | null; discount: number | null };
+    tier2: { quantity: number | null; discount: number | null };
+    tier3: { quantity: number | null; discount: number | null };
+    tier4: { quantity: number | null; discount: number | null };
+    tier5: { quantity: number | null; discount: number | null };
+  };
+  applies_to: {
+    collections: string[];
+    categories: string[];
+    by_use: string[];
+    price_range: { min: number | null; max: number | null };
+  };
   created_at?: string;
   updated_at?: string;
 }
@@ -53,7 +67,7 @@ const QuantityDiscount = () => {
   const [filters, setFilters] = useState({
     collection: '',
     category: '',
-    subcategory: ''
+    by_use: '',
   });
   const [templates, setTemplates] = useState<DiscountTemplate[]>([]);
   const [newTemplateName, setNewTemplateName] = useState('');
@@ -78,22 +92,13 @@ const QuantityDiscount = () => {
       });
       return;
     }
-
-    const transformedTemplates: DiscountTemplate[] = (data || []).map(template => ({
-      id: template.id,
-      template_name: template.template_name,
-      template_data: template.template_data as unknown as QuantityDiscount,
-      created_at: template.created_at,
-      updated_at: template.updated_at
-    }));
-
-    setTemplates(transformedTemplates);
+    setTemplates(data || []);
   };
 
   const fetchProducts = async () => {
     const { data, error } = await supabase
       .from('productManagement')
-      .select('prodId, prodName, prodCollection, prodCategory, prodSubcategory, prodBasePrice');
+      .select('prodId, prodName, prodCollection, prodCategory, prodSubcategory, prodBasePrice, by_use');
     
     if (error) {
       toast({
@@ -101,7 +106,6 @@ const QuantityDiscount = () => {
         title: "Error fetching products",
         description: error.message
       });
-      console.error('Error fetching products:', error);
       return;
     }
     setProducts(data || []);
@@ -118,7 +122,6 @@ const QuantityDiscount = () => {
         title: "Error fetching discounts",
         description: error.message
       });
-      console.error('Error fetching discounts:', error);
       return;
     }
 
@@ -140,13 +143,7 @@ const QuantityDiscount = () => {
     setDiscounts(mappedDiscounts);
   };
 
-  const handleDiscountChange = async (prodId: string, field: keyof QuantityDiscount, value: string | number) => {
-    const numericValue = Number(value);
-    
-    if (isNaN(numericValue)) {
-      return;
-    }
-
+  const handleDiscountChange = async (prodId: string, field: keyof QuantityDiscount, value: number) => {
     const dbFieldMap: Record<string, string> = {
       tierOneQuantity: 'tieronequantity',
       tierOneDiscount: 'tieronediscount',
@@ -167,7 +164,7 @@ const QuantityDiscount = () => {
       .from('productquantitydiscounts')
       .upsert({
         prodId,
-        [dbField]: numericValue,
+        [dbField]: value,
       }, {
         onConflict: 'prodId'
       });
@@ -197,11 +194,51 @@ const QuantityDiscount = () => {
       return;
     }
 
+    // Get the first discount as a base for the template
+    const baseDiscount = discounts[0];
+    if (!baseDiscount) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No discount structure available to save as template"
+      });
+      return;
+    }
+
+    const templateStructure = {
+      tier1: { 
+        quantity: baseDiscount.tierOneQuantity,
+        discount: baseDiscount.tierOneDiscount 
+      },
+      tier2: { 
+        quantity: baseDiscount.tierTwoQuantity,
+        discount: baseDiscount.tierTwoDiscount 
+      },
+      tier3: { 
+        quantity: baseDiscount.tierThreeQuantity,
+        discount: baseDiscount.tierThreeDiscount 
+      },
+      tier4: { 
+        quantity: baseDiscount.tierFourQuantity,
+        discount: baseDiscount.tierFourDiscount 
+      },
+      tier5: { 
+        quantity: baseDiscount.tierFiveQuantity,
+        discount: baseDiscount.tierFiveDiscount 
+      }
+    };
+
     const { error } = await supabase
       .from('discount_templates')
       .insert({
         template_name: newTemplateName,
-        template_data: discounts[0] || {}
+        tier_structure: templateStructure,
+        applies_to: {
+          collections: [],
+          categories: [],
+          by_use: [],
+          price_range: { min: null, max: null }
+        }
       });
 
     if (error) {
@@ -221,11 +258,25 @@ const QuantityDiscount = () => {
   };
 
   const applyTemplate = async (template: DiscountTemplate) => {
+    // Convert template structure to discount format
+    const discountData = {
+      tieronequantity: template.tier_structure.tier1.quantity,
+      tieronediscount: template.tier_structure.tier1.discount,
+      tiertwoquantity: template.tier_structure.tier2.quantity,
+      tiertwodiscount: template.tier_structure.tier2.discount,
+      tierthreequantity: template.tier_structure.tier3.quantity,
+      tierthreediscount: template.tier_structure.tier3.discount,
+      tierfourquantity: template.tier_structure.tier4.quantity,
+      tierfourdiscount: template.tier_structure.tier4.discount,
+      tierfivequantity: template.tier_structure.tier5.quantity,
+      tierfivediscount: template.tier_structure.tier5.discount
+    };
+
     const { error } = await supabase
       .from('productquantitydiscounts')
       .upsert({
-        ...template.template_data,
-        prodId: template.template_data.prodId
+        ...discountData,
+        prodId: products[0]?.prodId // You might want to modify this to apply to multiple products based on criteria
       }, {
         onConflict: 'prodId'
       });
@@ -253,9 +304,9 @@ const QuantityDiscount = () => {
     const matchesSearch = product.prodName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCollection = !filters.collection || product.prodCollection === filters.collection;
     const matchesCategory = !filters.category || product.prodCategory === filters.category;
-    const matchesSubcategory = !filters.subcategory || product.prodSubcategory === filters.subcategory;
+    const matchesByUse = !filters.by_use || (product.by_use && product.by_use.includes(filters.by_use));
     
-    return matchesSearch && matchesCollection && matchesCategory && matchesSubcategory;
+    return matchesSearch && matchesCollection && matchesCategory && matchesByUse;
   });
 
   const calculateDiscountedPrice = (basePrice: number, discountPercentage: number | null): number => {
@@ -337,7 +388,7 @@ const QuantityDiscount = () => {
           />
         </div>
 
-        {['collection', 'category', 'subcategory'].map((filterType) => (
+        {['collection', 'category', 'by_use'].map((filterType) => (
           <select
             key={filterType}
             className="px-4 py-2 border rounded-lg min-w-[150px]"
@@ -345,7 +396,7 @@ const QuantityDiscount = () => {
             onChange={(e) => setFilters(prev => ({ ...prev, [filterType]: e.target.value }))}
           >
             <option value="">All {filterType}s</option>
-            {getUniqueValues(`prod${filterType.charAt(0).toUpperCase() + filterType.slice(1)}` as keyof Product).map(value => (
+            {getUniqueValues(filterType === 'by_use' ? 'by_use' : `prod${filterType.charAt(0).toUpperCase() + filterType.slice(1)}` as keyof Product).map(value => (
               <option key={value} value={value}>{value}</option>
             ))}
           </select>

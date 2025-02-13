@@ -42,6 +42,8 @@ interface DiscountTemplate {
   id: string;
   template_name: string;
   template_data: QuantityDiscount;
+  created_at?: string;
+  updated_at?: string;
 }
 
 const QuantityDiscount = () => {
@@ -62,6 +64,31 @@ const QuantityDiscount = () => {
     fetchDiscounts();
     fetchTemplates();
   }, []);
+
+  const fetchTemplates = async () => {
+    const { data, error } = await supabase
+      .from('discount_templates')
+      .select('*');
+    
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Error fetching templates",
+        description: error.message
+      });
+      return;
+    }
+
+    const transformedTemplates: DiscountTemplate[] = (data || []).map(template => ({
+      id: template.id,
+      template_name: template.template_name,
+      template_data: template.template_data as unknown as QuantityDiscount,
+      created_at: template.created_at,
+      updated_at: template.updated_at
+    }));
+
+    setTemplates(transformedTemplates);
+  };
 
   const fetchProducts = async () => {
     const { data, error } = await supabase
@@ -113,23 +140,13 @@ const QuantityDiscount = () => {
     setDiscounts(mappedDiscounts);
   };
 
-  const fetchTemplates = async () => {
-    const { data, error } = await supabase
-      .from('discount_templates')
-      .select('*');
+  const handleDiscountChange = async (prodId: string, field: keyof QuantityDiscount, value: string | number) => {
+    const numericValue = typeof value === 'string' ? parseFloat(value) : value;
     
-    if (error) {
-      toast({
-        variant: "destructive",
-        title: "Error fetching templates",
-        description: error.message
-      });
+    if (isNaN(numericValue)) {
       return;
     }
-    setTemplates(data || []);
-  };
 
-  const handleDiscountChange = async (prodId: string, field: keyof QuantityDiscount, value: number) => {
     const dbFieldMap: Record<string, string> = {
       tierOneQuantity: 'tieronequantity',
       tierOneDiscount: 'tieronediscount',
@@ -150,7 +167,7 @@ const QuantityDiscount = () => {
       .from('productquantitydiscounts')
       .upsert({
         prodId,
-        [dbField]: value,
+        [dbField]: numericValue,
       }, {
         onConflict: 'prodId'
       });

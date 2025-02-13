@@ -9,6 +9,30 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      collections: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       custAccounts: {
         Row: {
           account_id: string
@@ -244,24 +268,27 @@ export type Database = {
       }
       discount_templates: {
         Row: {
+          applies_to: Json | null
           created_at: string | null
           id: string
-          template_data: Json
           template_name: string
+          tier_structure: Json
           updated_at: string | null
         }
         Insert: {
+          applies_to?: Json | null
           created_at?: string | null
           id?: string
-          template_data: Json
           template_name: string
+          tier_structure?: Json
           updated_at?: string | null
         }
         Update: {
+          applies_to?: Json | null
           created_at?: string | null
           id?: string
-          template_data?: Json
           template_name?: string
+          tier_structure?: Json
           updated_at?: string | null
         }
         Relationships: []
@@ -660,6 +687,7 @@ export type Database = {
       }
       productManagement: {
         Row: {
+          by_use: string[] | null
           prodBasePrice: number | null
           prodBoxstock: number | null
           prodBrand: string | null
@@ -700,6 +728,7 @@ export type Database = {
           prodVariant: string | null
         }
         Insert: {
+          by_use?: string[] | null
           prodBasePrice?: number | null
           prodBoxstock?: number | null
           prodBrand?: string | null
@@ -740,6 +769,7 @@ export type Database = {
           prodVariant?: string | null
         }
         Update: {
+          by_use?: string[] | null
           prodBasePrice?: number | null
           prodBoxstock?: number | null
           prodBrand?: string | null
@@ -1223,6 +1253,17 @@ export type Database = {
         | "sales_manager"
         | "business_manager"
         | "it_admin"
+      product_category:
+        | "furniture"
+        | "lighting"
+        | "decor"
+        | "textiles"
+        | "kitchenware"
+        | "bathroom"
+        | "outdoor"
+        | "storage"
+        | "electronics"
+        | "accessories"
     }
     CompositeTypes: {
       [_ in never]: never

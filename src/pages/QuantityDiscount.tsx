@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { Search, Save, FileDown, FileUp } from 'lucide-react';
@@ -92,7 +91,19 @@ const QuantityDiscount = () => {
       });
       return;
     }
-    setTemplates(data || []);
+
+    if (data) {
+      const parsedTemplates: DiscountTemplate[] = data.map(template => ({
+        ...template,
+        tier_structure: typeof template.tier_structure === 'string' 
+          ? JSON.parse(template.tier_structure)
+          : template.tier_structure,
+        applies_to: typeof template.applies_to === 'string'
+          ? JSON.parse(template.applies_to)
+          : template.applies_to
+      }));
+      setTemplates(parsedTemplates);
+    }
   };
 
   const fetchProducts = async () => {
@@ -143,7 +154,10 @@ const QuantityDiscount = () => {
     setDiscounts(mappedDiscounts);
   };
 
-  const handleDiscountChange = async (prodId: string, field: keyof QuantityDiscount, value: number) => {
+  const handleDiscountChange = async (prodId: string, field: keyof QuantityDiscount, value: string | number) => {
+    const numericValue = typeof value === 'string' ? parseFloat(value) : value;
+    if (isNaN(numericValue)) return;
+
     const dbFieldMap: Record<string, string> = {
       tierOneQuantity: 'tieronequantity',
       tierOneDiscount: 'tieronediscount',
@@ -164,7 +178,7 @@ const QuantityDiscount = () => {
       .from('productquantitydiscounts')
       .upsert({
         prodId,
-        [dbField]: value,
+        [dbField]: numericValue,
       }, {
         onConflict: 'prodId'
       });
@@ -296,8 +310,13 @@ const QuantityDiscount = () => {
     }
   };
 
-  const getUniqueValues = (field: keyof Product) => {
-    return [...new Set(products.map(p => p[field]).filter(Boolean))];
+  const getUniqueValues = (field: keyof Product): (string | number)[] => {
+    const values = products.map(p => p[field]).filter(Boolean);
+    if (Array.isArray(values[0])) {
+      // Handle array fields like by_use
+      return [...new Set(values.flat())];
+    }
+    return [...new Set(values)];
   };
 
   const filteredProducts = products.filter(product => {
@@ -396,8 +415,10 @@ const QuantityDiscount = () => {
             onChange={(e) => setFilters(prev => ({ ...prev, [filterType]: e.target.value }))}
           >
             <option value="">All {filterType}s</option>
-            {getUniqueValues(filterType === 'by_use' ? 'by_use' : `prod${filterType.charAt(0).toUpperCase() + filterType.slice(1)}` as keyof Product).map(value => (
-              <option key={value} value={value}>{value}</option>
+            {getUniqueValues(filterType === 'by_use' ? 'by_use' : `prod${filterType.charAt(0).toUpperCase() + filterType.slice(1)}` as keyof Product).map((value, index) => (
+              <option key={`${filterType}-${index}`} value={value}>
+                {value}
+              </option>
             ))}
           </select>
         ))}

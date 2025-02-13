@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../integrations/supabase/client';
@@ -113,7 +112,10 @@ const ManageProducts = () => {
   });
 
   const getUniqueValues = (field: keyof Product) => {
-    return [...new Set((products || []).map(p => p[field]).filter(Boolean))];
+    const values = [...new Set(products?.map(p => p[field]) || [])];
+    return values.filter((value): value is string => 
+      typeof value === 'string' && value.length > 0
+    );
   };
 
   if (isLoading) {
@@ -154,7 +156,7 @@ const ManageProducts = () => {
                 >
                   <option value="">All Categories</option>
                   {getUniqueValues('prodCategory').map(category => (
-                    <option key={category} value={category}>{category}</option>
+                    <option key={`category-${category}`} value={category}>{category}</option>
                   ))}
                 </select>
                 <select
@@ -164,7 +166,7 @@ const ManageProducts = () => {
                 >
                   <option value="">All Collections</option>
                   {getUniqueValues('prodCollection').map(collection => (
-                    <option key={collection} value={collection}>{collection}</option>
+                    <option key={`collection-${collection}`} value={collection}>{collection}</option>
                   ))}
                 </select>
                 <select
@@ -174,7 +176,7 @@ const ManageProducts = () => {
                 >
                   <option value="">All Statuses</option>
                   {getUniqueValues('prodStatus').map(status => (
-                    <option key={status} value={status}>{status}</option>
+                    <option key={`status-${status}`} value={status}>{status}</option>
                   ))}
                 </select>
               </div>

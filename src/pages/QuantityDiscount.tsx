@@ -1,16 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { Search, Save, FileDown, FileUp } from 'lucide-react';
 import { toast } from "../components/ui/use-toast";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../components/reused/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/reused/table";
 import {
   Dialog,
   DialogContent,
@@ -18,9 +10,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "../components/ui/dialog";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
+} from "@/components/reused/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface QuantityDiscount {
   id: string;

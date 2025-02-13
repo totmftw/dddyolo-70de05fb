@@ -484,8 +484,8 @@ const QuantityDiscount = () => {
                         />
                         <div className="w-20 px-2 py-1 bg-gray-100 rounded text-sm">
                           ${calculateDiscountedPrice(
-                            product.prodBasePrice,
-                            discount?.[discField as keyof QuantityDiscount] || null
+                            Number(product.prodBasePrice) || 0,
+                            Number(discount?.[discField as keyof QuantityDiscount]) || null
                           ).toFixed(2)}
                         </div>
                       </div>

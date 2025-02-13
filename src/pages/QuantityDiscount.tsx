@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
-import { Search } from 'lucide-react';
+import { Search, Save, FileDown, FileUp } from 'lucide-react';
 import { toast } from "../components/ui/use-toast";
 import {
   Table,
@@ -11,6 +11,16 @@ import {
   TableHeader,
   TableRow,
 } from "../components/reused/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../components/ui/dialog";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
 
 interface QuantityDiscount {
   id: string;
@@ -33,6 +43,13 @@ interface Product {
   prodCollection: string;
   prodCategory: string;
   prodSubcategory: string;
+  prodBasePrice: number;
+}
+
+interface DiscountTemplate {
+  id: string;
+  template_name: string;
+  template_data: QuantityDiscount;
 }
 
 const QuantityDiscount = () => {
@@ -44,16 +61,20 @@ const QuantityDiscount = () => {
     category: '',
     subcategory: ''
   });
+  const [templates, setTemplates] = useState<DiscountTemplate[]>([]);
+  const [newTemplateName, setNewTemplateName] = useState('');
+  const [selectedTemplate, setSelectedTemplate] = useState<DiscountTemplate | null>(null);
 
   useEffect(() => {
     fetchProducts();
     fetchDiscounts();
+    fetchTemplates();
   }, []);
 
   const fetchProducts = async () => {
     const { data, error } = await supabase
       .from('productManagement')
-      .select('prodId, prodName, prodCollection, prodCategory, prodSubcategory');
+      .select('prodId, prodName, prodCollection, prodCategory, prodSubcategory, prodBasePrice');
     
     if (error) {
       toast({
@@ -82,7 +103,6 @@ const QuantityDiscount = () => {
       return;
     }
 
-    // Map database column names to interface properties
     const mappedDiscounts: QuantityDiscount[] = (data || []).map(d => ({
       id: d.id,
       prodId: d.prodId,
@@ -101,8 +121,23 @@ const QuantityDiscount = () => {
     setDiscounts(mappedDiscounts);
   };
 
+  const fetchTemplates = async () => {
+    const { data, error } = await supabase
+      .from('discount_templates')
+      .select('*');
+    
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Error fetching templates",
+        description: error.message
+      });
+      return;
+    }
+    setTemplates(data || []);
+  };
+
   const handleDiscountChange = async (prodId: string, field: keyof QuantityDiscount, value: number) => {
-    // Map interface property names back to database column names
     const dbFieldMap: Record<string, string> = {
       tierOneQuantity: 'tieronequantity',
       tierOneDiscount: 'tieronediscount',
@@ -144,6 +179,64 @@ const QuantityDiscount = () => {
     }
   };
 
+  const saveTemplate = async () => {
+    if (!newTemplateName) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please enter a template name"
+      });
+      return;
+    }
+
+    const { error } = await supabase
+      .from('discount_templates')
+      .insert({
+        template_name: newTemplateName,
+        template_data: discounts[0] || {}
+      });
+
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Error saving template",
+        description: error.message
+      });
+    } else {
+      toast({
+        title: "Success",
+        description: "Template saved successfully"
+      });
+      setNewTemplateName('');
+      fetchTemplates();
+    }
+  };
+
+  const applyTemplate = async (template: DiscountTemplate) => {
+    const { error } = await supabase
+      .from('productquantitydiscounts')
+      .upsert({
+        ...template.template_data,
+        prodId: template.template_data.prodId
+      }, {
+        onConflict: 'prodId'
+      });
+
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Error applying template",
+        description: error.message
+      });
+    } else {
+      toast({
+        title: "Success",
+        description: "Template applied successfully"
+      });
+      fetchDiscounts();
+    }
+  };
+
   const getUniqueValues = (field: keyof Product) => {
     return [...new Set(products.map(p => p[field]).filter(Boolean))];
   };
@@ -157,9 +250,72 @@ const QuantityDiscount = () => {
     return matchesSearch && matchesCollection && matchesCategory && matchesSubcategory;
   });
 
+  const calculateDiscountedPrice = (basePrice: number, discountPercentage: number | null) => {
+    if (!discountPercentage) return basePrice;
+    return basePrice - (basePrice * (discountPercentage / 100));
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Quantity Discounts</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Quantity Discounts</h1>
+        <div className="flex gap-4">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="flex items-center gap-2">
+                <Save className="w-4 h-4" />
+                Save Template
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Save Discount Template</DialogTitle>
+                <DialogDescription>
+                  Enter a name for your template to save the current discount configuration.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex flex-col gap-4">
+                <Input
+                  placeholder="Template name"
+                  value={newTemplateName}
+                  onChange={(e) => setNewTemplateName(e.target.value)}
+                />
+                <Button onClick={saveTemplate}>Save Template</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="flex items-center gap-2">
+                <FileDown className="w-4 h-4" />
+                Load Template
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Load Discount Template</DialogTitle>
+                <DialogDescription>
+                  Select a template to apply its discount configuration.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex flex-col gap-4">
+                {templates.map((template) => (
+                  <Button
+                    key={template.id}
+                    variant="outline"
+                    onClick={() => applyTemplate(template)}
+                    className="justify-start"
+                  >
+                    <FileUp className="w-4 h-4 mr-2" />
+                    {template.template_name}
+                  </Button>
+                ))}
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
       
       <div className="flex flex-wrap gap-4 mb-6">
         <div className="relative flex-1 min-w-[200px]">
@@ -196,8 +352,12 @@ const QuantityDiscount = () => {
               <TableHead>Collection</TableHead>
               <TableHead>Category</TableHead>
               <TableHead>Subcategory</TableHead>
+              <TableHead>Base Price</TableHead>
               {[1, 2, 3, 4, 5].map(tier => (
-                <TableHead key={tier}>Tier {tier} (Qty/Disc%)</TableHead>
+                <TableHead key={tier}>
+                  <div>Tier {tier}</div>
+                  <div className="text-xs text-gray-500">(Qty/Disc%/Price)</div>
+                </TableHead>
               ))}
             </TableRow>
           </TableHeader>
@@ -210,6 +370,7 @@ const QuantityDiscount = () => {
                   <TableCell>{product.prodCollection}</TableCell>
                   <TableCell>{product.prodCategory}</TableCell>
                   <TableCell>{product.prodSubcategory}</TableCell>
+                  <TableCell>${product.prodBasePrice.toFixed(2)}</TableCell>
                   {[
                     ['tierOneQuantity', 'tierOneDiscount'],
                     ['tierTwoQuantity', 'tierTwoDiscount'],
@@ -221,18 +382,24 @@ const QuantityDiscount = () => {
                       <div className="flex gap-2">
                         <input
                           type="number"
-                          className="w-20 px-2 py-1 border rounded"
+                          className="w-16 px-2 py-1 border rounded"
                           value={discount?.[qtyField as keyof QuantityDiscount] || ''}
                           onChange={(e) => handleDiscountChange(product.prodId, qtyField as keyof QuantityDiscount, Number(e.target.value))}
                           placeholder="Qty"
                         />
                         <input
                           type="number"
-                          className="w-20 px-2 py-1 border rounded"
+                          className="w-16 px-2 py-1 border rounded"
                           value={discount?.[discField as keyof QuantityDiscount] || ''}
                           onChange={(e) => handleDiscountChange(product.prodId, discField as keyof QuantityDiscount, Number(e.target.value))}
                           placeholder="%"
                         />
+                        <div className="w-20 px-2 py-1 bg-gray-100 rounded text-sm">
+                          ${calculateDiscountedPrice(
+                            product.prodBasePrice,
+                            discount?.[discField as keyof QuantityDiscount] || null
+                          ).toFixed(2)}
+                        </div>
                       </div>
                     </TableCell>
                   ))}

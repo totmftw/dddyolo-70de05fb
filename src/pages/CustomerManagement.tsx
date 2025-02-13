@@ -2,11 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
-import { Filter, Plus, Upload, Download } from 'lucide-react';
-import ProductManagement from '../pages/ProductManagement';
-import AccountManagement from '../pages/AccountManagement';
+import { Filter, Plus, Upload } from 'lucide-react';
 import ThemeToggle from '../components/reused/ThemeToggle';
 import CustomerCard from '../components/reused/CustomerCard';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../components/ui/dialog";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
 import * as XLSX from 'xlsx';
 
 interface Customer {
@@ -170,7 +178,7 @@ const CustomerManagement = () => {
           }
 
           toast.success('Customers uploaded successfully');
-          fetchCustomers(); // Refresh the customer list
+          fetchCustomers();
         } catch (error) {
           console.error('Error processing file:', error);
           toast.error('Failed to process file');
@@ -318,27 +326,75 @@ const CustomerManagement = () => {
   };
 
   return (
-    <div className={`flex flex-col p-4 bg-background dark:bg-gray-800`}>
+    <div className="flex flex-col p-4 bg-background dark:bg-gray-800">
       <header className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-navy-700 dark:text-white">Customer Management</h1>
         <ThemeToggle />
       </header>
+
+      <div className="flex gap-4 mb-6">
+        <div className="flex-1">
+          <Input
+            type="text"
+            placeholder="Search customers..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full"
+          />
+        </div>
+        <select
+          className="px-4 py-2 border rounded-lg"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+        >
+          <option value="">All Status</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+        <Button 
+          onClick={() => setShowAddForm(true)}
+          className="flex items-center gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          Add Customer
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => document.getElementById('fileInput')?.click()}
+          className="flex items-center gap-2"
+        >
+          <Upload className="h-4 w-4" />
+          Upload Customers
+          <input
+            type="file"
+            id="fileInput"
+            className="hidden"
+            accept=".xlsx,.xls,.csv"
+            onChange={handleFileChange}
+          />
+        </Button>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredCustomers.map(customer => (
           <CustomerCard key={customer.id} customer={customer} />
         ))}
       </div>
+
       {showAddForm && (
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="fixed top-0 left-0 w-full h-full bg-black/50 flex items-center justify-center z-50"
-        >
-          <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-            <h2 className="text-xl font-semibold mb-6">
-              {selectedCustomer ? 'Edit Customer' : 'Add Customer'}
-            </h2>
-            <form onSubmit={selectedCustomer ? handleUpdateCustomer : handleAddCustomer}>
+        <Dialog open={showAddForm} onOpenChange={setShowAddForm}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                {selectedCustomer ? 'Edit Customer' : 'Add Customer'}
+              </DialogTitle>
+              <DialogDescription>
+                Enter customer details below
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={selectedCustomer ? handleUpdateCustomer : handleAddCustomer}
+              className="space-y-4"
+            >
               <input
                 type="text"
                 name="businessName"
@@ -471,7 +527,7 @@ const CustomerManagement = () => {
                 onChange={handleInputChange}
                 placeholder="Credit Period"
               />
-                <div className="flex items-center gap-4 mt-6">
+              <div className="flex items-center gap-4 mt-6">
                 <button 
                   type="submit" 
                   className="btn-primary flex-1"
@@ -507,25 +563,9 @@ const CustomerManagement = () => {
                 </button>
               </div>
             </form>
-          </div>
-        </motion.div>
+          </DialogContent>
+        </Dialog>
       )}
-      <div className="mt-4 flex justify-end">
-        <button 
-          onClick={handleFileUpload} 
-          className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-        >
-          <Upload className="h-4 w-4" />
-          Upload Customers
-          <input 
-            type="file" 
-            accept=".xlsx,.xls,.csv" 
-            onChange={handleFileChange} 
-            className="hidden" 
-            id="fileInput"
-          />
-        </button>
-      </div>
     </div>
   );
 };

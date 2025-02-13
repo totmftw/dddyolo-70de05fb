@@ -310,13 +310,15 @@ const QuantityDiscount = () => {
     }
   };
 
-  const getUniqueValues = (field: keyof Product): (string | number)[] => {
+  const getUniqueValues = (field: keyof Product): string[] => {
     const values = products.map(p => p[field]).filter(Boolean);
     if (Array.isArray(values[0])) {
-      // Handle array fields like by_use
-      return [...new Set(values.flat())];
+      // Handle array fields like by_use and flatten the array
+      const flattened = values.flat();
+      return [...new Set(flattened)].map(String);
     }
-    return [...new Set(values)];
+    // Convert all values to strings for consistency
+    return [...new Set(values.map(String))];
   };
 
   const filteredProducts = products.filter(product => {
@@ -329,7 +331,9 @@ const QuantityDiscount = () => {
   });
 
   const calculateDiscountedPrice = (basePrice: number, discountPercentage: number | null): number => {
-    if (!basePrice || !discountPercentage) return basePrice || 0;
+    if (!basePrice || !discountPercentage || typeof discountPercentage !== 'number') {
+      return basePrice || 0;
+    }
     return basePrice - (basePrice * (discountPercentage / 100));
   };
 

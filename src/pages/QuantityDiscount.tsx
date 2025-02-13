@@ -141,7 +141,7 @@ const QuantityDiscount = () => {
   };
 
   const handleDiscountChange = async (prodId: string, field: keyof QuantityDiscount, value: string | number) => {
-    const numericValue = typeof value === 'string' ? parseFloat(value) : value;
+    const numericValue = Number(value);
     
     if (isNaN(numericValue)) {
       return;
@@ -393,14 +393,14 @@ const QuantityDiscount = () => {
                           type="number"
                           className="w-16 px-2 py-1 border rounded"
                           value={discount?.[qtyField as keyof QuantityDiscount] || ''}
-                          onChange={(e) => handleDiscountChange(product.prodId, qtyField as keyof QuantityDiscount, Number(e.target.value))}
+                          onChange={(e) => handleDiscountChange(product.prodId, qtyField as keyof QuantityDiscount, e.target.value)}
                           placeholder="Qty"
                         />
                         <input
                           type="number"
                           className="w-16 px-2 py-1 border rounded"
                           value={discount?.[discField as keyof QuantityDiscount] || ''}
-                          onChange={(e) => handleDiscountChange(product.prodId, discField as keyof QuantityDiscount, Number(e.target.value))}
+                          onChange={(e) => handleDiscountChange(product.prodId, discField as keyof QuantityDiscount, e.target.value)}
                           placeholder="%"
                         />
                         <div className="w-20 px-2 py-1 bg-gray-100 rounded text-sm">

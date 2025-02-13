@@ -178,7 +178,6 @@ const QuantityDiscount = () => {
         title: "Error updating discount",
         description: error.message
       });
-      console.error('Error updating discount:', error);
     } else {
       toast({
         title: "Success",
@@ -259,8 +258,8 @@ const QuantityDiscount = () => {
     return matchesSearch && matchesCollection && matchesCategory && matchesSubcategory;
   });
 
-  const calculateDiscountedPrice = (basePrice: number, discountPercentage: number | null) => {
-    if (!discountPercentage) return basePrice;
+  const calculateDiscountedPrice = (basePrice: number, discountPercentage: number | null): number => {
+    if (!basePrice || !discountPercentage) return basePrice || 0;
     return basePrice - (basePrice * (discountPercentage / 100));
   };
 
@@ -379,7 +378,7 @@ const QuantityDiscount = () => {
                   <TableCell>{product.prodCollection}</TableCell>
                   <TableCell>{product.prodCategory}</TableCell>
                   <TableCell>{product.prodSubcategory}</TableCell>
-                  <TableCell>${product.prodBasePrice.toFixed(2)}</TableCell>
+                  <TableCell>${(product.prodBasePrice || 0).toFixed(2)}</TableCell>
                   {[
                     ['tierOneQuantity', 'tierOneDiscount'],
                     ['tierTwoQuantity', 'tierTwoDiscount'],

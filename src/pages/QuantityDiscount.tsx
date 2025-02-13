@@ -334,7 +334,11 @@ const QuantityDiscount = () => {
     if (!basePrice || !discountPercentage || typeof discountPercentage !== 'number') {
       return basePrice || 0;
     }
-    return basePrice - (basePrice * (discountPercentage / 100));
+    const parsedDiscount = Number(discountPercentage);
+    if (isNaN(parsedDiscount)) {
+      return basePrice || 0;
+    }
+    return basePrice - (basePrice * (parsedDiscount / 100));
   };
 
   return (

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from '../theme/ThemeContext';
@@ -44,7 +43,8 @@ const UnifiedSidebar = () => {
       subItems: [
         { path: '/dashboard/products', name: 'Add Product', icon: Plus, permission: { resource: 'products', action: 'create' as const } },
         { path: '/dashboard/products/manage', name: 'Manage Products', icon: Edit, permission: { resource: 'products', action: 'view' as const } },
-        { path: '/dashboard/products/view', name: 'View Products', icon: Eye, permission: { resource: 'products', action: 'view' as const } }
+        { path: '/dashboard/products/view', name: 'View Products', icon: Eye, permission: { resource: 'products', action: 'view' as const } },
+        { path: '/dashboard/products/admin', name: 'Product Config', icon: Settings, permission: { resource: 'products', action: 'create' as const } }
       ]
     }
   ];

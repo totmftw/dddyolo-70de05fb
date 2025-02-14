@@ -36,26 +36,24 @@ function App() {
                 path="/dashboard"
                 element={
                   <AuthGuard>
-                    <AdminOneLayout>
-                      <Routes>
-                        <Route index element={<Dashboard />} />
-                        <Route path="customers" element={<CustomerManagement />} />
-                        <Route path="inventory" element={<InventoryManagement />} />
-                        <Route path="sales-opportunities" element={<SalesOpportunities />} />
-                        <Route path="account" element={<AccountManagement />} />
-                        <Route path="payments" element={<PaymentTracking />} />
-                        <Route path="roles" element={<UserRoleManagement />} />
-                        <Route path="products" element={<ProductManagement />} />
-                        <Route path="products/manage" element={<ManageProducts />} />
-                        <Route path="products/view" element={<ViewProducts />} />
-                        <Route path="products/admin" element={<AdminProductConfig />} />
-                        <Route path="sales-management" element={<SalesOpportunityManagement />} />
-                        <Route path="quantity-discounts" element={<QuantityDiscount />} />
-                      </Routes>
-                    </AdminOneLayout>
+                    <AdminOneLayout />
                   </AuthGuard>
                 }
-              />
+              >
+                <Route index element={<Dashboard />} />
+                <Route path="customers" element={<CustomerManagement />} />
+                <Route path="inventory" element={<InventoryManagement />} />
+                <Route path="sales-opportunities" element={<SalesOpportunities />} />
+                <Route path="account" element={<AccountManagement />} />
+                <Route path="payments" element={<PaymentTracking />} />
+                <Route path="roles" element={<UserRoleManagement />} />
+                <Route path="products" element={<ProductManagement />} />
+                <Route path="products/manage" element={<ManageProducts />} />
+                <Route path="products/view" element={<ViewProducts />} />
+                <Route path="products/admin" element={<AdminProductConfig />} />
+                <Route path="sales-management" element={<SalesOpportunityManagement />} />
+                <Route path="quantity-discounts" element={<QuantityDiscount />} />
+              </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
           </SidebarProvider>

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { Package, Download, Upload, Database, Edit2 } from 'lucide-react';
@@ -8,7 +9,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/components/reused/dialog";
 
 interface Product {
     prodId: string;
@@ -461,14 +462,17 @@ const ProductManagement = () => {
                                 <option key={collection} value={collection}>{collection}</option>
                             ))}
                         </select>
-                        <input
-                            type="text"
-                            name="prodCollectionName"
-                            value={formData.prodCollectionName || ''}
-                            onChange={handleInputChange}
-                            placeholder="Collection Name"
-                            className="w-full p-2 border rounded"
-                        />
+                        <div>
+                            <h4 className="font-medium">Collection</h4>
+                            <input
+                                type="text"
+                                name="prodCollection"
+                                value={formData.prodCollection || ''}
+                                onChange={handleInputChange}
+                                placeholder="Collection Name"
+                                className="w-full p-2 border rounded"
+                            />
+                        </div>
                     </div>
 
                     <div className="space-y-4">
@@ -736,7 +740,7 @@ const ProductManagement = () => {
                             <p className="text-sm text-gray-600">Brand: {product.prodBrand || 'N/A'}</p>
                             <p className="text-sm text-gray-600">Category: {product.prodCategory || 'N/A'}</p>
                             <p className="text-sm text-gray-600">Room Type: {product.prodCollection || 'N/A'}</p>
-                            <p className="text-sm text-gray-600">Collection: {product.prodCollectionName || 'N/A'}</p>
+                            <p className="text-sm text-gray-600">Collection: {product.prodCollection || 'N/A'}</p>
                             <p className="text-sm text-gray-600">Stock: {String(product.prodPiecestock || 0)} pieces</p>
                             <div className="mt-2 flex gap-2">
                                 {[1, 2, 3, 4, 5].map(num => {

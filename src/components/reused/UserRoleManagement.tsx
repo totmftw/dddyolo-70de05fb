@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
 import { useTheme } from '../../theme/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 import { toast } from "sonner";
 
 interface FeaturePermission {
@@ -14,8 +15,10 @@ interface FeaturePermission {
 
 const UserRoleManagement = () => {
     const { theme } = useTheme();
+    const { userProfile } = useAuth();
     const [permissions, setPermissions] = useState<FeaturePermission[]>([]);
     const [newFeature, setNewFeature] = useState('');
+    const isAdmin = userProfile?.role === 'it_admin';
 
     useEffect(() => {
         fetchPermissions();
@@ -35,6 +38,11 @@ const UserRoleManagement = () => {
     };
 
     const addFeature = async () => {
+        if (!isAdmin) {
+            toast.error('Only IT administrators can add features');
+            return;
+        }
+
         if (!newFeature.trim()) {
             toast.error('Please enter a feature name');
             return;
@@ -59,6 +67,11 @@ const UserRoleManagement = () => {
     };
 
     const toggleFeature = async (id: string, currentStatus: boolean) => {
+        if (!isAdmin) {
+            toast.error('Only IT administrators can modify features');
+            return;
+        }
+
         const { error } = await supabase
             .from('feature_permissions')
             .update({ is_enabled: !currentStatus })
@@ -78,27 +91,34 @@ const UserRoleManagement = () => {
             <h2 className={`text-lg ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>User Role Management</h2>
             <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                 Manage user roles and permissions within the application.
+                {!isAdmin && (
+                    <span className="block mt-2 text-yellow-500">
+                        Note: Only IT administrators can modify features
+                    </span>
+                )}
             </p>
             
-            <div className="mt-4 flex gap-2">
-                <input 
-                    type="text" 
-                    value={newFeature} 
-                    onChange={(e) => setNewFeature(e.target.value)} 
-                    placeholder="New Feature" 
-                    className={`py-2 px-4 text-sm text-gray-700 ${
-                        theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
-                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent`}
-                />
-                <button 
-                    onClick={addFeature}
-                    className={`py-2 px-4 text-sm text-white rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent ${
-                        theme === 'dark' ? 'bg-gray-600' : 'bg-gray-700'
-                    }`}
-                >
-                    Add Feature
-                </button>
-            </div>
+            {isAdmin && (
+                <div className="mt-4 flex gap-2">
+                    <input 
+                        type="text" 
+                        value={newFeature} 
+                        onChange={(e) => setNewFeature(e.target.value)} 
+                        placeholder="New Feature" 
+                        className={`py-2 px-4 text-sm text-gray-700 ${
+                            theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                        } rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent`}
+                    />
+                    <button 
+                        onClick={addFeature}
+                        className={`py-2 px-4 text-sm text-white rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent ${
+                            theme === 'dark' ? 'bg-gray-600' : 'bg-gray-700'
+                        }`}
+                    >
+                        Add Feature
+                    </button>
+                </div>
+            )}
 
             <div className="mt-6">
                 <h3 className={`text-lg mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
@@ -130,7 +150,8 @@ const UserRoleManagement = () => {
                                     permission.is_enabled 
                                         ? 'bg-green-100 text-green-800' 
                                         : 'bg-red-100 text-red-800'
-                                }`}
+                                } ${!isAdmin && 'cursor-not-allowed opacity-70'}`}
+                                disabled={!isAdmin}
                             >
                                 {permission.is_enabled ? 'Enabled' : 'Disabled'}
                             </button>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
@@ -12,10 +11,9 @@ import {
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/components/reused/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Trash2, Edit2 } from 'lucide-react';
@@ -272,7 +270,7 @@ const AdminProductConfig = () => {
           <Card>
             <CardHeader>
               <CardTitle>Collections</CardTitle>
-              <CardDescription>Manage product collections</CardDescription>
+              <p>Manage product collections</p>
             </CardHeader>
             <CardContent>
               <div className="flex gap-4 mb-4">
@@ -317,7 +315,7 @@ const AdminProductConfig = () => {
           <Card>
             <CardHeader>
               <CardTitle>Categories</CardTitle>
-              <CardDescription>Manage product categories for the selected collection</CardDescription>
+              <p>Manage product categories for the selected collection</p>
             </CardHeader>
             <CardContent>
               {selectedCollection ? (
@@ -364,12 +362,113 @@ const AdminProductConfig = () => {
           </Card>
         </TabsContent>
 
-        {/* Similar TabsContent sections for roomTypes, materials, and colors */}
+        <TabsContent value="roomTypes">
+          <Card>
+            <CardHeader>
+              <CardTitle>Room Types</CardTitle>
+              <p>Manage room types for the selected collection</p>
+            </CardHeader>
+            <CardContent>
+              {selectedCollection ? (
+                <>
+                  <div className="flex gap-4 mb-4">
+                    <Input
+                      placeholder="Room Type Name"
+                      value={newItemName}
+                      onChange={(e) => setNewItemName(e.target.value)}
+                    />
+                    <Input
+                      placeholder="Description"
+                      value={newItemDescription}
+                      onChange={(e) => setNewItemDescription(e.target.value)}
+                    />
+                    <Button onClick={addCategory}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Room Type
+                    </Button>
+                  </div>
+                  <div className="space-y-2">
+                    {roomTypes.map((roomType) => (
+                      <div key={roomType.id} className="flex justify-between items-center p-3 bg-gray-50 rounded">
+                        <div>
+                          <h3 className="font-medium">{roomType.name}</h3>
+                          <p className="text-sm text-gray-600">{roomType.description}</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="ghost" size="sm">
+                            <Edit2 className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm">
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <p className="text-yellow-600">Please select a collection first</p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="materials">
+          <Card>
+            <CardHeader>
+              <CardTitle>Materials</CardTitle>
+              <p>Manage materials for the selected collection</p>
+            </CardHeader>
+            <CardContent>
+              {selectedCollection ? (
+                <>
+                  <div className="flex gap-4 mb-4">
+                    <Input
+                      placeholder="Material Name"
+                      value={newItemName}
+                      onChange={(e) => setNewItemName(e.target.value)}
+                    />
+                    <Input
+                      placeholder="Description"
+                      value={newItemDescription}
+                      onChange={(e) => setNewItemDescription(e.target.value)}
+                    />
+                    <Button onClick={addCategory}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Material
+                    </Button>
+                  </div>
+                  <div className="space-y-2">
+                    {materials.map((material) => (
+                      <div key={material.id} className="flex justify-between items-center p-3 bg-gray-50 rounded">
+                        <div>
+                          <h3 className="font-medium">{material.name}</h3>
+                          <p className="text-sm text-gray-600">{material.description}</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="ghost" size="sm">
+                            <Edit2 className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm">
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <p className="text-yellow-600">Please select a collection first</p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="colors">
           <Card>
             <CardHeader>
               <CardTitle>Colors</CardTitle>
-              <CardDescription>Manage color options for the selected collection</CardDescription>
+              <p>Manage color options for the selected collection</p>
             </CardHeader>
             <CardContent>
               {selectedCollection ? (

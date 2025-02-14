@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
@@ -14,7 +15,7 @@ import ManageProducts from './pages/ManageProducts';
 import ViewProducts from './pages/ViewProducts';
 import NotFound from './pages/NotFound';
 import AdminOneLayout from './layouts/AdminOneLayout';
-import AuthGuard from './AuthGuard';
+import AuthGuard from './components/AuthGuard';
 import SalesOpportunityManagement from './pages/SalesOpportunityManagement';
 import QuantityDiscount from './pages/QuantityDiscount';
 import { ThemeProvider } from './theme/ThemeContext';
@@ -29,21 +30,23 @@ function App() {
           <Toaster />
           <Routes>
             <Route path="/" element={<Auth />} />
-            <Route path="/dashboard" element={<AuthGuard><AdminOneLayout /></AuthGuard>}>
-              <Route index element={<Dashboard />} />
-              <Route path="customers" element={<CustomerManagement />} />
-              <Route path="inventory" element={<InventoryManagement />} />
-              <Route path="sales-opportunities" element={<SalesOpportunities />} />
-              <Route path="account" element={<AccountManagement />} />
-              <Route path="payments" element={<PaymentTracking />} />
-              <Route path="roles" element={<UserRoleManagement />} />
-              <Route path="products" element={<ProductManagement />} />
-              <Route path="products/manage" element={<ManageProducts />} />
-              <Route path="products/view" element={<ViewProducts />} />
-              <Route path="products/admin" element={<AdminProductConfig />} />
-              <Route path="sales-management" element={<SalesOpportunityManagement />} />
-              <Route path="quantity-discounts" element={<QuantityDiscount />} />
-            </Route>
+            <Route path="/dashboard" element={<AuthGuard><AdminOneLayout>
+              <Routes>
+                <Route index element={<Dashboard />} />
+                <Route path="customers" element={<CustomerManagement />} />
+                <Route path="inventory" element={<InventoryManagement />} />
+                <Route path="sales-opportunities" element={<SalesOpportunities />} />
+                <Route path="account" element={<AccountManagement />} />
+                <Route path="payments" element={<PaymentTracking />} />
+                <Route path="roles" element={<UserRoleManagement />} />
+                <Route path="products" element={<ProductManagement />} />
+                <Route path="products/manage" element={<ManageProducts />} />
+                <Route path="products/view" element={<ViewProducts />} />
+                <Route path="products/admin" element={<AdminProductConfig />} />
+                <Route path="sales-management" element={<SalesOpportunityManagement />} />
+                <Route path="quantity-discounts" element={<QuantityDiscount />} />
+              </Routes>
+            </AdminOneLayout></AuthGuard>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </ThemeProvider>

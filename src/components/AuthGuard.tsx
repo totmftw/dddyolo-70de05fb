@@ -1,8 +1,12 @@
 
-import { useEffect } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { toast } from '../components/ui/use-toast';
+import { toast } from "sonner";
+
+interface AuthGuardProps {
+  children: ReactNode;
+}
 
 // Map routes to required permissions
 const routePermissions: Record<string, { resource: string; action: 'view' | 'create' | 'edit' | 'delete' }> = {
@@ -17,14 +21,14 @@ const routePermissions: Record<string, { resource: string; action: 'view' | 'cre
   '/dashboard/product-bulk': { resource: 'products', action: 'create' },
 };
 
-const AuthGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const AuthGuard = ({ children }: AuthGuardProps) => {
   const { session, hasPermission } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
     if (!session) {
-      navigate('/auth');
+      navigate('/');
       return;
     }
 
@@ -35,11 +39,7 @@ const AuthGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     if (requiredPermission) {
       const hasAccess = hasPermission(requiredPermission.resource, requiredPermission.action);
       if (!hasAccess) {
-        toast({
-          variant: "destructive",
-          title: "Access Denied",
-          description: "You don't have permission to access this page"
-        });
+        toast.error("You don't have permission to access this page");
         navigate('/dashboard');
       }
     }

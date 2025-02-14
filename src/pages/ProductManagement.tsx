@@ -1,8 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
-import { Package, Download, Upload, Database } from 'lucide-react';
+import { Package, Download, Upload, Database, Edit2 } from 'lucide-react';
 import { toast } from "sonner";
 import * as XLSX from 'xlsx';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface Product {
     prodId: string;
@@ -50,11 +56,14 @@ const ProductManagement = () => {
     const [formData, setFormData] = useState<Product>({
         prodId: '',
         prodName: '',
-        prodBrand: 'Black Gold', // Default brand
+        prodBrand: 'Black Gold',
         prodStatus: true
     });
     const [loading, setLoading] = useState(false);
     const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
+    const [showEditDialog, setShowEditDialog] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+    const [additionalColors, setAdditionalColors] = useState<string[]>([]);
 
     const collections = [
         'Living Room',
@@ -64,6 +73,15 @@ const ProductManagement = () => {
         'Bathroom',
         'Outdoor',
         'Office'
+    ];
+
+    const categories = [
+        'Furniture',
+        'Lighting',
+        'Decor',
+        'Storage',
+        'Outdoor',
+        'Accessories'
     ];
 
     const subCategories = {
@@ -325,6 +343,36 @@ const ProductManagement = () => {
         XLSX.writeFile(wb, 'all_products.xlsx');
     };
 
+    const handleEditProduct = (product: Product) => {
+        setSelectedProduct(product);
+        setFormData(product);
+        setShowEditDialog(true);
+    };
+
+    const handleUpdateProduct = async () => {
+        const { error } = await supabase
+            .from('productManagement')
+            .update(formData)
+            .eq('prodId', selectedProduct?.prodId);
+
+        if (error) {
+            toast.error('Error updating product');
+            console.error('Error updating product:', error);
+        } else {
+            toast.success('Product updated successfully');
+            setShowEditDialog(false);
+            fetchProducts();
+        }
+    };
+
+    const addColorField = () => {
+        if (additionalColors.length < 5) {
+            setAdditionalColors([...additionalColors, '']);
+        } else {
+            toast.error('Maximum 5 additional colors allowed');
+        }
+    };
+
     return (
         <div className="p-6 max-w-7xl mx-auto">
             <div className="flex items-center justify-between mb-6">
@@ -391,28 +439,36 @@ const ProductManagement = () => {
                             className="w-full p-2 border rounded"
                         />
                         <select
+                            name="prodCategory"
+                            value={formData.prodCategory || ''}
+                            onChange={handleInputChange}
+                            className="w-full p-2 border rounded"
+                        >
+                            <option value="">Select Category</option>
+                            {categories.map(category => (
+                                <option key={category} value={category}>{category}</option>
+                            ))}
+                        </select>
+                        <h4 className="font-medium">By Room Type</h4>
+                        <select
                             name="prodCollection"
                             value={String(formData.prodCollection)}
                             onChange={handleInputChange}
                             className="w-full p-2 border rounded"
                         >
-                            <option value="">Select Collection</option>
+                            <option value="">Select Room Type</option>
                             {collections.map(collection => (
                                 <option key={collection} value={collection}>{collection}</option>
                             ))}
                         </select>
-                        <select
-                            name="prodSubcategory"
-                            value={String(formData.prodSubcategory)}
+                        <input
+                            type="text"
+                            name="prodCollectionName"
+                            value={formData.prodCollectionName || ''}
                             onChange={handleInputChange}
+                            placeholder="Collection Name"
                             className="w-full p-2 border rounded"
-                            disabled={!formData.prodCollection}
-                        >
-                            <option value="">Select Subcategory</option>
-                            {formData.prodCollection && subCategories[formData.prodCollection as keyof typeof subCategories].map(sub => (
-                                <option key={sub} value={sub}>{sub}</option>
-                            ))}
-                        </select>
+                        />
                     </div>
 
                     <div className="space-y-4">
@@ -424,9 +480,6 @@ const ProductManagement = () => {
                                 value={String(formData[`prodColor${num}` as keyof Product])}
                                 onChange={handleInputChange}
                                 className="w-full p-2 border rounded"
-                                style={{
-                                    backgroundColor: colors.find(c => c.name === formData[`prodColor${num}` as keyof Product])?.value
-                                }}
                             >
                                 <option value="">Select Color {num}</option>
                                 {colors.map(color => (
@@ -435,6 +488,33 @@ const ProductManagement = () => {
                                         value={color.name}
                                         style={{ backgroundColor: color.value }}
                                     >
+                                        {color.name}
+                                    </option>
+                                ))}
+                            </select>
+                        ))}
+                        <button
+                            type="button"
+                            onClick={addColorField}
+                            className="text-blue-600 hover:text-blue-800"
+                        >
+                            + Add more colors
+                        </button>
+                        {additionalColors.map((_, index) => (
+                            <select
+                                key={`additional-${index}`}
+                                name={`additionalColor${index}`}
+                                value={additionalColors[index]}
+                                onChange={(e) => {
+                                    const newColors = [...additionalColors];
+                                    newColors[index] = e.target.value;
+                                    setAdditionalColors(newColors);
+                                }}
+                                className="w-full p-2 border rounded"
+                            >
+                                <option value="">Select Additional Color</option>
+                                {colors.map(color => (
+                                    <option key={color.name} value={color.name}>
                                         {color.name}
                                     </option>
                                 ))}
@@ -654,8 +734,9 @@ const ProductManagement = () => {
                             )}
                             <h4 className="font-semibold">{product.prodName}</h4>
                             <p className="text-sm text-gray-600">Brand: {product.prodBrand || 'N/A'}</p>
-                            <p className="text-sm text-gray-600">Collection: {product.prodCollection || 'N/A'}</p>
-                            <p className="text-sm text-gray-600">Subcategory: {product.prodSubcategory || 'N/A'}</p>
+                            <p className="text-sm text-gray-600">Category: {product.prodCategory || 'N/A'}</p>
+                            <p className="text-sm text-gray-600">Room Type: {product.prodCollection || 'N/A'}</p>
+                            <p className="text-sm text-gray-600">Collection: {product.prodCollectionName || 'N/A'}</p>
                             <p className="text-sm text-gray-600">Stock: {String(product.prodPiecestock || 0)} pieces</p>
                             <div className="mt-2 flex gap-2">
                                 {[1, 2, 3, 4, 5].map(num => {
@@ -674,15 +755,56 @@ const ProductManagement = () => {
                                     return null;
                                 })}
                             </div>
-                            <div className="mt-2">
+                            <div className="mt-2 flex justify-between items-center">
                                 <span className={`px-2 py-1 rounded-full text-xs ${product.prodStatus ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                                     {product.prodStatus ? 'Active' : 'Inactive'}
                                 </span>
+                                <button
+                                    onClick={() => handleEditProduct(product)}
+                                    className="text-blue-600 hover:text-blue-800"
+                                >
+                                    <Edit2 className="h-4 w-4" />
+                                </button>
                             </div>
                         </div>
                     ))}
                 </div>
             </div>
+
+            <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+                <DialogContent className="max-w-4xl">
+                    <DialogHeader>
+                        <DialogTitle>Edit Product</DialogTitle>
+                    </DialogHeader>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-4">
+                            <input
+                                type="text"
+                                name="prodName"
+                                value={formData.prodName}
+                                onChange={handleInputChange}
+                                placeholder="Product Name"
+                                className="w-full p-2 border rounded"
+                            />
+                            {/* Add all other form fields here, similar to the add form */}
+                        </div>
+                    </div>
+                    <div className="flex justify-end gap-4 mt-4">
+                        <button
+                            onClick={() => setShowEditDialog(false)}
+                            className="px-4 py-2 border rounded hover:bg-gray-100"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={handleUpdateProduct}
+                            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                        >
+                            Update
+                        </button>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };

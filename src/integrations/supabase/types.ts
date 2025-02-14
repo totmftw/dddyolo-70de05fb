@@ -685,6 +685,35 @@ export type Database = {
           },
         ]
       }
+      product_additional_colors: {
+        Row: {
+          color_name: string
+          created_at: string | null
+          id: string
+          product_id: string | null
+        }
+        Insert: {
+          color_name: string
+          created_at?: string | null
+          id?: string
+          product_id?: string | null
+        }
+        Update: {
+          color_name?: string
+          created_at?: string | null
+          id?: string
+          product_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_additional_colors_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "productManagement"
+            referencedColumns: ["prodId"]
+          },
+        ]
+      }
       productManagement: {
         Row: {
           by_use: string[] | null
@@ -704,6 +733,7 @@ export type Database = {
           prodImages: string[] | null
           prodLandingcost: number | null
           prodMaterial: string | null
+          prodMaxColors: number | null
           prodMoq: number | null
           prodName: string
           prodNettweight: number | null
@@ -745,6 +775,7 @@ export type Database = {
           prodImages?: string[] | null
           prodLandingcost?: number | null
           prodMaterial?: string | null
+          prodMaxColors?: number | null
           prodMoq?: number | null
           prodName: string
           prodNettweight?: number | null
@@ -786,6 +817,7 @@ export type Database = {
           prodImages?: string[] | null
           prodLandingcost?: number | null
           prodMaterial?: string | null
+          prodMaxColors?: number | null
           prodMoq?: number | null
           prodName?: string
           prodNettweight?: number | null

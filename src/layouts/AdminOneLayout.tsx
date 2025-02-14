@@ -3,11 +3,7 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import UnifiedSidebar from '../components/UnifiedSidebar';
 
-interface AdminOneLayoutProps {
-  children: React.ReactNode;
-}
-
-const AdminOneLayout = ({ children }: AdminOneLayoutProps) => {
+const AdminOneLayout = () => {
   return (
     <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900">
       <UnifiedSidebar />

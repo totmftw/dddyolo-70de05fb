@@ -166,7 +166,7 @@ const UserRoleManagement = () => {
                                     </p>
                                 </div>
                                 <button
-                                    onClick={() => togglePermission(permission.id, 'is_enabled', permission.is_enabled)}
+                                    onClick={() => togglePermission(permission.id, 'is_enabled', Boolean(permission.is_enabled))}
                                     className={`px-3 py-1 text-xs rounded-full ${
                                         permission.is_enabled 
                                             ? 'bg-green-100 text-green-800' 
@@ -178,25 +178,28 @@ const UserRoleManagement = () => {
                                 </button>
                             </div>
                             <div className="mt-3 flex gap-4">
-                                {['read', 'create', 'update', 'delete'].map((action) => (
-                                    <label
-                                        key={action}
-                                        className="flex items-center space-x-2"
-                                    >
-                                        <input
-                                            type="checkbox"
-                                            checked={permission[`can_${action}` as keyof FeaturePermission]}
-                                            onChange={() => togglePermission(
-                                                permission.id,
-                                                `can_${action}` as keyof FeaturePermission,
-                                                permission[`can_${action}` as keyof FeaturePermission]
-                                            )}
-                                            disabled={!isAdmin}
-                                            className="form-checkbox h-4 w-4 text-blue-600"
-                                        />
-                                        <span className="text-sm capitalize">{action}</span>
-                                    </label>
-                                ))}
+                                {['read', 'create', 'update', 'delete'].map((action) => {
+                                    const permissionKey = `can_${action}` as keyof FeaturePermission;
+                                    return (
+                                        <label
+                                            key={action}
+                                            className="flex items-center space-x-2"
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                checked={Boolean(permission[permissionKey])}
+                                                onChange={() => togglePermission(
+                                                    permission.id,
+                                                    permissionKey,
+                                                    Boolean(permission[permissionKey])
+                                                )}
+                                                disabled={!isAdmin}
+                                                className="form-checkbox h-4 w-4 text-blue-600"
+                                            />
+                                            <span className="text-sm capitalize">{action}</span>
+                                        </label>
+                                    );
+                                })}
                             </div>
                         </div>
                     ))}

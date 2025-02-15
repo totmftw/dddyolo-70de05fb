@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
@@ -61,9 +62,9 @@ interface ColorOption {
 
 const AdminProductConfig = () => {
   const { userProfile } = useAuth();
-  const isAdmin = userProfile?.role === 'it_admin';
 
-  if (!isAdmin) {
+  // Remove the unnecessary permission check
+  if (!userProfile || userProfile.role !== 'it_admin') {
     return (
       <div className="p-4">
         <h1 className="text-2xl font-bold text-red-600">Access Denied</h1>

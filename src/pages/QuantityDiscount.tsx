@@ -393,8 +393,8 @@ const QuantityDiscount = () => {
   });
 
   return (
-    <div className="h-screen flex flex-col p-4">
-      <div className="flex-none">
+    <div className="p-4 max-w-[1920px] mx-auto">
+      <div className="mb-6">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Quantity Discounts</h1>
           <div className="flex gap-4">
@@ -485,89 +485,94 @@ const QuantityDiscount = () => {
         </div>
       </div>
 
-      <div className="flex-grow overflow-auto bg-white rounded-lg shadow">
-        <Table>
-          <TableHeader className="sticky top-0 bg-white z-10">
-            <TableRow>
-              <TableHead className="min-w-[200px]">Product</TableHead>
-              <TableHead>Collection</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Subcategory</TableHead>
-              <TableHead>MRP</TableHead>
-              <TableHead>Base Price</TableHead>
-              <TableHead>Price Type</TableHead>
-              {[1, 2, 3, 4, 5].map(tier => (
-                <TableHead key={tier}>
-                  <div>Tier {tier}</div>
-                  <div className="text-xs text-gray-500">(Qty/Disc%/Price)</div>
-                </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredProducts.map((product) => {
-              const discount = discounts.find(d => d.prodId === product.prodId);
-              return (
-                <TableRow key={product.prodId}>
-                  <TableCell className="min-w-[200px]">{product.prodName}</TableCell>
-                  <TableCell>{product.prodCollection}</TableCell>
-                  <TableCell>{product.prodCategory}</TableCell>
-                  <TableCell>{product.prodSubcategory}</TableCell>
-                  <TableCell>₹{(product.prodMrp || 0).toFixed(2)}</TableCell>
-                  <TableCell>₹{(product.prodBasePrice || 0).toFixed(2)}</TableCell>
-                  <TableCell>
-                    <Select
-                      value={discount?.default_price_type || 'mrp'}
-                      onValueChange={(value: 'mrp' | 'base_price') => handlePriceTypeChange(product.prodId, value)}
-                    >
-                      <SelectTrigger className="w-[120px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="mrp">MRP</SelectItem>
-                        <SelectItem value="base_price">Base Price</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </TableCell>
-                  {[
-                    ['tierOneQuantity', 'tierOneDiscount'],
-                    ['tierTwoQuantity', 'tierTwoDiscount'],
-                    ['tierThreeQuantity', 'tierThreeDiscount'],
-                    ['tierFourQuantity', 'tierFourDiscount'],
-                    ['tierFiveQuantity', 'tierFiveDiscount']
-                  ].map(([qtyField, discField], index) => (
-                    <TableCell key={index}>
-                      <div className="flex gap-2">
-                        <input
-                          type="number"
-                          className="w-16 px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          value={discount?.[qtyField as keyof QuantityDiscount] || ''}
-                          onChange={(e) => handleDiscountChange(product.prodId, qtyField as keyof QuantityDiscount, e.target.value)}
-                          placeholder="Qty"
-                        />
-                        <input
-                          type="number"
-                          className="w-16 px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          value={discount?.[discField as keyof QuantityDiscount] || ''}
-                          onChange={(e) => handleDiscountChange(product.prodId, discField as keyof QuantityDiscount, e.target.value)}
-                          placeholder="%"
-                        />
-                        <div className="w-20 px-2 py-1 bg-gray-100 rounded text-sm">
-                          ₹{calculateDiscountedPrice(
-                            Number(product.prodMrp) || 0,
-                            Number(product.prodBasePrice) || 0,
-                            Number(discount?.[discField as keyof QuantityDiscount]) || null,
-                            discount?.default_price_type || 'mrp'
-                          ).toFixed(2)}
-                        </div>
-                      </div>
-                    </TableCell>
+      <div className="border rounded-lg shadow bg-white">
+        <div className="overflow-x-auto">
+          <div className="inline-block min-w-full align-middle">
+            <div className="overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[200px] bg-white sticky left-0 z-20">Product</TableHead>
+                    <TableHead className="min-w-[150px]">Collection</TableHead>
+                    <TableHead className="min-w-[150px]">Category</TableHead>
+                    <TableHead className="min-w-[150px]">Subcategory</TableHead>
+                    <TableHead className="min-w-[100px]">MRP</TableHead>
+                    <TableHead className="min-w-[100px]">Base Price</TableHead>
+                    <TableHead className="min-w-[120px]">Price Type</TableHead>
+                    {[1, 2, 3, 4, 5].map(tier => (
+                      <TableHead key={tier} className="min-w-[200px]">
+                        <div>Tier {tier}</div>
+                        <div className="text-xs text-gray-500">(Qty/Disc%/Price)</div>
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredProducts.map((product) => (
+                    <TableRow key={product.prodId}>
+                      <TableCell className="w-[200px] bg-white sticky left-0 z-10">
+                        {product.prodName}
+                      </TableCell>
+                      <TableCell>{product.prodCollection}</TableCell>
+                      <TableCell>{product.prodCategory}</TableCell>
+                      <TableCell>{product.prodSubcategory}</TableCell>
+                      <TableCell>₹{(product.prodMrp || 0).toFixed(2)}</TableCell>
+                      <TableCell>₹{(product.prodBasePrice || 0).toFixed(2)}</TableCell>
+                      <TableCell>
+                        <Select
+                          value={discounts.find(d => d.prodId === product.prodId)?.default_price_type || 'mrp'}
+                          onValueChange={(value: 'mrp' | 'base_price') => handlePriceTypeChange(product.prodId, value)}
+                        >
+                          <SelectTrigger className="w-[120px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="mrp">MRP</SelectItem>
+                            <SelectItem value="base_price">Base Price</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      {[
+                        ['tierOneQuantity', 'tierOneDiscount'],
+                        ['tierTwoQuantity', 'tierTwoDiscount'],
+                        ['tierThreeQuantity', 'tierThreeDiscount'],
+                        ['tierFourQuantity', 'tierFourDiscount'],
+                        ['tierFiveQuantity', 'tierFiveDiscount']
+                      ].map(([qtyField, discField], index) => (
+                        <TableCell key={index}>
+                          <div className="flex gap-2">
+                            <input
+                              type="number"
+                              className="w-16 px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              value={discounts.find(d => d.prodId === product.prodId)?.[qtyField as keyof QuantityDiscount] || ''}
+                              onChange={(e) => handleDiscountChange(product.prodId, qtyField as keyof QuantityDiscount, e.target.value)}
+                              placeholder="Qty"
+                            />
+                            <input
+                              type="number"
+                              className="w-16 px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              value={discounts.find(d => d.prodId === product.prodId)?.[discField as keyof QuantityDiscount] || ''}
+                              onChange={(e) => handleDiscountChange(product.prodId, discField as keyof QuantityDiscount, e.target.value)}
+                              placeholder="%"
+                            />
+                            <div className="w-20 px-2 py-1 bg-gray-100 rounded text-sm">
+                              ₹{calculateDiscountedPrice(
+                                Number(product.prodMrp) || 0,
+                                Number(product.prodBasePrice) || 0,
+                                Number(discounts.find(d => d.prodId === product.prodId)?.[discField as keyof QuantityDiscount]) || null,
+                                discounts.find(d => d.prodId === product.prodId)?.default_price_type || 'mrp'
+                              ).toFixed(2)}
+                            </div>
+                          </div>
+                        </TableCell>
+                      ))}
+                    </TableRow>
                   ))}
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

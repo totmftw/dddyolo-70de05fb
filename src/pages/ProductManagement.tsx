@@ -65,6 +65,7 @@ const ProductManagement = () => {
     const [showEditDialog, setShowEditDialog] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [additionalColors, setAdditionalColors] = useState<string[]>([]);
+    const [mrpPercentage, setMrpPercentage] = useState(25); // Default 25% off MRP for base price
 
     const collections = [
         'Living Room',
@@ -160,6 +161,12 @@ const ProductManagement = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
+
+        if (!formData.prodMrp) {
+            toast.error('MRP is required');
+            setLoading(false);
+            return;
+        }
 
         const images: string[] = [];
         if (selectedFiles) {
@@ -574,27 +581,20 @@ const ProductManagement = () => {
                         <h3 className="font-semibold text-lg">Pricing</h3>
                         <input
                             type="number"
+                            name="prodMrp"
+                            value={formData.prodMrp || ''}
+                            onChange={handleInputChange}
+                            placeholder="MRP *"
+                            className="w-full p-2 border rounded"
+                            required
+                        />
+                        <input
+                            type="number"
                             name="prodBasePrice"
                             value={formData.prodBasePrice || ''}
-                            onChange={handleInputChange}
-                            placeholder="Base Price"
-                            className="w-full p-2 border rounded"
-                        />
-                        <input
-                            type="number"
-                            name="prodLandingcost"
-                            value={formData.prodLandingcost || ''}
-                            onChange={handleInputChange}
-                            placeholder="Landing Cost"
-                            className="w-full p-2 border rounded"
-                        />
-                        <input
-                            type="number"
-                            name="prodVariableprice"
-                            value={formData.prodVariableprice || ''}
-                            onChange={handleInputChange}
-                            placeholder="Variable Price"
-                            className="w-full p-2 border rounded"
+                            readOnly
+                            className="w-full p-2 border rounded bg-gray-50"
+                            placeholder="Base Price (auto-calculated)"
                         />
                     </div>
 

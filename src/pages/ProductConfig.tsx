@@ -173,7 +173,7 @@ const ProductConfig = () => {
       .from('material_subcategory_mapping')
       .select(`
         material_id,
-        materials:material_id (
+        materials:materials!inner(
           id,
           name
         )

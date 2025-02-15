@@ -573,6 +573,45 @@ export type Database = {
           },
         ]
       }
+      material_subcategory_mapping: {
+        Row: {
+          created_at: string | null
+          id: string
+          material_id: string
+          sub_category_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          material_id: string
+          sub_category_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          material_id?: string
+          sub_category_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_subcategory_mapping_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_subcategory_mapping_sub_category_id_fkey"
+            columns: ["sub_category_id"]
+            isOneToOne: false
+            referencedRelation: "sub_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       materials: {
         Row: {
           collection_id: string | null

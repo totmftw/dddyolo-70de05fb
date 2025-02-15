@@ -61,9 +61,9 @@ interface ColorOption {
 
 const AdminProductConfig = () => {
   const { userProfile } = useAuth();
+  const isAdmin = userProfile?.role === 'it_admin';
 
-  // Remove the unnecessary permission check
-  if (!userProfile || userProfile.role !== 'it_admin') {
+  if (!isAdmin) {
     return (
       <div className="p-4">
         <h1 className="text-2xl font-bold text-red-600">Access Denied</h1>
@@ -84,8 +84,10 @@ const AdminProductConfig = () => {
   const [newColorHex, setNewColorHex] = useState('#000000');
 
   useEffect(() => {
-    fetchCollections();
-  }, []);
+    if (isAdmin) {
+      fetchCollections();
+    }
+  }, [isAdmin]);
 
   useEffect(() => {
     if (selectedCollection) {

@@ -11,6 +11,10 @@ interface FeaturePermission {
     feature_path: string;
     is_enabled: boolean;
     parent_id: string | null;
+    can_create: boolean;
+    can_read: boolean;
+    can_update: boolean;
+    can_delete: boolean;
 }
 
 const UserRoleManagement = () => {
@@ -18,6 +22,7 @@ const UserRoleManagement = () => {
     const { userProfile } = useAuth();
     const [permissions, setPermissions] = useState<FeaturePermission[]>([]);
     const [newFeature, setNewFeature] = useState('');
+    const [newPath, setNewPath] = useState('');
     const isAdmin = userProfile?.role === 'it_admin';
 
     useEffect(() => {
@@ -27,7 +32,8 @@ const UserRoleManagement = () => {
     const fetchPermissions = async () => {
         const { data, error } = await supabase
             .from('feature_permissions')
-            .select('*');
+            .select('*')
+            .order('feature_name');
         
         if (error) {
             console.error('Error fetching permissions:', error);
@@ -43,8 +49,8 @@ const UserRoleManagement = () => {
             return;
         }
 
-        if (!newFeature.trim()) {
-            toast.error('Please enter a feature name');
+        if (!newFeature.trim() || !newPath.trim()) {
+            toast.error('Please enter both feature name and path');
             return;
         }
 
@@ -52,8 +58,12 @@ const UserRoleManagement = () => {
             .from('feature_permissions')
             .insert([{ 
                 feature_name: newFeature,
-                feature_path: `/dashboard/${newFeature.toLowerCase().replace(/\s+/g, '-')}`,
-                is_enabled: true
+                feature_path: newPath,
+                is_enabled: true,
+                can_create: false,
+                can_read: true,
+                can_update: false,
+                can_delete: false
             }]);
 
         if (error) {
@@ -62,26 +72,27 @@ const UserRoleManagement = () => {
         } else {
             toast.success('Feature added successfully');
             setNewFeature('');
+            setNewPath('');
             fetchPermissions();
         }
     };
 
-    const toggleFeature = async (id: string, currentStatus: boolean) => {
+    const togglePermission = async (id: string, field: keyof FeaturePermission, currentValue: boolean) => {
         if (!isAdmin) {
-            toast.error('Only IT administrators can modify features');
+            toast.error('Only IT administrators can modify permissions');
             return;
         }
 
         const { error } = await supabase
             .from('feature_permissions')
-            .update({ is_enabled: !currentStatus })
+            .update({ [field]: !currentValue })
             .eq('id', id);
 
         if (error) {
-            console.error('Error toggling feature:', error);
-            toast.error('Failed to update feature status');
+            console.error('Error toggling permission:', error);
+            toast.error('Failed to update permission');
         } else {
-            toast.success('Feature status updated');
+            toast.success('Permission updated successfully');
             fetchPermissions();
         }
     };
@@ -90,10 +101,10 @@ const UserRoleManagement = () => {
         <div className={`p-4 ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-black'}`}> 
             <h2 className={`text-lg ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>User Role Management</h2>
             <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                Manage user roles and permissions within the application.
+                Manage feature permissions within the application.
                 {!isAdmin && (
                     <span className="block mt-2 text-yellow-500">
-                        Note: Only IT administrators can modify features
+                        Note: Only IT administrators can modify permissions
                     </span>
                 )}
             </p>
@@ -104,8 +115,17 @@ const UserRoleManagement = () => {
                         type="text" 
                         value={newFeature} 
                         onChange={(e) => setNewFeature(e.target.value)} 
-                        placeholder="New Feature" 
-                        className={`py-2 px-4 text-sm text-gray-700 ${
+                        placeholder="Feature Name" 
+                        className={`flex-1 py-2 px-4 text-sm text-gray-700 ${
+                            theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                        } rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent`}
+                    />
+                    <input 
+                        type="text" 
+                        value={newPath} 
+                        onChange={(e) => setNewPath(e.target.value)} 
+                        placeholder="Feature Path" 
+                        className={`flex-1 py-2 px-4 text-sm text-gray-700 ${
                             theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
                         } rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent`}
                     />
@@ -122,39 +142,62 @@ const UserRoleManagement = () => {
 
             <div className="mt-6">
                 <h3 className={`text-lg mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
-                    Existing Features
+                    Feature Permissions
                 </h3>
                 <div className="space-y-2">
                     {permissions.map((permission) => (
                         <div 
                             key={permission.id} 
-                            className={`flex justify-between items-center p-3 rounded-lg ${
+                            className={`p-4 rounded-lg ${
                                 theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'
                             }`}
                         >
-                            <div>
-                                <p className={`text-sm font-medium ${
-                                    theme === 'dark' ? 'text-white' : 'text-gray-800'
-                                }`}>
-                                    {permission.feature_name}
-                                </p>
-                                <p className={`text-xs ${
-                                    theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                                }`}>
-                                    Path: {permission.feature_path}
-                                </p>
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <p className={`font-medium ${
+                                        theme === 'dark' ? 'text-white' : 'text-gray-800'
+                                    }`}>
+                                        {permission.feature_name}
+                                    </p>
+                                    <p className={`text-xs ${
+                                        theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                                    }`}>
+                                        Path: {permission.feature_path}
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => togglePermission(permission.id, 'is_enabled', permission.is_enabled)}
+                                    className={`px-3 py-1 text-xs rounded-full ${
+                                        permission.is_enabled 
+                                            ? 'bg-green-100 text-green-800' 
+                                            : 'bg-red-100 text-red-800'
+                                    } ${!isAdmin && 'cursor-not-allowed opacity-70'}`}
+                                    disabled={!isAdmin}
+                                >
+                                    {permission.is_enabled ? 'Enabled' : 'Disabled'}
+                                </button>
                             </div>
-                            <button
-                                onClick={() => toggleFeature(permission.id, permission.is_enabled)}
-                                className={`px-3 py-1 text-xs rounded-full ${
-                                    permission.is_enabled 
-                                        ? 'bg-green-100 text-green-800' 
-                                        : 'bg-red-100 text-red-800'
-                                } ${!isAdmin && 'cursor-not-allowed opacity-70'}`}
-                                disabled={!isAdmin}
-                            >
-                                {permission.is_enabled ? 'Enabled' : 'Disabled'}
-                            </button>
+                            <div className="mt-3 flex gap-4">
+                                {['read', 'create', 'update', 'delete'].map((action) => (
+                                    <label
+                                        key={action}
+                                        className="flex items-center space-x-2"
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={permission[`can_${action}` as keyof FeaturePermission]}
+                                            onChange={() => togglePermission(
+                                                permission.id,
+                                                `can_${action}` as keyof FeaturePermission,
+                                                permission[`can_${action}` as keyof FeaturePermission]
+                                            )}
+                                            disabled={!isAdmin}
+                                            className="form-checkbox h-4 w-4 text-blue-600"
+                                        />
+                                        <span className="text-sm capitalize">{action}</span>
+                                    </label>
+                                ))}
+                            </div>
                         </div>
                     ))}
                 </div>

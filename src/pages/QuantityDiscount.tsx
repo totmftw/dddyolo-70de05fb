@@ -183,9 +183,16 @@ const QuantityDiscount = () => {
       });
 
     if (error) {
-      toast.error('Error updating discount');
+      toast({
+        variant: "destructive",
+        title: "Error updating discount",
+        description: error.message
+      });
     } else {
-      toast.success('Discount updated successfully');
+      toast({
+        title: "Success",
+        description: "Discount updated successfully"
+      });
       fetchDiscounts();
     }
   };

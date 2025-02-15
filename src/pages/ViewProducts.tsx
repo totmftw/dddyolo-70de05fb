@@ -12,6 +12,8 @@ interface Product {
   prodImages?: string[];
   prodPiecestock?: number;
   prodStatus?: boolean;
+  prodMrp?: number;
+  prodBasePrice?: number;
 }
 
 const ViewProducts = () => {
@@ -55,7 +57,11 @@ const ViewProducts = () => {
             <p className="text-sm text-gray-600">Brand: {product.prodBrand || 'N/A'}</p>
             <p className="text-sm text-gray-600">Category: {product.prodCategory || 'N/A'}</p>
             <p className="text-sm text-gray-600">Stock: {String(product.prodPiecestock || 0)} pieces</p>
-            <div className="mt-2">
+            <div className="mt-2 flex justify-between items-center">
+              <div>
+                <p className="font-semibold">MRP: ₹{product.prodMrp || 0}</p>
+                <p className="text-sm text-gray-600">Base: ₹{product.prodBasePrice || 0}</p>
+              </div>
               <span className={`px-2 py-1 rounded-full text-xs ${product.prodStatus ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                 {product.prodStatus ? 'Active' : 'Inactive'}
               </span>

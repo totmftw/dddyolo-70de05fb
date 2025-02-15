@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { Package, Download, Upload, Database, Edit2 } from 'lucide-react';
@@ -50,6 +49,7 @@ interface Product {
     prodRestockDate?: string;
     prodSku?: string;
     prodShortName?: string;
+    prodMrp?: number;
 }
 
 const ProductManagement = () => {
@@ -629,52 +629,6 @@ const ProductManagement = () => {
                     <div className="space-y-4">
                         <h3 className="font-semibold text-lg">Measurements</h3>
                         <div className="grid grid-cols-1 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Box Measurements (L x W x H in cm)</label>
-                                <div className="grid grid-cols-3 gap-2">
-                                    <input
-                                        type="number"
-                                        name="boxLength"
-                                        placeholder="Length"
-                                        className="w-full p-2 border rounded"
-                                    />
-                                    <input
-                                        type="number"
-                                        name="boxWidth"
-                                        placeholder="Width"
-                                        className="w-full p-2 border rounded"
-                                    />
-                                    <input
-                                        type="number"
-                                        name="boxHeight"
-                                        placeholder="Height"
-                                        className="w-full p-2 border rounded"
-                                    />
-                                </div>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Product Dimensions (L x W x H in cm)</label>
-                                <div className="grid grid-cols-3 gap-2">
-                                    <input
-                                        type="number"
-                                        name="prodLength"
-                                        placeholder="Length"
-                                        className="w-full p-2 border rounded"
-                                    />
-                                    <input
-                                        type="number"
-                                        name="prodWidth"
-                                        placeholder="Width"
-                                        className="w-full p-2 border rounded"
-                                    />
-                                    <input
-                                        type="number"
-                                        name="prodHeight"
-                                        placeholder="Height"
-                                        className="w-full p-2 border rounded"
-                                    />
-                                </div>
-                            </div>
                             <input
                                 type="number"
                                 name="prodUnitweight"

@@ -60,6 +60,18 @@ interface ColorOption {
 }
 
 const AdminProductConfig = () => {
+  const { userProfile } = useAuth();
+  const isAdmin = userProfile?.role === 'it_admin';
+
+  if (!isAdmin) {
+    return (
+      <div className="p-4">
+        <h1 className="text-2xl font-bold text-red-600">Access Denied</h1>
+        <p className="mt-2">Only IT administrators can access this page.</p>
+      </div>
+    );
+  }
+
   const { hasPermission } = useAuth();
   
   if (!hasPermission('products', 'create')) {
@@ -71,7 +83,6 @@ const AdminProductConfig = () => {
     );
   }
 
-  const { userProfile } = useAuth();
   const [collections, setCollections] = useState<Collection[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
@@ -82,7 +93,6 @@ const AdminProductConfig = () => {
   const [newItemName, setNewItemName] = useState('');
   const [newItemDescription, setNewItemDescription] = useState('');
   const [newColorHex, setNewColorHex] = useState('#000000');
-  const isAdmin = userProfile?.role === 'it_admin';
 
   useEffect(() => {
     if (isAdmin) {
@@ -238,15 +248,6 @@ const AdminProductConfig = () => {
       fetchColors(selectedCollection);
     }
   };
-
-  if (!isAdmin) {
-    return (
-      <div className="p-4">
-        <h1 className="text-2xl font-bold text-red-600">Access Denied</h1>
-        <p className="mt-2">Only IT administrators can access this page.</p>
-      </div>
-    );
-  }
 
   return (
     <div className="p-6">

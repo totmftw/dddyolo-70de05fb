@@ -15,6 +15,7 @@ const routePermissions: Record<string, { resource: string; action: 'view' | 'cre
   '/dashboard/payments': { resource: 'payments', action: 'view' },
   '/dashboard/products': { resource: 'products', action: 'view' },
   '/dashboard/products/view': { resource: 'products', action: 'view' },
+  '/dashboard/products/admin': { resource: 'products', action: 'create' },
   '/dashboard/roles': { resource: 'roles', action: 'view' },
   '/dashboard/sales-opportunities': { resource: 'sales', action: 'view' },
   '/dashboard/sales-management': { resource: 'sales', action: 'view' },

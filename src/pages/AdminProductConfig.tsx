@@ -61,16 +61,6 @@ interface ColorOption {
 
 const AdminProductConfig = () => {
   const { userProfile } = useAuth();
-  const isAdmin = userProfile?.role === 'it_admin';
-
-  if (!isAdmin) {
-    return (
-      <div className="p-4">
-        <h1 className="text-2xl font-bold text-red-600">Access Denied</h1>
-        <p className="mt-2">Only IT administrators can access this page.</p>
-      </div>
-    );
-  }
 
   const [collections, setCollections] = useState<Collection[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -84,10 +74,8 @@ const AdminProductConfig = () => {
   const [newColorHex, setNewColorHex] = useState('#000000');
 
   useEffect(() => {
-    if (isAdmin) {
-      fetchCollections();
-    }
-  }, [isAdmin]);
+    fetchCollections();
+  }, []);
 
   useEffect(() => {
     if (selectedCollection) {

@@ -1,4 +1,3 @@
-
 import { ReactNode, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -8,7 +7,6 @@ interface AuthGuardProps {
   children: ReactNode;
 }
 
-// Map routes to required permissions
 const routePermissions: Record<string, { resource: string; action: 'view' | 'create' | 'edit' | 'delete' }> = {
   '/dashboard/customers': { resource: 'customers', action: 'view' },
   '/dashboard/inventory': { resource: 'inventory', action: 'view' },
@@ -33,7 +31,7 @@ const AuthGuard = ({ children }: AuthGuardProps) => {
       return;
     }
 
-    // Super Admin bypass - always has access
+    // Super Admin (IT Admin) bypass - always has access
     if (userProfile?.role === 'it_admin') {
       return;
     }

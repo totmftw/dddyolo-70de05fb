@@ -173,27 +173,36 @@ const QuantityDiscount = () => {
     const dbField = dbFieldMap[field];
     if (!dbField) return;
 
-    const { error } = await supabase
-      .from('productquantitydiscounts')
-      .upsert({
-        prodId,
-        [dbField]: numericValue,
-      }, {
-        onConflict: 'prodId'
-      });
+    try {
+      const { error } = await supabase
+        .from('productquantitydiscounts')
+        .upsert({
+          prodId,
+          [dbField]: numericValue,
+        }, {
+          onConflict: 'prodid_unique'
+        });
 
-    if (error) {
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Error updating discount",
+          description: error.message
+        });
+      } else {
+        toast({
+          title: "Success",
+          description: "Discount updated successfully"
+        });
+        fetchDiscounts();
+      }
+    } catch (err) {
+      console.error('Error in handleDiscountChange:', err);
       toast({
         variant: "destructive",
-        title: "Error updating discount",
-        description: error.message
+        title: "Error",
+        description: "Failed to update discount. Please try again."
       });
-    } else {
-      toast({
-        title: "Success",
-        description: "Discount updated successfully"
-      });
-      fetchDiscounts();
     }
   };
 

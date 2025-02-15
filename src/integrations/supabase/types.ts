@@ -536,38 +536,24 @@ export type Database = {
       }
       materials: {
         Row: {
-          collection_id: string | null
-          created_at: string
-          description: string | null
+          created_at: string | null
           id: string
           name: string
-          updated_at: string
+          updated_at: string | null
         }
         Insert: {
-          collection_id?: string | null
-          created_at?: string
-          description?: string | null
+          created_at?: string | null
           id?: string
           name: string
-          updated_at?: string
+          updated_at?: string | null
         }
         Update: {
-          collection_id?: string | null
-          created_at?: string
-          description?: string | null
+          created_at?: string | null
           id?: string
           name?: string
-          updated_at?: string
+          updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "materials_collection_id_fkey"
-            columns: ["collection_id"]
-            isOneToOne: false
-            referencedRelation: "collections"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       mrktCampaigns: {
         Row: {
@@ -1267,21 +1253,21 @@ export type Database = {
       }
       sizes: {
         Row: {
-          category_id: string | null
+          category_id: string
           created_at: string | null
           id: string
           name: string
           updated_at: string | null
         }
         Insert: {
-          category_id?: string | null
+          category_id: string
           created_at?: string | null
           id?: string
           name: string
           updated_at?: string | null
         }
         Update: {
-          category_id?: string | null
+          category_id?: string
           created_at?: string | null
           id?: string
           name?: string
@@ -1337,21 +1323,21 @@ export type Database = {
       }
       sub_categories: {
         Row: {
-          category_id: string | null
+          category_id: string
           created_at: string | null
           id: string
           name: string
           updated_at: string | null
         }
         Insert: {
-          category_id?: string | null
+          category_id: string
           created_at?: string | null
           id?: string
           name: string
           updated_at?: string | null
         }
         Update: {
-          category_id?: string | null
+          category_id?: string
           created_at?: string | null
           id?: string
           name?: string

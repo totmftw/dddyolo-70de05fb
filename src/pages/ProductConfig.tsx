@@ -35,6 +35,11 @@ interface Size {
   name: string;
 }
 
+interface Material {
+  id: string;
+  name: string;
+}
+
 interface ProductConfig {
   id: string;
   category_id: string;
@@ -50,12 +55,14 @@ const ProductConfig = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
   const [sizes, setSizes] = useState<Size[]>([]);
+  const [materials, setMaterials] = useState<Material[]>([]);
   const [productConfigs, setProductConfigs] = useState<ProductConfig[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [newItemName, setNewItemName] = useState('');
 
   useEffect(() => {
     fetchCategories();
+    fetchMaterials();
   }, []);
 
   useEffect(() => {
@@ -75,6 +82,19 @@ const ProductConfig = () => {
       toast.error('Error fetching categories');
     } else {
       setCategories(data || []);
+    }
+  };
+
+  const fetchMaterials = async () => {
+    const { data, error } = await supabase
+      .from('materials')
+      .select('*')
+      .order('name');
+    
+    if (error) {
+      toast.error('Error fetching materials');
+    } else {
+      setMaterials(data || []);
     }
   };
 
@@ -122,6 +142,25 @@ const ProductConfig = () => {
       toast.success('Category added successfully');
       setNewItemName('');
       fetchCategories();
+    }
+  };
+
+  const addMaterial = async () => {
+    if (!newItemName) {
+      toast.error('Please enter a material name');
+      return;
+    }
+
+    const { error } = await supabase
+      .from('materials')
+      .insert([{ name: newItemName }]);
+
+    if (error) {
+      toast.error('Error adding material');
+    } else {
+      toast.success('Material added successfully');
+      setNewItemName('');
+      fetchMaterials();
     }
   };
 
@@ -192,6 +231,7 @@ const ProductConfig = () => {
       <Tabs defaultValue="categories" className="w-full">
         <TabsList>
           <TabsTrigger value="categories">Categories</TabsTrigger>
+          <TabsTrigger value="materials">Materials</TabsTrigger>
           <TabsTrigger value="subcategories">Sub-Categories</TabsTrigger>
           <TabsTrigger value="sizes">Sizes</TabsTrigger>
           <TabsTrigger value="productConfig">Product Config</TabsTrigger>
@@ -219,6 +259,44 @@ const ProductConfig = () => {
                   <div key={category.id} className="flex justify-between items-center p-3 bg-gray-50 rounded">
                     <div>
                       <h3 className="font-medium">{category.name}</h3>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="ghost" size="sm">
+                        <Edit2 className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="materials">
+          <Card>
+            <CardHeader>
+              <CardTitle>Materials</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-4 mb-4">
+                <Input
+                  placeholder="Material Name"
+                  value={newItemName}
+                  onChange={(e) => setNewItemName(e.target.value)}
+                />
+                <Button onClick={addMaterial}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Material
+                </Button>
+              </div>
+              <div className="space-y-2">
+                {materials.map((material) => (
+                  <div key={material.id} className="flex justify-between items-center p-3 bg-gray-50 rounded">
+                    <div>
+                      <h3 className="font-medium">{material.name}</h3>
                     </div>
                     <div className="flex gap-2">
                       <Button variant="ghost" size="sm">

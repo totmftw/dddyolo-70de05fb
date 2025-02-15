@@ -45,7 +45,7 @@ interface Product {
     prodSlabprice5?: number;
     prodBoxstock?: number;
     prodPiecestock?: number;
-    prodStatus?: boolean;
+    prodStatus?: string; // Changed from boolean to string to match table definition
     prodRestockDate?: string;
     prodSku?: string;
     prodShortName?: string;
@@ -58,7 +58,8 @@ const ProductManagement = () => {
         prodId: '',
         prodName: '',
         prodBrand: 'Black Gold',
-        prodStatus: true
+        prodStatus: 'active', // Changed from boolean to string to match table definition
+        prodSku: '', // Add this required field
     });
     const [loading, setLoading] = useState(false);
     const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
@@ -162,10 +163,11 @@ const ProductManagement = () => {
         e.preventDefault();
         setLoading(true);
 
-        if (!formData.prodMrp) {
-            toast.error('MRP is required');
-            setLoading(false);
-            return;
+        // Generate SKU if not provided
+        if (!formData.prodSku) {
+            const timestamp = Date.now();
+            const randomString = Math.random().toString(36).substring(2, 7).toUpperCase();
+            formData.prodSku = `SKU-${timestamp}-${randomString}`;
         }
 
         const images: string[] = [];
@@ -193,7 +195,8 @@ const ProductManagement = () => {
         const productData = {
             ...formData,
             prodId: formData.prodId || `PROD-${Date.now()}`,
-            prodImages: images
+            prodImages: images,
+            prodStatus: formData.prodStatus || 'active'
         };
 
         const { error } = await supabase
@@ -210,7 +213,8 @@ const ProductManagement = () => {
                 prodId: '',
                 prodName: '',
                 prodBrand: 'Black Gold',
-                prodStatus: true
+                prodStatus: 'active',
+                prodSku: '', // Reset SKU field
             });
             setSelectedFiles(null);
         }
@@ -443,7 +447,7 @@ const ProductManagement = () => {
                             name="prodSku"
                             value={formData.prodSku || ''}
                             onChange={handleInputChange}
-                            placeholder="SKU"
+                            placeholder="SKU (will be auto-generated if empty)"
                             className="w-full p-2 border rounded"
                         />
                         <select

@@ -45,7 +45,7 @@ interface Product {
     prodSlabprice5?: number;
     prodBoxstock?: number;
     prodPiecestock?: number;
-    prodStatus?: string; // Changed from boolean to string to match table definition
+    prodStatus?: string; // Changed from boolean to string
     prodRestockDate?: string;
     prodSku?: string;
     prodShortName?: string;
@@ -58,15 +58,15 @@ const ProductManagement = () => {
         prodId: '',
         prodName: '',
         prodBrand: 'Black Gold',
-        prodStatus: 'active', // Changed from boolean to string to match table definition
-        prodSku: '', // Add this required field
+        prodStatus: 'active',
+        prodSku: '',
     });
     const [loading, setLoading] = useState(false);
     const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
     const [showEditDialog, setShowEditDialog] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [additionalColors, setAdditionalColors] = useState<string[]>([]);
-    const [mrpPercentage, setMrpPercentage] = useState(25); // Default 25% off MRP for base price
+    const [mrpPercentage, setMrpPercentage] = useState(25);
 
     const collections = [
         'Living Room',
@@ -129,23 +129,10 @@ const ProductManagement = () => {
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-        const { name, type, value } = e.target;
-        let parsedValue: string | number | boolean;
-
-        if (type === 'checkbox') {
-            const target = e.target as HTMLInputElement; // Type assertion here
-            parsedValue = target.checked; // This will be a boolean
-        } else if (type === 'number') {
-            parsedValue = value === '' ? '' : Number(value); // This will be a number
-        } else {
-            parsedValue = value; // This will be a string for other input types
-        }
-
-        // Ensure only compatible types are assigned
-        const valueToSet = typeof parsedValue === 'boolean' ? parsedValue : String(parsedValue);
+        const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
-            [name]: valueToSet
+            [name]: value
         }));
     };
 
@@ -214,7 +201,7 @@ const ProductManagement = () => {
                 prodName: '',
                 prodBrand: 'Black Gold',
                 prodStatus: 'active',
-                prodSku: '', // Reset SKU field
+                prodSku: '',
             });
             setSelectedFiles(null);
         }
@@ -316,7 +303,7 @@ const ProductManagement = () => {
                         prodUnitweight: row['Unit Weight (kg)'],
                         prodGrossweight: row['Gross Weight (kg)'],
                         prodNettweight: row['Net Weight (kg)'],
-                        prodStatus: row['Status'] === 'Active'
+                        prodStatus: row['Status'] === 'Active' ? 'active' : 'inactive'
                     };
 
                     const { error } = await supabase
@@ -662,16 +649,15 @@ const ProductManagement = () => {
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <label className="flex items-center gap-2">
-                        <input
-                            type="checkbox"
-                            name="prodStatus"
-                            checked={formData.prodStatus || false}
-                            onChange={handleInputChange}
-                            className="form-checkbox"
-                        />
-                        <span>Active Product</span>
-                    </label>
+                    <select
+                        name="prodStatus"
+                        value={formData.prodStatus || 'active'}
+                        onChange={handleInputChange}
+                        className="w-full p-2 border rounded"
+                    >
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
                     <button
                         type="submit"
                         disabled={loading}
@@ -718,8 +704,8 @@ const ProductManagement = () => {
                                 })}
                             </div>
                             <div className="mt-2 flex justify-between items-center">
-                                <span className={`px-2 py-1 rounded-full text-xs ${product.prodStatus ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                                    {product.prodStatus ? 'Active' : 'Inactive'}
+                                <span className={`px-2 py-1 rounded-full text-xs ${product.prodStatus === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                    {product.prodStatus === 'active' ? 'Active' : 'Inactive'}
                                 </span>
                                 <button
                                     onClick={() => handleEditProduct(product)}

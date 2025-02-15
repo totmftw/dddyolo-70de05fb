@@ -868,6 +868,7 @@ export type Database = {
           category_id: string
           collection_name: string | null
           created_at: string | null
+          gsm: number | null
           id: string
           material_id: string
           size_id: string
@@ -880,6 +881,7 @@ export type Database = {
           category_id: string
           collection_name?: string | null
           created_at?: string | null
+          gsm?: number | null
           id?: string
           material_id: string
           size_id: string
@@ -892,6 +894,7 @@ export type Database = {
           category_id?: string
           collection_name?: string | null
           created_at?: string | null
+          gsm?: number | null
           id?: string
           material_id?: string
           size_id?: string

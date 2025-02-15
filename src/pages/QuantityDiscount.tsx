@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { Search, Save, FileDown, FileUp } from 'lucide-react';
@@ -174,12 +175,16 @@ const QuantityDiscount = () => {
     if (!dbField) return;
 
     try {
-      // First check if a record exists
-      const { data: existingRecord } = await supabase
+      // Use maybeSingle() instead of single()
+      const { data: existingRecord, error: fetchError } = await supabase
         .from('productquantitydiscounts')
         .select()
         .eq('prodId', prodId)
-        .single();
+        .maybeSingle();
+
+      if (fetchError) {
+        throw fetchError;
+      }
 
       let error;
       

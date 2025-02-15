@@ -18,9 +18,10 @@ import AdminOneLayout from './layouts/AdminOneLayout';
 import AuthGuard from './components/AuthGuard';
 import SalesOpportunityManagement from './pages/SalesOpportunityManagement';
 import QuantityDiscount from './pages/QuantityDiscount';
+import ProductConfig from './pages/ProductConfig';
+import CollectionConfig from './pages/CollectionConfig';
 import { ThemeProvider } from './theme/ThemeContext';
 import { Toaster } from "sonner";
-import AdminProductConfig from './pages/AdminProductConfig';
 import { SidebarProvider } from './context/SidebarContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -55,7 +56,8 @@ function App() {
                   <Route path="products" element={<ProductManagement />} />
                   <Route path="products/manage" element={<ManageProducts />} />
                   <Route path="products/view" element={<ViewProducts />} />
-                  <Route path="products/admin" element={<AdminProductConfig />} />
+                  <Route path="products/admin" element={<ProductConfig />} />
+                  <Route path="products/collections" element={<CollectionConfig />} />
                   <Route path="sales-management" element={<SalesOpportunityManagement />} />
                   <Route path="quantity-discounts" element={<QuantityDiscount />} />
                 </Route>

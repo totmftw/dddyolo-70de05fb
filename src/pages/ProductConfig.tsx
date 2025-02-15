@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { toast } from "sonner";
+import { Link } from 'react-router-dom';
 import {
   Tabs,
   TabsContent,
@@ -22,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Trash2, Edit2, Save } from 'lucide-react';
+import { Plus, Trash2, Edit2, Save, Tags } from 'lucide-react';
 
 interface Category {
   id: string;
@@ -485,31 +486,45 @@ const ProductConfig = () => {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Category Configuration</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Category Configuration</h1>
+        <Link to="/dashboard/products/collections">
+          <Button variant="outline" className="flex items-center gap-2">
+            <Tags className="w-4 h-4" />
+            Manage Collections
+          </Button>
+        </Link>
+      </div>
       
       <div className="mb-6">
-        <h2 className="text-lg font-semibold mb-4">Category Selection</h2>
-        <select
-          className="w-full max-w-xs p-2 border rounded"
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-        >
-          <option value="">Select a Category</option>
-          {categories.map((category) => (
-            <option key={category.id} value={category.id}>
-              {category.name}
-            </option>
-          ))}
-        </select>
+        <Card>
+          <CardHeader>
+            <CardTitle>Category Selection</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <select
+              className="w-full max-w-xs p-2 border rounded"
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+            >
+              <option value="">Select a Category</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </CardContent>
+        </Card>
       </div>
 
       <Tabs defaultValue="categories" className="w-full">
-        <TabsList>
+        <TabsList className="w-full justify-start">
           <TabsTrigger value="categories">Categories</TabsTrigger>
           <TabsTrigger value="subcategories">Sub-Categories</TabsTrigger>
           <TabsTrigger value="sizes">Sizes</TabsTrigger>
           <TabsTrigger value="materials">Materials</TabsTrigger>
-          <TabsTrigger value="productConfig">Category Configuration</TabsTrigger>
+          <TabsTrigger value="productConfig">Category Configurations</TabsTrigger>
         </TabsList>
 
         <TabsContent value="categories">

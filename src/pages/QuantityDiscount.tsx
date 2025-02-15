@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { Search, Save, FileDown, FileUp } from 'lucide-react';
@@ -14,6 +13,7 @@ import {
 } from "@/components/reused/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface QuantityDiscount {
   id: string;
@@ -28,6 +28,7 @@ interface QuantityDiscount {
   tierFourDiscount: number | null;
   tierFiveQuantity: number | null;
   tierFiveDiscount: number | null;
+  default_price_type: 'mrp' | 'base_price';
 }
 
 interface Product {
@@ -37,6 +38,7 @@ interface Product {
   prodCategory: string;
   prodSubcategory: string;
   prodBasePrice: number;
+  prodMrp: number;
   by_use: string[];
 }
 
@@ -110,7 +112,7 @@ const QuantityDiscount = () => {
   const fetchProducts = async () => {
     const { data, error } = await supabase
       .from('productManagement')
-      .select('prodId, prodName, prodCollection, prodCategory, prodSubcategory, prodBasePrice, by_use');
+      .select('prodId, prodName, prodCollection, prodCategory, prodSubcategory, prodBasePrice, prodMrp, by_use');
     
     if (error) {
       toast({
@@ -149,7 +151,8 @@ const QuantityDiscount = () => {
       tierFourQuantity: d.tierfourquantity,
       tierFourDiscount: d.tierfourdiscount,
       tierFiveQuantity: d.tierfivequantity,
-      tierFiveDiscount: d.tierfivediscount
+      tierFiveDiscount: d.tierfivediscount,
+      default_price_type: 'mrp'
     }));
     
     setDiscounts(mappedDiscounts);
@@ -175,7 +178,6 @@ const QuantityDiscount = () => {
     if (!dbField) return;
 
     try {
-      // Use maybeSingle() instead of single()
       const { data: existingRecord, error: fetchError } = await supabase
         .from('productquantitydiscounts')
         .select()
@@ -197,7 +199,11 @@ const QuantityDiscount = () => {
       } else {
         const { error: insertError } = await supabase
           .from('productquantitydiscounts')
-          .insert({ prodId, [dbField]: numericValue });
+          .insert({ 
+            prodId, 
+            [dbField]: numericValue,
+            default_price_type: 'mrp' 
+          });
         error = insertError;
       }
 
@@ -219,6 +225,40 @@ const QuantityDiscount = () => {
       });
     }
   }, [fetchDiscounts]);
+
+  const handlePriceTypeChange = async (prodId: string, value: 'mrp' | 'base_price') => {
+    try {
+      const { error } = await supabase
+        .from('productquantitydiscounts')
+        .update({ default_price_type: value })
+        .eq('prodId', prodId);
+
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Error updating price type",
+          description: error.message
+        });
+      } else {
+        fetchDiscounts();
+      }
+    } catch (err) {
+      console.error('Error updating price type:', err);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update price type. Please try again."
+      });
+    }
+  };
+
+  const calculateDiscountedPrice = (mrp: number, basePrice: number, discountPercentage: number | null, priceType: 'mrp' | 'base_price'): number => {
+    if (!discountPercentage || typeof discountPercentage !== 'number') {
+      return priceType === 'mrp' ? mrp : basePrice;
+    }
+    const baseAmount = priceType === 'mrp' ? mrp : basePrice;
+    return baseAmount - (baseAmount * (discountPercentage / 100));
+  };
 
   const saveTemplate = async () => {
     if (!newTemplateName) {
@@ -352,17 +392,6 @@ const QuantityDiscount = () => {
     return matchesSearch && matchesCollection && matchesCategory && matchesByUse;
   });
 
-  const calculateDiscountedPrice = (basePrice: number, discountPercentage: number | null): number => {
-    if (!basePrice || !discountPercentage || typeof discountPercentage !== 'number') {
-      return basePrice || 0;
-    }
-    const parsedDiscount = Number(discountPercentage);
-    if (isNaN(parsedDiscount)) {
-      return basePrice || 0;
-    }
-    return basePrice - (basePrice * (parsedDiscount / 100));
-  };
-
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
@@ -462,7 +491,9 @@ const QuantityDiscount = () => {
               <TableHead>Collection</TableHead>
               <TableHead>Category</TableHead>
               <TableHead>Subcategory</TableHead>
+              <TableHead>MRP</TableHead>
               <TableHead>Base Price</TableHead>
+              <TableHead>Price Type</TableHead>
               {[1, 2, 3, 4, 5].map(tier => (
                 <TableHead key={tier}>
                   <div>Tier {tier}</div>
@@ -480,7 +511,22 @@ const QuantityDiscount = () => {
                   <TableCell>{product.prodCollection}</TableCell>
                   <TableCell>{product.prodCategory}</TableCell>
                   <TableCell>{product.prodSubcategory}</TableCell>
+                  <TableCell>${(product.prodMrp || 0).toFixed(2)}</TableCell>
                   <TableCell>${(product.prodBasePrice || 0).toFixed(2)}</TableCell>
+                  <TableCell>
+                    <Select
+                      value={discount?.default_price_type || 'mrp'}
+                      onValueChange={(value: 'mrp' | 'base_price') => handlePriceTypeChange(product.prodId, value)}
+                    >
+                      <SelectTrigger className="w-[120px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="mrp">MRP</SelectItem>
+                        <SelectItem value="base_price">Base Price</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
                   {[
                     ['tierOneQuantity', 'tierOneDiscount'],
                     ['tierTwoQuantity', 'tierTwoDiscount'],
@@ -506,8 +552,10 @@ const QuantityDiscount = () => {
                         />
                         <div className="w-20 px-2 py-1 bg-gray-100 rounded text-sm">
                           ${calculateDiscountedPrice(
+                            Number(product.prodMrp) || 0,
                             Number(product.prodBasePrice) || 0,
-                            Number(discount?.[discField as keyof QuantityDiscount]) || null
+                            Number(discount?.[discField as keyof QuantityDiscount]) || null,
+                            discount?.default_price_type || 'mrp'
                           ).toFixed(2)}
                         </div>
                       </div>

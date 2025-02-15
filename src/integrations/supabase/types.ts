@@ -887,6 +887,7 @@ export type Database = {
           prodMaterial: string | null
           prodMaxColors: number | null
           prodMoq: number | null
+          prodMrp: number | null
           prodName: string
           prodNettweight: number | null
           prodPackaging: string | null
@@ -929,6 +930,7 @@ export type Database = {
           prodMaterial?: string | null
           prodMaxColors?: number | null
           prodMoq?: number | null
+          prodMrp?: number | null
           prodName: string
           prodNettweight?: number | null
           prodPackaging?: string | null
@@ -971,6 +973,7 @@ export type Database = {
           prodMaterial?: string | null
           prodMaxColors?: number | null
           prodMoq?: number | null
+          prodMrp?: number | null
           prodName?: string
           prodNettweight?: number | null
           prodPackaging?: string | null
@@ -998,6 +1001,7 @@ export type Database = {
       productquantitydiscounts: {
         Row: {
           created_at: string
+          default_price_type: string | null
           id: string
           prodId: string | null
           tierfivediscount: number | null
@@ -1014,6 +1018,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          default_price_type?: string | null
           id?: string
           prodId?: string | null
           tierfivediscount?: number | null
@@ -1030,6 +1035,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          default_price_type?: string | null
           id?: string
           prodId?: string | null
           tierfivediscount?: number | null

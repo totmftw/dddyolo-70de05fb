@@ -393,103 +393,101 @@ const QuantityDiscount = () => {
   });
 
   return (
-    <div className="h-screen flex flex-col p-4">
-      <div className="flex-none">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold">Quantity Discounts</h1>
-          <div className="flex gap-4">
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline" className="flex items-center gap-2">
-                  <Save className="w-4 h-4" />
-                  Save Template
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Save Discount Template</DialogTitle>
-                  <DialogDescription>
-                    Enter a name for your template to save the current discount configuration.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="flex flex-col gap-4">
-                  <Input
-                    placeholder="Template name"
-                    value={newTemplateName}
-                    onChange={(e) => setNewTemplateName(e.target.value)}
-                  />
-                  <Button onClick={saveTemplate}>Save Template</Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+    <div className="p-4">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Quantity Discounts</h1>
+        <div className="flex gap-4">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="flex items-center gap-2">
+                <Save className="w-4 h-4" />
+                Save Template
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Save Discount Template</DialogTitle>
+                <DialogDescription>
+                  Enter a name for your template to save the current discount configuration.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex flex-col gap-4">
+                <Input
+                  placeholder="Template name"
+                  value={newTemplateName}
+                  onChange={(e) => setNewTemplateName(e.target.value)}
+                />
+                <Button onClick={saveTemplate}>Save Template</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
 
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline" className="flex items-center gap-2">
-                  <FileDown className="w-4 h-4" />
-                  Load Template
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Load Discount Template</DialogTitle>
-                  <DialogDescription>
-                    Select a template to apply its discount configuration.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="flex flex-col gap-4">
-                  {templates.map((template) => (
-                    <Button
-                      key={template.id}
-                      variant="outline"
-                      onClick={() => applyTemplate(template)}
-                      className="justify-start"
-                    >
-                      <FileUp className="w-4 h-4 mr-2" />
-                      {template.template_name}
-                    </Button>
-                  ))}
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>
-        </div>
-        
-        <div className="flex flex-wrap gap-4 mb-4">
-          <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search products..."
-              className="w-full pl-10 pr-4 py-2 border rounded-lg"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-
-          {['collection', 'category', 'by_use'].map((filterType) => (
-            <select
-              key={filterType}
-              className="px-4 py-2 border rounded-lg min-w-[150px]"
-              value={filters[filterType as keyof typeof filters]}
-              onChange={(e) => setFilters(prev => ({ ...prev, [filterType]: e.target.value }))}
-            >
-              <option value="">All {filterType}s</option>
-              {getUniqueValues(filterType === 'by_use' ? 'by_use' : `prod${filterType.charAt(0).toUpperCase() + filterType.slice(1)}` as keyof Product).map((value, index) => (
-                <option key={`${filterType}-${index}`} value={value}>
-                  {value}
-                </option>
-              ))}
-            </select>
-          ))}
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="flex items-center gap-2">
+                <FileDown className="w-4 h-4" />
+                Load Template
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Load Discount Template</DialogTitle>
+                <DialogDescription>
+                  Select a template to apply its discount configuration.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex flex-col gap-4">
+                {templates.map((template) => (
+                  <Button
+                    key={template.id}
+                    variant="outline"
+                    onClick={() => applyTemplate(template)}
+                    className="justify-start"
+                  >
+                    <FileUp className="w-4 h-4 mr-2" />
+                    {template.template_name}
+                  </Button>
+                ))}
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
+      
+      <div className="flex flex-wrap gap-4 mb-4">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search products..."
+            className="w-full pl-10 pr-4 py-2 border rounded-lg"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
 
-      <div className="flex-1 overflow-hidden border rounded-lg shadow bg-white">
-        <div className="overflow-x-auto h-full">
+        {['collection', 'category', 'by_use'].map((filterType) => (
+          <select
+            key={filterType}
+            className="px-4 py-2 border rounded-lg min-w-[150px]"
+            value={filters[filterType as keyof typeof filters]}
+            onChange={(e) => setFilters(prev => ({ ...prev, [filterType]: e.target.value }))}
+          >
+            <option value="">All {filterType}s</option>
+            {getUniqueValues(filterType === 'by_use' ? 'by_use' : `prod${filterType.charAt(0).toUpperCase() + filterType.slice(1)}` as keyof Product).map((value, index) => (
+              <option key={`${filterType}-${index}`} value={value}>
+                {value}
+              </option>
+            ))}
+          </select>
+        ))}
+      </div>
+
+      <div className="border rounded-lg shadow bg-white" style={{ height: 'calc(100vh - 200px)', overflowY: 'auto' }}>
+        <div className="overflow-x-auto">
           <div className="inline-block min-w-full align-middle">
             <Table>
-              <TableHeader className="sticky top-0 bg-white z-10">
+              <TableHeader>
                 <TableRow>
                   <TableHead className="w-[200px] bg-white sticky left-0 z-20">Product</TableHead>
                   <TableHead className="min-w-[150px]">Collection</TableHead>

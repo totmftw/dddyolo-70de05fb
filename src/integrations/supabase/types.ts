@@ -9,6 +9,27 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      categories: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       collections: {
         Row: {
           created_at: string
@@ -767,6 +788,74 @@ export type Database = {
           },
         ]
       }
+      product_config: {
+        Row: {
+          category_id: string
+          collection_name: string | null
+          created_at: string | null
+          id: string
+          material_id: string
+          size_id: string
+          sku: string
+          sub_category_id: string
+          thread_count: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          category_id: string
+          collection_name?: string | null
+          created_at?: string | null
+          id?: string
+          material_id: string
+          size_id: string
+          sku: string
+          sub_category_id: string
+          thread_count?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          category_id?: string
+          collection_name?: string | null
+          created_at?: string | null
+          id?: string
+          material_id?: string
+          size_id?: string
+          sku?: string
+          sub_category_id?: string
+          thread_count?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_config_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_config_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_config_size_id_fkey"
+            columns: ["size_id"]
+            isOneToOne: false
+            referencedRelation: "sizes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_config_sub_category_id_fkey"
+            columns: ["sub_category_id"]
+            isOneToOne: false
+            referencedRelation: "sub_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_subcategories: {
         Row: {
           category_id: string | null
@@ -1176,6 +1265,108 @@ export type Database = {
           },
         ]
       }
+      sizes: {
+        Row: {
+          category_id: string | null
+          created_at: string | null
+          id: string
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sizes_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock: {
+        Row: {
+          barcode: string | null
+          batch_id: string | null
+          created_at: string | null
+          id: string
+          product_config_id: string
+          quantity: number
+          updated_at: string | null
+        }
+        Insert: {
+          barcode?: string | null
+          batch_id?: string | null
+          created_at?: string | null
+          id?: string
+          product_config_id: string
+          quantity?: number
+          updated_at?: string | null
+        }
+        Update: {
+          barcode?: string | null
+          batch_id?: string | null
+          created_at?: string | null
+          id?: string
+          product_config_id?: string
+          quantity?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_product_config_id_fkey"
+            columns: ["product_config_id"]
+            isOneToOne: false
+            referencedRelation: "product_config"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sub_categories: {
+        Row: {
+          category_id: string | null
+          created_at: string | null
+          id: string
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sub_categories_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       thread_counts: {
         Row: {
           collection_id: string | null
@@ -1455,6 +1646,15 @@ export type Database = {
           existing_payment_date: string
           existing_amount: number
         }[]
+      }
+      generate_sku: {
+        Args: {
+          p_category_name: string
+          p_subcategory_name: string
+          p_material_name: string
+          p_size_name: string
+        }
+        Returns: string
       }
       generate_unique_invoice_number: {
         Args: Record<PropertyKey, never>

@@ -96,6 +96,7 @@ const ProductConfig = () => {
     if (selectedSubCategory) {
       fetchAvailableMaterials(selectedSubCategory);
       fetchAvailableSizes(selectedCategory);
+      fetchMaterialMappings(selectedSubCategory);
     }
   }, [selectedSubCategory]);
 
@@ -183,6 +184,20 @@ const ProductConfig = () => {
     } else {
       const materials = data.map(item => item.materials);
       setAvailableMaterials(materials);
+    }
+  };
+
+  const fetchAvailableSizes = async (categoryId: string) => {
+    const { data, error } = await supabase
+      .from('sizes')
+      .select('*')
+      .eq('category_id', categoryId)
+      .order('name');
+    
+    if (error) {
+      toast.error('Error fetching available sizes');
+    } else {
+      setAvailableSizes(data || []);
     }
   };
 

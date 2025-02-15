@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
@@ -73,17 +72,6 @@ const AdminProductConfig = () => {
     );
   }
 
-  const { hasPermission } = useAuth();
-  
-  if (!hasPermission('products', 'create')) {
-    return (
-      <div className="p-4">
-        <h1 className="text-xl font-bold text-red-600">Access Denied</h1>
-        <p className="text-gray-600">You don't have permission to access this page.</p>
-      </div>
-    );
-  }
-
   const [collections, setCollections] = useState<Collection[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
@@ -96,10 +84,8 @@ const AdminProductConfig = () => {
   const [newColorHex, setNewColorHex] = useState('#000000');
 
   useEffect(() => {
-    if (isAdmin) {
-      fetchCollections();
-    }
-  }, [isAdmin]);
+    fetchCollections();
+  }, []);
 
   useEffect(() => {
     if (selectedCollection) {

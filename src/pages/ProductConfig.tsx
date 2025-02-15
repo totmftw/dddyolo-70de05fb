@@ -62,6 +62,7 @@ interface ProductConfig {
   gsm?: number;
   thread_count?: number;
   created_at: string;
+  sku: string;
 }
 
 const ProductConfig = () => {
@@ -309,35 +310,66 @@ const ProductConfig = () => {
     }
   };
 
+  const generateSKU = async (categoryId: string, subCategoryId: string, materialId: string, sizeId: string) => {
+    try {
+      const [categoryData, subCategoryData, materialData, sizeData] = await Promise.all([
+        supabase.from('categories').select('name').eq('id', categoryId).single(),
+        supabase.from('sub_categories').select('name').eq('id', subCategoryId).single(),
+        supabase.from('materials').select('name').eq('id', materialId).single(),
+        supabase.from('sizes').select('name').eq('id', sizeId).single()
+      ]);
+
+      if (!categoryData.data || !subCategoryData.data || !materialData.data || !sizeData.data) {
+        throw new Error('Could not fetch all required data for SKU generation');
+      }
+
+      const sku = `${categoryData.data.name.slice(0, 3)}-${subCategoryData.data.name.slice(0, 3)}-${materialData.data.name.slice(0, 3)}-${sizeData.data.name.slice(0, 3)}`.toUpperCase();
+      
+      return sku;
+    } catch (error) {
+      console.error('Error generating SKU:', error);
+      throw error;
+    }
+  };
+
   const saveProductConfig = async () => {
     if (!selectedCategory || !selectedSubCategory || !selectedMaterial || !selectedSize) {
       toast.error('Please select all required fields');
       return;
     }
 
-    const newConfig = {
-      category_id: selectedCategory,
-      sub_category_id: selectedSubCategory,
-      material_id: selectedMaterial,
-      size_id: selectedSize,
-      gsm: gsm ? parseInt(gsm) : null,
-      thread_count: threadCount ? parseInt(threadCount) : null
-    };
+    try {
+      const sku = await generateSKU(selectedCategory, selectedSubCategory, selectedMaterial, selectedSize);
 
-    const { error } = await supabase
-      .from('product_config')
-      .insert([newConfig]);
+      const newConfig = {
+        category_id: selectedCategory,
+        sub_category_id: selectedSubCategory,
+        material_id: selectedMaterial,
+        size_id: selectedSize,
+        gsm: gsm ? parseInt(gsm) : null,
+        thread_count: threadCount ? parseInt(threadCount) : null,
+        sku: sku
+      };
 
-    if (error) {
-      toast.error('Error saving product configuration');
-    } else {
-      toast.success('Product configuration saved successfully');
-      // Reset form
-      setSelectedSubCategory('');
-      setSelectedMaterial('');
-      setSelectedSize('');
-      setGsm('');
-      setThreadCount('');
+      const { error } = await supabase
+        .from('product_config')
+        .insert([newConfig]);
+
+      if (error) {
+        toast.error('Error saving product configuration');
+        console.error('Error saving config:', error);
+      } else {
+        toast.success('Product configuration saved successfully');
+        // Reset form
+        setSelectedSubCategory('');
+        setSelectedMaterial('');
+        setSelectedSize('');
+        setGsm('');
+        setThreadCount('');
+      }
+    } catch (error) {
+      toast.error('Error generating SKU');
+      console.error('Error:', error);
     }
   };
 

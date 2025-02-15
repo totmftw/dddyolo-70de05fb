@@ -887,7 +887,7 @@ export type Database = {
           prodMaterial: string | null
           prodMaxColors: number | null
           prodMoq: number | null
-          prodMrp: number | null
+          prodMrp: number
           prodName: string
           prodNettweight: number | null
           prodPackaging: string | null
@@ -930,7 +930,7 @@ export type Database = {
           prodMaterial?: string | null
           prodMaxColors?: number | null
           prodMoq?: number | null
-          prodMrp?: number | null
+          prodMrp: number
           prodName: string
           prodNettweight?: number | null
           prodPackaging?: string | null
@@ -973,7 +973,7 @@ export type Database = {
           prodMaterial?: string | null
           prodMaxColors?: number | null
           prodMoq?: number | null
-          prodMrp?: number | null
+          prodMrp?: number
           prodName?: string
           prodNettweight?: number | null
           prodPackaging?: string | null

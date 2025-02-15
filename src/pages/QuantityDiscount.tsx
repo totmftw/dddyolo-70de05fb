@@ -393,101 +393,103 @@ const QuantityDiscount = () => {
   });
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Quantity Discounts</h1>
-        <div className="flex gap-4">
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="outline" className="flex items-center gap-2">
-                <Save className="w-4 h-4" />
-                Save Template
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Save Discount Template</DialogTitle>
-                <DialogDescription>
-                  Enter a name for your template to save the current discount configuration.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="flex flex-col gap-4">
-                <Input
-                  placeholder="Template name"
-                  value={newTemplateName}
-                  onChange={(e) => setNewTemplateName(e.target.value)}
-                />
-                <Button onClick={saveTemplate}>Save Template</Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+    <div className="h-screen flex flex-col p-4">
+      <div className="flex-none">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">Quantity Discounts</h1>
+          <div className="flex gap-4">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="flex items-center gap-2">
+                  <Save className="w-4 h-4" />
+                  Save Template
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Save Discount Template</DialogTitle>
+                  <DialogDescription>
+                    Enter a name for your template to save the current discount configuration.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="flex flex-col gap-4">
+                  <Input
+                    placeholder="Template name"
+                    value={newTemplateName}
+                    onChange={(e) => setNewTemplateName(e.target.value)}
+                  />
+                  <Button onClick={saveTemplate}>Save Template</Button>
+                </div>
+              </DialogContent>
+            </Dialog>
 
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="outline" className="flex items-center gap-2">
-                <FileDown className="w-4 h-4" />
-                Load Template
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Load Discount Template</DialogTitle>
-                <DialogDescription>
-                  Select a template to apply its discount configuration.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="flex flex-col gap-4">
-                {templates.map((template) => (
-                  <Button
-                    key={template.id}
-                    variant="outline"
-                    onClick={() => applyTemplate(template)}
-                    className="justify-start"
-                  >
-                    <FileUp className="w-4 h-4 mr-2" />
-                    {template.template_name}
-                  </Button>
-                ))}
-              </div>
-            </DialogContent>
-          </Dialog>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="flex items-center gap-2">
+                  <FileDown className="w-4 h-4" />
+                  Load Template
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Load Discount Template</DialogTitle>
+                  <DialogDescription>
+                    Select a template to apply its discount configuration.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="flex flex-col gap-4">
+                  {templates.map((template) => (
+                    <Button
+                      key={template.id}
+                      variant="outline"
+                      onClick={() => applyTemplate(template)}
+                      className="justify-start"
+                    >
+                      <FileUp className="w-4 h-4 mr-2" />
+                      {template.template_name}
+                    </Button>
+                  ))}
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+        
+        <div className="flex flex-wrap gap-4 mb-6">
+          <div className="relative flex-1 min-w-[200px]">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search products..."
+              className="w-full pl-10 pr-4 py-2 border rounded-lg"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          {['collection', 'category', 'by_use'].map((filterType) => (
+            <select
+              key={filterType}
+              className="px-4 py-2 border rounded-lg min-w-[150px]"
+              value={filters[filterType as keyof typeof filters]}
+              onChange={(e) => setFilters(prev => ({ ...prev, [filterType]: e.target.value }))}
+            >
+              <option value="">All {filterType}s</option>
+              {getUniqueValues(filterType === 'by_use' ? 'by_use' : `prod${filterType.charAt(0).toUpperCase() + filterType.slice(1)}` as keyof Product).map((value, index) => (
+                <option key={`${filterType}-${index}`} value={value}>
+                  {value}
+                </option>
+              ))}
+            </select>
+          ))}
         </div>
       </div>
-      
-      <div className="flex flex-wrap gap-4 mb-6">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search products..."
-            className="w-full pl-10 pr-4 py-2 border rounded-lg"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
 
-        {['collection', 'category', 'by_use'].map((filterType) => (
-          <select
-            key={filterType}
-            className="px-4 py-2 border rounded-lg min-w-[150px]"
-            value={filters[filterType as keyof typeof filters]}
-            onChange={(e) => setFilters(prev => ({ ...prev, [filterType]: e.target.value }))}
-          >
-            <option value="">All {filterType}s</option>
-            {getUniqueValues(filterType === 'by_use' ? 'by_use' : `prod${filterType.charAt(0).toUpperCase() + filterType.slice(1)}` as keyof Product).map((value, index) => (
-              <option key={`${filterType}-${index}`} value={value}>
-                {value}
-              </option>
-            ))}
-          </select>
-        ))}
-      </div>
-
-      <div className="bg-white rounded-lg shadow overflow-x-auto">
+      <div className="flex-grow overflow-auto bg-white rounded-lg shadow">
         <Table>
-          <TableHeader>
+          <TableHeader className="sticky top-0 bg-white z-10">
             <TableRow>
-              <TableHead>Product</TableHead>
+              <TableHead className="min-w-[200px]">Product</TableHead>
               <TableHead>Collection</TableHead>
               <TableHead>Category</TableHead>
               <TableHead>Subcategory</TableHead>
@@ -507,12 +509,12 @@ const QuantityDiscount = () => {
               const discount = discounts.find(d => d.prodId === product.prodId);
               return (
                 <TableRow key={product.prodId}>
-                  <TableCell>{product.prodName}</TableCell>
+                  <TableCell className="min-w-[200px]">{product.prodName}</TableCell>
                   <TableCell>{product.prodCollection}</TableCell>
                   <TableCell>{product.prodCategory}</TableCell>
                   <TableCell>{product.prodSubcategory}</TableCell>
-                  <TableCell>${(product.prodMrp || 0).toFixed(2)}</TableCell>
-                  <TableCell>${(product.prodBasePrice || 0).toFixed(2)}</TableCell>
+                  <TableCell>₹{(product.prodMrp || 0).toFixed(2)}</TableCell>
+                  <TableCell>₹{(product.prodBasePrice || 0).toFixed(2)}</TableCell>
                   <TableCell>
                     <Select
                       value={discount?.default_price_type || 'mrp'}
@@ -551,7 +553,7 @@ const QuantityDiscount = () => {
                           placeholder="%"
                         />
                         <div className="w-20 px-2 py-1 bg-gray-100 rounded text-sm">
-                          ${calculateDiscountedPrice(
+                          ₹{calculateDiscountedPrice(
                             Number(product.prodMrp) || 0,
                             Number(product.prodBasePrice) || 0,
                             Number(discount?.[discField as keyof QuantityDiscount]) || null,

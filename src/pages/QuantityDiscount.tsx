@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { Search, Save, FileDown, FileUp } from 'lucide-react';
@@ -180,7 +181,7 @@ const QuantityDiscount = () => {
           prodId,
           [dbField]: numericValue,
         }, {
-          onConflict: 'prodid_unique'
+          onConflict: 'prodId'  // Changed from 'prodid_unique' to 'prodId'
         });
 
       if (error) {

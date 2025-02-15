@@ -1,3 +1,4 @@
+
 import { ReactNode, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -18,6 +19,7 @@ const routePermissions: Record<string, { resource: string; action: 'view' | 'cre
   '/dashboard/sales-opportunities': { resource: 'sales', action: 'view' },
   '/dashboard/sales-management': { resource: 'sales', action: 'view' },
   '/dashboard/product-bulk': { resource: 'products', action: 'create' },
+  '/dashboard/product-config': { resource: 'products', action: 'create' }, // Added product config route
 };
 
 const AuthGuard = ({ children }: AuthGuardProps) => {

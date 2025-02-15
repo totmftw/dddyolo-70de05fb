@@ -536,24 +536,35 @@ export type Database = {
       }
       materials: {
         Row: {
+          collection_id: string | null
           created_at: string | null
           id: string
           name: string
           updated_at: string | null
         }
         Insert: {
+          collection_id?: string | null
           created_at?: string | null
           id?: string
           name: string
           updated_at?: string | null
         }
         Update: {
+          collection_id?: string | null
           created_at?: string | null
           id?: string
           name?: string
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "materials_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       mrktCampaigns: {
         Row: {

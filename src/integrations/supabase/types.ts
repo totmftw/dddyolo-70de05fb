@@ -30,6 +30,45 @@ export type Database = {
         }
         Relationships: []
       }
+      category_collections: {
+        Row: {
+          category_id: string | null
+          collection_id: string | null
+          created_at: string | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          category_id?: string | null
+          collection_id?: string | null
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          category_id?: string | null
+          collection_id?: string | null
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "category_collections_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "category_collections_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       collections: {
         Row: {
           created_at: string
@@ -1360,6 +1399,45 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subcategory_collections: {
+        Row: {
+          collection_id: string | null
+          created_at: string | null
+          id: string
+          sub_category_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          collection_id?: string | null
+          created_at?: string | null
+          id?: string
+          sub_category_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          collection_id?: string | null
+          created_at?: string | null
+          id?: string
+          sub_category_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subcategory_collections_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subcategory_collections_sub_category_id_fkey"
+            columns: ["sub_category_id"]
+            isOneToOne: false
+            referencedRelation: "sub_categories"
             referencedColumns: ["id"]
           },
         ]

@@ -344,7 +344,7 @@ const ProductConfig = () => {
     <TabsContent value="productConfig">
       <Card>
         <CardHeader>
-          <CardTitle>Product Configuration</CardTitle>
+          <CardTitle>Category Configuration</CardTitle>
         </CardHeader>
         <CardContent>
           {selectedCategory ? (
@@ -485,7 +485,7 @@ const ProductConfig = () => {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Product Configuration</h1>
+      <h1 className="text-2xl font-bold mb-6">Category Configuration</h1>
       
       <div className="mb-6">
         <h2 className="text-lg font-semibold mb-4">Category Selection</h2>
@@ -506,10 +506,10 @@ const ProductConfig = () => {
       <Tabs defaultValue="categories" className="w-full">
         <TabsList>
           <TabsTrigger value="categories">Categories</TabsTrigger>
-          <TabsTrigger value="materials">Materials</TabsTrigger>
           <TabsTrigger value="subcategories">Sub-Categories</TabsTrigger>
           <TabsTrigger value="sizes">Sizes</TabsTrigger>
-          <TabsTrigger value="productConfig">Product Config</TabsTrigger>
+          <TabsTrigger value="materials">Materials</TabsTrigger>
+          <TabsTrigger value="productConfig">Category Configuration</TabsTrigger>
         </TabsList>
 
         <TabsContent value="categories">
@@ -534,44 +534,6 @@ const ProductConfig = () => {
                   <div key={category.id} className="flex justify-between items-center p-3 bg-gray-50 rounded">
                     <div>
                       <h3 className="font-medium">{category.name}</h3>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button variant="ghost" size="sm">
-                        <Edit2 className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="materials">
-          <Card>
-            <CardHeader>
-              <CardTitle>Materials</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex gap-4 mb-4">
-                <Input
-                  placeholder="Material Name"
-                  value={newItemName}
-                  onChange={(e) => setNewItemName(e.target.value)}
-                />
-                <Button onClick={addMaterial}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Material
-                </Button>
-              </div>
-              <div className="space-y-2">
-                {materials.map((material) => (
-                  <div key={material.id} className="flex justify-between items-center p-3 bg-gray-50 rounded">
-                    <div>
-                      <h3 className="font-medium">{material.name}</h3>
                     </div>
                     <div className="flex gap-2">
                       <Button variant="ghost" size="sm">
@@ -672,6 +634,44 @@ const ProductConfig = () => {
               ) : (
                 <p className="text-yellow-600">Please select a category first</p>
               )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="materials">
+          <Card>
+            <CardHeader>
+              <CardTitle>Materials</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-4 mb-4">
+                <Input
+                  placeholder="Material Name"
+                  value={newItemName}
+                  onChange={(e) => setNewItemName(e.target.value)}
+                />
+                <Button onClick={addMaterial}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Material
+                </Button>
+              </div>
+              <div className="space-y-2">
+                {materials.map((material) => (
+                  <div key={material.id} className="flex justify-between items-center p-3 bg-gray-50 rounded">
+                    <div>
+                      <h3 className="font-medium">{material.name}</h3>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="ghost" size="sm">
+                        <Edit2 className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

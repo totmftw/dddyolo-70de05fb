@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
@@ -16,7 +17,7 @@ import {
 } from "@/components/reused/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash2, Edit2 } from 'lucide-react';
+import { Plus, Trash2, Edit2, Settings } from 'lucide-react';
 
 interface Collection {
   id: string;
@@ -31,18 +32,27 @@ interface Category {
   description: string;
 }
 
-interface Subcategory {
+interface ProductType {
   id: string;
   category_id: string;
   name: string;
   description: string;
-}
-
-interface RoomType {
-  id: string;
-  collection_id: string;
-  name: string;
-  description: string;
+  attributes_schema: {
+    dimensions?: {
+      required: boolean;
+      fields: string[];
+    };
+    thread_count?: {
+      required: boolean;
+      type: string;
+      min: number;
+      max: number;
+    };
+    materials?: {
+      required: boolean;
+      multiple: boolean;
+    };
+  };
 }
 
 interface Material {
@@ -52,26 +62,17 @@ interface Material {
   description: string;
 }
 
-interface ColorOption {
-  id: string;
-  collection_id: string;
-  name: string;
-  hex_code: string;
-}
-
 const AdminProductConfig = () => {
   const { userProfile } = useAuth();
 
   const [collections, setCollections] = useState<Collection[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
-  const [roomTypes, setRoomTypes] = useState<RoomType[]>([]);
+  const [productTypes, setProductTypes] = useState<ProductType[]>([]);
   const [materials, setMaterials] = useState<Material[]>([]);
-  const [colors, setColors] = useState<ColorOption[]>([]);
   const [selectedCollection, setSelectedCollection] = useState<string>('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [newItemName, setNewItemName] = useState('');
   const [newItemDescription, setNewItemDescription] = useState('');
-  const [newColorHex, setNewColorHex] = useState('#000000');
 
   useEffect(() => {
     fetchCollections();
@@ -80,11 +81,15 @@ const AdminProductConfig = () => {
   useEffect(() => {
     if (selectedCollection) {
       fetchCategories(selectedCollection);
-      fetchRoomTypes(selectedCollection);
       fetchMaterials(selectedCollection);
-      fetchColors(selectedCollection);
     }
   }, [selectedCollection]);
+
+  useEffect(() => {
+    if (selectedCategory) {
+      fetchProductTypes(selectedCategory);
+    }
+  }, [selectedCategory]);
 
   const fetchCollections = async () => {
     const { data, error } = await supabase
@@ -113,17 +118,17 @@ const AdminProductConfig = () => {
     }
   };
 
-  const fetchRoomTypes = async (collectionId: string) => {
+  const fetchProductTypes = async (categoryId: string) => {
     const { data, error } = await supabase
-      .from('room_types')
+      .from('product_types')
       .select('*')
-      .eq('collection_id', collectionId)
+      .eq('category_id', categoryId)
       .order('name');
     
     if (error) {
-      toast.error('Error fetching room types');
+      toast.error('Error fetching product types');
     } else {
-      setRoomTypes(data || []);
+      setProductTypes(data || []);
     }
   };
 
@@ -138,20 +143,6 @@ const AdminProductConfig = () => {
       toast.error('Error fetching materials');
     } else {
       setMaterials(data || []);
-    }
-  };
-
-  const fetchColors = async (collectionId: string) => {
-    const { data, error } = await supabase
-      .from('color_options')
-      .select('*')
-      .eq('collection_id', collectionId)
-      .order('name');
-    
-    if (error) {
-      toast.error('Error fetching colors');
-    } else {
-      setColors(data || []);
     }
   };
 
@@ -202,27 +193,69 @@ const AdminProductConfig = () => {
     }
   };
 
-  const addColor = async () => {
+  const addProductType = async () => {
+    if (!selectedCategory || !newItemName) {
+      toast.error('Please select a category and enter a product type name');
+      return;
+    }
+
+    const defaultSchema = {
+      dimensions: {
+        required: true,
+        fields: ["length", "width", "height", "unit"]
+      },
+      thread_count: {
+        required: false,
+        type: "number",
+        min: 100,
+        max: 1500
+      },
+      materials: {
+        required: true,
+        multiple: true
+      }
+    };
+
+    const { error } = await supabase
+      .from('product_types')
+      .insert([{
+        category_id: selectedCategory,
+        name: newItemName,
+        description: newItemDescription,
+        attributes_schema: defaultSchema
+      }]);
+
+    if (error) {
+      toast.error('Error adding product type');
+    } else {
+      toast.success('Product type added successfully');
+      setNewItemName('');
+      setNewItemDescription('');
+      fetchProductTypes(selectedCategory);
+    }
+  };
+
+  const addMaterial = async () => {
     if (!selectedCollection || !newItemName) {
-      toast.error('Please select a collection and enter a color name');
+      toast.error('Please select a collection and enter a material name');
       return;
     }
 
     const { error } = await supabase
-      .from('color_options')
+      .from('materials')
       .insert([{
         collection_id: selectedCollection,
         name: newItemName,
-        hex_code: newColorHex
+        description: newItemDescription
       }]);
 
     if (error) {
-      toast.error('Error adding color');
+      toast.error('Error adding material');
     } else {
-      toast.success('Color added successfully');
+      toast.success('Material added successfully');
       setNewItemName('');
-      setNewColorHex('#000000');
-      fetchColors(selectedCollection);
+      setNewItemDescription('');
+      fetchMaterials(selectedCollection);
     }
   };
 
@@ -246,13 +279,30 @@ const AdminProductConfig = () => {
         </select>
       </div>
 
+      {selectedCollection && (
+        <div className="mb-6">
+          <h2 className="text-lg font-semibold mb-4">Category Selection</h2>
+          <select
+            className="w-full max-w-xs p-2 border rounded"
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+          >
+            <option value="">Select a Category</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
       <Tabs defaultValue="collections" className="w-full">
         <TabsList>
           <TabsTrigger value="collections">Collections</TabsTrigger>
           <TabsTrigger value="categories">Categories</TabsTrigger>
-          <TabsTrigger value="roomTypes">Room Types</TabsTrigger>
+          <TabsTrigger value="productTypes">Product Types</TabsTrigger>
           <TabsTrigger value="materials">Materials</TabsTrigger>
-          <TabsTrigger value="colors">Colors</TabsTrigger>
         </TabsList>
 
         <TabsContent value="collections">
@@ -351,18 +401,18 @@ const AdminProductConfig = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="roomTypes">
+        <TabsContent value="productTypes">
           <Card>
             <CardHeader>
-              <CardTitle>Room Types</CardTitle>
-              <p>Manage room types for the selected collection</p>
+              <CardTitle>Product Types</CardTitle>
+              <p>Manage product types for the selected category</p>
             </CardHeader>
             <CardContent>
-              {selectedCollection ? (
+              {selectedCategory ? (
                 <>
                   <div className="flex gap-4 mb-4">
                     <Input
-                      placeholder="Room Type Name"
+                      placeholder="Product Type Name"
                       value={newItemName}
                       onChange={(e) => setNewItemName(e.target.value)}
                     />
@@ -371,19 +421,22 @@ const AdminProductConfig = () => {
                       value={newItemDescription}
                       onChange={(e) => setNewItemDescription(e.target.value)}
                     />
-                    <Button onClick={addCategory}>
+                    <Button onClick={addProductType}>
                       <Plus className="w-4 h-4 mr-2" />
-                      Add Room Type
+                      Add Product Type
                     </Button>
                   </div>
                   <div className="space-y-2">
-                    {roomTypes.map((roomType) => (
-                      <div key={roomType.id} className="flex justify-between items-center p-3 bg-gray-50 rounded">
+                    {productTypes.map((productType) => (
+                      <div key={productType.id} className="flex justify-between items-center p-3 bg-gray-50 rounded">
                         <div>
-                          <h3 className="font-medium">{roomType.name}</h3>
-                          <p className="text-sm text-gray-600">{roomType.description}</p>
+                          <h3 className="font-medium">{productType.name}</h3>
+                          <p className="text-sm text-gray-600">{productType.description}</p>
                         </div>
                         <div className="flex gap-2">
+                          <Button variant="ghost" size="sm">
+                            <Settings className="w-4 h-4" />
+                          </Button>
                           <Button variant="ghost" size="sm">
                             <Edit2 className="w-4 h-4" />
                           </Button>
@@ -396,7 +449,7 @@ const AdminProductConfig = () => {
                   </div>
                 </>
               ) : (
-                <p className="text-yellow-600">Please select a collection first</p>
+                <p className="text-yellow-600">Please select a category first</p>
               )}
             </CardContent>
           </Card>
@@ -422,7 +475,7 @@ const AdminProductConfig = () => {
                       value={newItemDescription}
                       onChange={(e) => setNewItemDescription(e.target.value)}
                     />
-                    <Button onClick={addCategory}>
+                    <Button onClick={addMaterial}>
                       <Plus className="w-4 h-4 mr-2" />
                       Add Material
                     </Button>
@@ -433,61 +486,6 @@ const AdminProductConfig = () => {
                         <div>
                           <h3 className="font-medium">{material.name}</h3>
                           <p className="text-sm text-gray-600">{material.description}</p>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button variant="ghost" size="sm">
-                            <Edit2 className="w-4 h-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm">
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              ) : (
-                <p className="text-yellow-600">Please select a collection first</p>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="colors">
-          <Card>
-            <CardHeader>
-              <CardTitle>Colors</CardTitle>
-              <p>Manage color options for the selected collection</p>
-            </CardHeader>
-            <CardContent>
-              {selectedCollection ? (
-                <>
-                  <div className="flex gap-4 mb-4">
-                    <Input
-                      placeholder="Color Name"
-                      value={newItemName}
-                      onChange={(e) => setNewItemName(e.target.value)}
-                    />
-                    <Input
-                      type="color"
-                      value={newColorHex}
-                      onChange={(e) => setNewColorHex(e.target.value)}
-                      className="w-20"
-                    />
-                    <Button onClick={addColor}>
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Color
-                    </Button>
-                  </div>
-                  <div className="space-y-2">
-                    {colors.map((color) => (
-                      <div key={color.id} className="flex justify-between items-center p-3 bg-gray-50 rounded">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className="w-6 h-6 rounded border"
-                            style={{ backgroundColor: color.hex_code }}
-                          />
-                          <h3 className="font-medium">{color.name}</h3>
                         </div>
                         <div className="flex gap-2">
                           <Button variant="ghost" size="sm">

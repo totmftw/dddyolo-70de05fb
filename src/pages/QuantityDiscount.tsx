@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { Search, Save, FileDown, FileUp } from 'lucide-react';
 import { toast } from "../components/ui/use-toast";
@@ -155,7 +154,7 @@ const QuantityDiscount = () => {
     setDiscounts(mappedDiscounts);
   };
 
-  const handleDiscountChange = async (prodId: string, field: keyof QuantityDiscount, value: string) => {
+  const handleDiscountChange = useCallback(async (prodId: string, field: keyof QuantityDiscount, value: string) => {
     const numericValue = value === '' ? null : parseFloat(value);
     
     const dbFieldMap: Record<string, string> = {
@@ -185,14 +184,12 @@ const QuantityDiscount = () => {
       let error;
       
       if (existingRecord) {
-        // Update existing record
         const { error: updateError } = await supabase
           .from('productquantitydiscounts')
           .update({ [dbField]: numericValue })
           .eq('prodId', prodId);
         error = updateError;
       } else {
-        // Insert new record
         const { error: insertError } = await supabase
           .from('productquantitydiscounts')
           .insert({ prodId, [dbField]: numericValue });
@@ -206,10 +203,6 @@ const QuantityDiscount = () => {
           description: error.message
         });
       } else {
-        toast({
-          title: "Success",
-          description: "Discount updated successfully"
-        });
         fetchDiscounts();
       }
     } catch (err) {
@@ -220,7 +213,7 @@ const QuantityDiscount = () => {
         description: "Failed to update discount. Please try again."
       });
     }
-  };
+  }, [fetchDiscounts]);
 
   const saveTemplate = async () => {
     if (!newTemplateName) {
@@ -494,14 +487,14 @@ const QuantityDiscount = () => {
                       <div className="flex gap-2">
                         <input
                           type="number"
-                          className="w-16 px-2 py-1 border rounded"
+                          className="w-16 px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                           value={discount?.[qtyField as keyof QuantityDiscount] || ''}
                           onChange={(e) => handleDiscountChange(product.prodId, qtyField as keyof QuantityDiscount, e.target.value)}
                           placeholder="Qty"
                         />
                         <input
                           type="number"
-                          className="w-16 px-2 py-1 border rounded"
+                          className="w-16 px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                           value={discount?.[discField as keyof QuantityDiscount] || ''}
                           onChange={(e) => handleDiscountChange(product.prodId, discField as keyof QuantityDiscount, e.target.value)}
                           placeholder="%"

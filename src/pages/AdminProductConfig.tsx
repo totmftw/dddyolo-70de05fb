@@ -60,6 +60,17 @@ interface ColorOption {
 }
 
 const AdminProductConfig = () => {
+  const { hasPermission } = useAuth();
+  
+  if (!hasPermission('products', 'create')) {
+    return (
+      <div className="p-4">
+        <h1 className="text-xl font-bold text-red-600">Access Denied</h1>
+        <p className="text-gray-600">You don't have permission to access this page.</p>
+      </div>
+    );
+  }
+
   const { userProfile } = useAuth();
   const [collections, setCollections] = useState<Collection[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);

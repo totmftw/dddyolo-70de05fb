@@ -154,10 +154,9 @@ const QuantityDiscount = () => {
     setDiscounts(mappedDiscounts);
   };
 
-  const handleDiscountChange = async (prodId: string, field: keyof QuantityDiscount, value: string | number) => {
-    const numericValue = typeof value === 'string' ? parseFloat(value) : value;
-    if (isNaN(numericValue)) return;
-
+  const handleDiscountChange = async (prodId: string, field: keyof QuantityDiscount, value: string) => {
+    const numericValue = value === '' ? null : parseFloat(value);
+    
     const dbFieldMap: Record<string, string> = {
       tierOneQuantity: 'tieronequantity',
       tierOneDiscount: 'tieronediscount',
@@ -184,16 +183,9 @@ const QuantityDiscount = () => {
       });
 
     if (error) {
-      toast({
-        variant: "destructive",
-        title: "Error updating discount",
-        description: error.message
-      });
+      toast.error('Error updating discount');
     } else {
-      toast({
-        title: "Success",
-        description: "Discount updated successfully"
-      });
+      toast.success('Discount updated successfully');
       fetchDiscounts();
     }
   };

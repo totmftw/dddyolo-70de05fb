@@ -22,13 +22,18 @@ const routePermissions: Record<string, { resource: string; action: 'view' | 'cre
 };
 
 const AuthGuard = ({ children }: AuthGuardProps) => {
-  const { session, hasPermission } = useAuth();
+  const { session, hasPermission, userProfile } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
     if (!session) {
       navigate('/');
+      return;
+    }
+
+    // Super Admin bypass - always has access
+    if (userProfile?.role === 'it_admin') {
       return;
     }
 
@@ -43,7 +48,7 @@ const AuthGuard = ({ children }: AuthGuardProps) => {
         navigate('/dashboard');
       }
     }
-  }, [session, location.pathname, hasPermission, navigate]);
+  }, [session, location.pathname, hasPermission, navigate, userProfile]);
 
   if (!session) {
     return null;

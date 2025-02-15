@@ -1158,6 +1158,41 @@ export type Database = {
           },
         ]
       }
+      thread_counts: {
+        Row: {
+          collection_id: string | null
+          count: number
+          created_at: string
+          description: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          collection_id?: string | null
+          count: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          collection_id?: string | null
+          count?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "thread_counts_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       usage_categories: {
         Row: {
           created_at: string | null

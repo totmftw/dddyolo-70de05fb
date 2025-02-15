@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { toast } from "sonner";
@@ -16,7 +15,14 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash2, Edit2 } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Plus, Trash2, Edit2, Save } from 'lucide-react';
 
 interface Category {
   id: string;
@@ -40,15 +46,21 @@ interface Material {
   name: string;
 }
 
+interface MaterialSubcategoryMapping {
+  id: string;
+  sub_category_id: string;
+  material_id: string;
+}
+
 interface ProductConfig {
   id: string;
   category_id: string;
   sub_category_id: string;
   material_id: string;
   size_id: string;
+  gsm?: number;
   thread_count?: number;
-  collection_name?: string;
-  sku: string;
+  created_at: string;
 }
 
 const ProductConfig = () => {
@@ -59,6 +71,14 @@ const ProductConfig = () => {
   const [productConfigs, setProductConfigs] = useState<ProductConfig[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [newItemName, setNewItemName] = useState('');
+  const [availableMaterials, setAvailableMaterials] = useState<Material[]>([]);
+  const [availableSizes, setAvailableSizes] = useState<Size[]>([]);
+  const [selectedSubCategory, setSelectedSubCategory] = useState<string>('');
+  const [selectedMaterial, setSelectedMaterial] = useState<string>('');
+  const [selectedSize, setSelectedSize] = useState<string>('');
+  const [gsm, setGsm] = useState<string>('');
+  const [threadCount, setThreadCount] = useState<string>('');
+  const [materialMappings, setMaterialMappings] = useState<MaterialSubcategoryMapping[]>([]);
 
   useEffect(() => {
     fetchCategories();
@@ -71,6 +91,13 @@ const ProductConfig = () => {
       fetchSizes(selectedCategory);
     }
   }, [selectedCategory]);
+
+  useEffect(() => {
+    if (selectedSubCategory) {
+      fetchAvailableMaterials(selectedSubCategory);
+      fetchAvailableSizes(selectedCategory);
+    }
+  }, [selectedSubCategory]);
 
   const fetchCategories = async () => {
     const { data, error } = await supabase
@@ -123,6 +150,39 @@ const ProductConfig = () => {
       toast.error('Error fetching sizes');
     } else {
       setSizes(data || []);
+    }
+  };
+
+  const fetchMaterialMappings = async (subCategoryId: string) => {
+    const { data, error } = await supabase
+      .from('material_subcategory_mapping')
+      .select('*')
+      .eq('sub_category_id', subCategoryId);
+    
+    if (error) {
+      toast.error('Error fetching material mappings');
+    } else {
+      setMaterialMappings(data || []);
+    }
+  };
+
+  const fetchAvailableMaterials = async (subCategoryId: string) => {
+    const { data, error } = await supabase
+      .from('material_subcategory_mapping')
+      .select(`
+        material_id,
+        materials:material_id (
+          id,
+          name
+        )
+      `)
+      .eq('sub_category_id', subCategoryId);
+    
+    if (error) {
+      toast.error('Error fetching available materials');
+    } else {
+      const materials = data.map(item => item.materials);
+      setAvailableMaterials(materials);
     }
   };
 
@@ -207,6 +267,206 @@ const ProductConfig = () => {
       fetchSizes(selectedCategory);
     }
   };
+
+  const addMaterialMapping = async () => {
+    if (!selectedSubCategory || !selectedMaterial) {
+      toast.error('Please select both sub-category and material');
+      return;
+    }
+
+    const { error } = await supabase
+      .from('material_subcategory_mapping')
+      .insert([{
+        sub_category_id: selectedSubCategory,
+        material_id: selectedMaterial
+      }]);
+
+    if (error) {
+      if (error.code === '23505') {
+        toast.error('This material is already mapped to this sub-category');
+      } else {
+        toast.error('Error adding material mapping');
+      }
+    } else {
+      toast.success('Material mapping added successfully');
+      fetchMaterialMappings(selectedSubCategory);
+    }
+  };
+
+  const saveProductConfig = async () => {
+    if (!selectedCategory || !selectedSubCategory || !selectedMaterial || !selectedSize) {
+      toast.error('Please select all required fields');
+      return;
+    }
+
+    const newConfig = {
+      category_id: selectedCategory,
+      sub_category_id: selectedSubCategory,
+      material_id: selectedMaterial,
+      size_id: selectedSize,
+      gsm: gsm ? parseInt(gsm) : null,
+      thread_count: threadCount ? parseInt(threadCount) : null
+    };
+
+    const { error } = await supabase
+      .from('product_config')
+      .insert([newConfig]);
+
+    if (error) {
+      toast.error('Error saving product configuration');
+    } else {
+      toast.success('Product configuration saved successfully');
+      // Reset form
+      setSelectedSubCategory('');
+      setSelectedMaterial('');
+      setSelectedSize('');
+      setGsm('');
+      setThreadCount('');
+    }
+  };
+
+  const renderProductConfigTab = () => (
+    <TabsContent value="productConfig">
+      <Card>
+        <CardHeader>
+          <CardTitle>Product Configuration</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {selectedCategory ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Sub-Category</label>
+                  <Select
+                    value={selectedSubCategory}
+                    onValueChange={setSelectedSubCategory}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Sub-Category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {subCategories.map((subCat) => (
+                        <SelectItem key={subCat.id} value={subCat.id}>
+                          {subCat.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Material</label>
+                  <Select
+                    value={selectedMaterial}
+                    onValueChange={setSelectedMaterial}
+                    disabled={!selectedSubCategory}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Material" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableMaterials.map((material) => (
+                        <SelectItem key={material.id} value={material.id}>
+                          {material.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Size</label>
+                  <Select
+                    value={selectedSize}
+                    onValueChange={setSelectedSize}
+                    disabled={!selectedSubCategory}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Size" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {sizes.map((size) => (
+                        <SelectItem key={size.id} value={size.id}>
+                          {size.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">GSM</label>
+                  <Input
+                    type="number"
+                    placeholder="Enter GSM"
+                    value={gsm}
+                    onChange={(e) => setGsm(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Thread Count</label>
+                  <Input
+                    type="number"
+                    placeholder="Enter Thread Count"
+                    value={threadCount}
+                    onChange={(e) => setThreadCount(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end mt-4">
+                <Button onClick={saveProductConfig} className="flex items-center gap-2">
+                  <Save className="w-4 h-4" />
+                  Save Configuration
+                </Button>
+              </div>
+
+              {selectedSubCategory && (
+                <div className="mt-8">
+                  <h3 className="text-lg font-semibold mb-4">Material Mappings</h3>
+                  <div className="flex gap-4 mb-4">
+                    <Select value={selectedMaterial} onValueChange={setSelectedMaterial}>
+                      <SelectTrigger className="w-[200px]">
+                        <SelectValue placeholder="Select Material" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {materials.map((material) => (
+                          <SelectItem key={material.id} value={material.id}>
+                            {material.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button onClick={addMaterialMapping}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Map Material
+                    </Button>
+                  </div>
+                  <div className="space-y-2">
+                    {materialMappings.map((mapping) => (
+                      <div key={mapping.id} className="flex justify-between items-center p-3 bg-gray-50 rounded">
+                        <div>
+                          <h3 className="font-medium">
+                            {materials.find(m => m.id === mapping.material_id)?.name}
+                          </h3>
+                        </div>
+                        <Button variant="ghost" size="sm">
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="text-yellow-600">Please select a category first</p>
+          )}
+        </CardContent>
+      </Card>
+    </TabsContent>
+  );
 
   return (
     <div className="p-6">
@@ -401,22 +661,7 @@ const ProductConfig = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="productConfig">
-          <Card>
-            <CardHeader>
-              <CardTitle>Product Configuration</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {selectedCategory ? (
-                <div>
-                  <p>Product configuration interface coming soon...</p>
-                </div>
-              ) : (
-                <p className="text-yellow-600">Please select a category first</p>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+        {renderProductConfigTab()}
       </Tabs>
     </div>
   );

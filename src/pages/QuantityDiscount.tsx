@@ -175,14 +175,29 @@ const QuantityDiscount = () => {
     if (!dbField) return;
 
     try {
-      const { error } = await supabase
+      // First check if a record exists
+      const { data: existingRecord } = await supabase
         .from('productquantitydiscounts')
-        .upsert({
-          prodId,
-          [dbField]: numericValue,
-        }, {
-          onConflict: 'prodId'  // Changed from 'prodid_unique' to 'prodId'
-        });
+        .select()
+        .eq('prodId', prodId)
+        .single();
+
+      let error;
+      
+      if (existingRecord) {
+        // Update existing record
+        const { error: updateError } = await supabase
+          .from('productquantitydiscounts')
+          .update({ [dbField]: numericValue })
+          .eq('prodId', prodId);
+        error = updateError;
+      } else {
+        // Insert new record
+        const { error: insertError } = await supabase
+          .from('productquantitydiscounts')
+          .insert({ prodId, [dbField]: numericValue });
+        error = insertError;
+      }
 
       if (error) {
         toast({

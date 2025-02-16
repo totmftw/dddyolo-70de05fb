@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from '../theme/ThemeContext';
@@ -35,16 +34,7 @@ const UnifiedSidebar = () => {
     { path: '/dashboard/account', name: 'Account Management', icon: Settings, permission: { resource: 'settings', action: 'view' as const } },
     { path: '/dashboard/payments', name: 'Payment Tracking', icon: CreditCard, permission: { resource: 'payments', action: 'view' as const } },
     { path: '/dashboard/roles', name: 'User Role Management', icon: UserCog, permission: { resource: 'roles', action: 'view' as const } },
-    {
-      path: '/dashboard/sales-management',
-      name: 'Sales Management',
-      icon: ClipboardList,
-      permission: { resource: 'sales', action: 'view' as const },
-      subItems: [
-        { path: '/dashboard/sales-management', name: 'Overview', icon: Eye, permission: { resource: 'sales', action: 'view' as const } },
-        { path: '/dashboard/sales-management/catalog', name: 'Catalog Builder', icon: Grid, permission: { resource: 'sales', action: 'create' as const } }
-      ]
-    },
+    { path: '/dashboard/catalog-builder', name: 'Catalog Builder', icon: Grid, permission: { resource: 'catalogs', action: 'view' as const } },
     { path: '/dashboard/quantity-discounts', name: 'Quantity Discounts', icon: Percent, permission: { resource: 'products', action: 'view' as const } },
     {
       path: '/dashboard/products',

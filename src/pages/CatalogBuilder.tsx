@@ -90,10 +90,10 @@ const CatalogBuilder = () => {
     <div className="p-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <Grid className="h-6 w-6" />
-            Catalog Builder
-          </CardTitle>
+            <CardTitle>Catalog Builder</CardTitle>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-6">

@@ -3,7 +3,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../supabaseClient';
 
-type UserRole = 'business_owner' | 'catalog_builder' | 'sales_manager' | 'business_manager' | 'it_admin';
+type UserRole = 'business_owner' | 'catalog_manager' | 'accounts_manager' | 'sales_manager' | 'inventory_manager' | 'section_inventory_incharge' | 'it_admin';
 
 interface UserPermissions {
   resource: string;

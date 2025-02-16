@@ -20,12 +20,12 @@ import SalesOpportunityManagement from './pages/SalesOpportunityManagement';
 import QuantityDiscount from './pages/QuantityDiscount';
 import ProductConfig from './pages/ProductConfig';
 import CollectionConfig from './pages/CollectionConfig';
+import CatalogBuilder from './pages/CatalogBuilder';
 import { ThemeProvider } from './theme/ThemeContext';
 import { Toaster } from "sonner";
 import { SidebarProvider } from './context/SidebarContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-// Create a client
 const queryClient = new QueryClient();
 
 function App() {
@@ -58,6 +58,7 @@ function App() {
                   <Route path="products/view" element={<ViewProducts />} />
                   <Route path="products/admin" element={<ProductConfig />} />
                   <Route path="products/collections" element={<CollectionConfig />} />
+                  <Route path="catalog-builder" element={<CatalogBuilder />} />
                   <Route path="sales-management" element={<SalesOpportunityManagement />} />
                   <Route path="quantity-discounts" element={<QuantityDiscount />} />
                 </Route>

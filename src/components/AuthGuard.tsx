@@ -15,9 +15,10 @@ const routePermissions: Record<string, { resource: string; action: 'view' | 'cre
   '/dashboard/products': { resource: 'products', action: 'view' },
   '/dashboard/products/view': { resource: 'products', action: 'view' },
   '/dashboard/products/admin': { resource: 'products', action: 'create' },
-  '/dashboard/roles': { resource: 'roles', action: 'view' },
+  '/dashboard/roles': { resource: 'users', action: 'view' },
   '/dashboard/sales-opportunities': { resource: 'sales', action: 'view' },
   '/dashboard/sales-management': { resource: 'sales', action: 'view' },
+  '/dashboard/catalog-builder': { resource: 'catalogs', action: 'view' },
   '/dashboard/product-bulk': { resource: 'products', action: 'create' },
 };
 
@@ -32,8 +33,8 @@ const AuthGuard = ({ children }: AuthGuardProps) => {
       return;
     }
 
-    // Super Admin (IT Admin) bypass - always has access
-    if (userProfile?.role === 'it_admin') {
+    // IT Admin and Business Owner bypass - always has access
+    if (userProfile?.role === 'it_admin' || userProfile?.role === 'business_owner') {
       return;
     }
 

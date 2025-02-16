@@ -10,7 +10,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "../components/reused/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {

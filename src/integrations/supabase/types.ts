@@ -486,6 +486,48 @@ export type Database = {
           },
         ]
       }
+      inventory_stock: {
+        Row: {
+          added_by: string | null
+          added_date: string | null
+          batch_number: string | null
+          created_at: string | null
+          id: string
+          notes: string | null
+          product_id: string
+          quantity: number
+          status: string | null
+          unit_cost: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          added_by?: string | null
+          added_date?: string | null
+          batch_number?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          product_id: string
+          quantity?: number
+          status?: string | null
+          unit_cost?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          added_by?: string | null
+          added_date?: string | null
+          batch_number?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          product_id?: string
+          quantity?: number
+          status?: string | null
+          unit_cost?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       invoice_table_config: {
         Row: {
           column_order: string[] | null

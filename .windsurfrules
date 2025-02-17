@@ -1,3 +1,4 @@
 this app is entirely built with vite, react on lovable.dev with supabase as the database
 create detailed documentation for all the files and code modifications immediately.
 analyze the existing codebase before attempting any modifications.
+analyze the database and memorize the schema. periodically check the entire codebase and the database and update memory

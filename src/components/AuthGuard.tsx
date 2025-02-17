@@ -1,4 +1,3 @@
-
 import { ReactNode, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -9,17 +8,15 @@ interface AuthGuardProps {
 }
 
 const routePermissions: Record<string, { resource: string; action: 'view' | 'create' | 'edit' | 'delete' }> = {
-  '/dashboard/customers': { resource: 'customers', action: 'view' },
-  '/dashboard/inventory': { resource: 'inventory', action: 'view' },
-  '/dashboard/payments': { resource: 'payments', action: 'view' },
-  '/dashboard/products': { resource: 'products', action: 'view' },
-  '/dashboard/products/view': { resource: 'products', action: 'view' },
-  '/dashboard/products/admin': { resource: 'products', action: 'create' },
-  '/dashboard/roles': { resource: 'roles', action: 'view' },
-  '/dashboard/sales-opportunities': { resource: 'sales', action: 'view' },
-  '/dashboard/sales-management': { resource: 'sales', action: 'view' },
-  '/dashboard/catalog-builder': { resource: 'catalogs', action: 'view' },
-  '/dashboard/product-bulk': { resource: 'products', action: 'create' },
+  '/app/customers': { resource: 'customers', action: 'view' },
+  '/app/inventory': { resource: 'inventory', action: 'view' },
+  '/app/payments': { resource: 'payments', action: 'view' },
+  '/app/products': { resource: 'products', action: 'view' },
+  '/app/roles': { resource: 'roles', action: 'view' },
+  '/app/sales-opportunities': { resource: 'sales', action: 'view' },
+  '/app/sales-management': { resource: 'sales', action: 'view' },
+  '/app/catalog-builder': { resource: 'catalogs', action: 'view' },
+  '/app/dashboard': { resource: 'dashboard', action: 'view' },
 };
 
 const AuthGuard = ({ children }: AuthGuardProps) => {

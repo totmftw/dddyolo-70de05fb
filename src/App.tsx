@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
@@ -13,7 +12,6 @@ import UserRoleManagement from './components/reused/UserRoleManagement';
 import ProductManagement from './pages/ProductManagement';
 import ManageProducts from './pages/ManageProducts';
 import ViewProducts from './pages/ViewProducts';
-import NotFound from './pages/NotFound';
 import AdminOneLayout from './layouts/AdminOneLayout';
 import AuthGuard from './components/AuthGuard';
 import SalesOpportunityManagement from './pages/SalesOpportunityManagement';
@@ -39,7 +37,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<Auth />} />
                 <Route
-                  path="/dashboard"
+                  path="/app"
                   element={
                     <AuthGuard>
                       <AdminOneLayout />
@@ -62,7 +60,7 @@ function App() {
                   <Route path="sales-management" element={<SalesOpportunityManagement />} />
                   <Route path="quantity-discounts" element={<QuantityDiscount />} />
                 </Route>
-                <Route path="*" element={<NotFound />} />
+                <Route path="*" element={<div>Page Not Found</div>} />
               </Routes>
             </SidebarProvider>
           </ThemeProvider>

@@ -33,21 +33,42 @@ interface Product {
   prodNettweight?: number;
 }
 
+interface ProductManagementType {
+  prodId: string;
+  prodName: string;
+  prodMrp: number;
+  prodSku: string;
+  prodStatus: string;
+  prodBrand?: string | null;
+  prodCategory?: string | null;
+  prodCollection?: string | null;
+  prodSubcategory?: string | null;
+  prodType?: string | null;
+  prodVariant?: string | null;
+  prodMaterial?: string | null;
+  prodBasePrice?: number | null;
+  prodImages?: string[] | null;
+  prodMoq?: number | null;
+  prodBoxstock?: number | null;
+  prodPiecestock?: number | null;
+  prodUnitweight?: number | null;
+  prodGrossweight?: number | null;
+  prodNettweight?: number | null;
+  prodPackaging?: string | null;
+  prodCbm?: number | null;
+  prodShortName?: string | null;
+  by_use?: string[] | null;
+}
+
 const ProductManagement = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [formData, setFormData] = useState<Product>({
-    prodId: '',
+  const [formData, setFormData] = useState<ProductManagementType>({
+    prodId: `PROD-${Date.now()}`,
     prodName: '',
     prodMrp: 0,
     prodSku: '',
     prodStatus: 'active',
     prodBrand: 'Black Gold',
-    prodMoq: 0,
-    prodBoxstock: 0,
-    prodPiecestock: 0,
-    prodUnitweight: 0,
-    prodGrossweight: 0,
-    prodNettweight: 0,
   });
   const [loading, setLoading] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
@@ -140,10 +161,9 @@ const ProductManagement = () => {
       return;
     }
 
-    const productData: Partial<Product> = {
+    const productData: ProductManagementType = {
       ...formData,
-      prodId: formData.prodId || `PROD-${Date.now()}`,
-      prodImages: selectedFiles ? Array.from(selectedFiles).map(file => URL.createObjectURL(file)) : []
+      prodImages: selectedFiles ? Array.from(selectedFiles).map(file => URL.createObjectURL(file)) : [],
     };
 
     const { error } = await supabase
@@ -191,7 +211,6 @@ const ProductManagement = () => {
         const worksheet = workbook.Sheets[sheetName];
         const data = XLSX.utils.sheet_to_json(worksheet);
 
-        // Check for duplicates in the uploaded data
         const duplicates = data.filter((item, index, self) =>
           index !== self.findIndex((t) => (
             t['SKU'] === item['SKU'] ||
@@ -217,9 +236,7 @@ const ProductManagement = () => {
           return;
         }
 
-        // Process and upload each product
         for (const row of data) {
-          // Check if product already exists in database
           const { data: existingProduct } = await supabase
             .from('productManagement')
             .select('prodId')
@@ -301,10 +318,12 @@ const ProductManagement = () => {
   };
 
   const handleUpdateProduct = async () => {
+    if (!selectedProduct) return;
+
     const { error } = await supabase
       .from('productManagement')
       .update(formData)
-      .eq('prodId', selectedProduct?.prodId);
+      .eq('prodId', selectedProduct.prodId);
 
     if (error) {
       toast.error('Error updating product');
@@ -326,18 +345,12 @@ const ProductManagement = () => {
 
   const clearFields = () => {
     setFormData({
-      prodId: '',
+      prodId: `PROD-${Date.now()}`,
       prodName: '',
       prodMrp: 0,
       prodSku: '',
       prodStatus: 'active',
       prodBrand: 'Black Gold',
-      prodMoq: 0,
-      prodBoxstock: 0,
-      prodPiecestock: 0,
-      prodUnitweight: 0,
-      prodGrossweight: 0,
-      prodNettweight: 0,
     });
     setSelectedFiles(null);
   };
@@ -449,7 +462,7 @@ const ProductManagement = () => {
               <select
                 key={num}
                 name={`prodColor${num}`}
-                value={String(formData[`prodColor${num}` as keyof Product])}
+                value={String(formData[`prodColor${num}` as keyof ProductManagementType])}
                 onChange={handleInputChange}
                 className="w-full p-2 border rounded"
               >
@@ -658,7 +671,7 @@ const ProductManagement = () => {
               <p className="text-sm text-gray-600">Stock: {String(product.prodPiecestock || 0)} pieces</p>
               <div className="mt-2 flex gap-2">
                 {[1, 2, 3, 4, 5].map(num => {
-                  const colorName = product[`prodColor${num}` as keyof Product];
+                  const colorName = product[`prodColor${num}` as keyof ProductManagementType];
                   if (colorName) {
                     const colorValue = colors.find(c => c.name === colorName)?.value;
                     return (

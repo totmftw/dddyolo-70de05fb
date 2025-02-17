@@ -31,12 +31,15 @@ interface InventoryItem {
   id: string;
   product_id: string;
   quantity: number;
-  batch_number: string;
-  unit_cost: number;
-  added_date: string;
-  notes: string;
-  status: string;
-  shipment_id: string;
+  batch_number: string | null;
+  unit_cost: number | null;
+  added_date: string | null;
+  notes: string | null;
+  status: string | null;
+  shipment_id: string | null;
+  added_by: string | null;
+  created_at: string | null;
+  updated_at: string | null;
   productManagement?: {
     prodName: string;
     prodId: string;
@@ -63,12 +66,12 @@ const InventoryManagement = () => {
         .from('inventory_stock')
         .select(`
           *,
-          productManagement(prodName, prodId)
+          productManagement:product_id (prodName, prodId)
         `)
         .order(sortField, { ascending: sortDirection === 'asc' });
 
       if (error) throw error;
-      return (data || []) as InventoryItem[];
+      return data as unknown as InventoryItem[];
     }
   });
 

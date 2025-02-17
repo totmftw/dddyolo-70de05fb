@@ -7,8 +7,9 @@ interface Quotation {
   id: string;
   customer_id: number;
   total_amount: number;
-  status: 'pending' | 'approved' | 'rejected';
+  status: string;
   created_at: string;
+  updated_at: string;
 }
 
 const QuotationOrderProcessing = () => {
@@ -19,17 +20,16 @@ const QuotationOrderProcessing = () => {
   }, []);
 
   const fetchQuotations = async () => {
-    const { data, error } = await supabase
-      .from('quotations')
-      .select('*');
+    try {
+      const { data, error } = await supabase
+        .from('quotations')
+        .select('*');
 
-    if (error) {
+      if (error) throw error;
+      setQuotations(data || []);
+    } catch (error) {
       toast.error('Error fetching quotations');
-      return;
-    }
-
-    if (data) {
-      setQuotations(data);
+      console.error('Error:', error);
     }
   };
 

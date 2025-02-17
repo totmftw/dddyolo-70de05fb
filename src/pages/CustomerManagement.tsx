@@ -198,21 +198,21 @@ const CustomerManagement = () => {
     const customerData = {
       custBusinessname: formData.businessName,
       custOwnername: formData.ownerName,
-      custPhone: Number(formData.phone),
-      custWhatsapp: Number(formData.whatsapp),
-      custOwnerphone: Number(formData.ownerPhone),
-      custOwnerwhatsapp: Number(formData.ownerWhatsapp),
+      custPhone: parseInt(formData.phone, 10),
+      custWhatsapp: parseInt(formData.whatsapp, 10),
+      custOwnerphone: parseInt(formData.ownerPhone, 10),
+      custOwnerwhatsapp: parseInt(formData.ownerWhatsapp, 10),
       custEmail: formData.email,
       custOwneremail: formData.ownerEmail,
       custType: formData.type,
       custAddress: formData.address,
       custProvince: formData.province,
       custCity: formData.city,
-      custPincode: Number(formData.pincode),
+      custPincode: parseInt(formData.pincode, 10),
       custGST: formData.gst,
       custRemarks: formData.remarks,
       custStatus: formData.status || 'active',
-      custCreditperiod: Number(formData.creditPeriod)
+      custCreditperiod: parseInt(formData.creditPeriod, 10)
     };
 
     const { error } = await supabase

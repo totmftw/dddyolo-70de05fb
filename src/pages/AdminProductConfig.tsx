@@ -2,39 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { useAuth } from '../context/AuthContext';
 import { toast } from "sonner";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-
-interface AttributeSchema {
-  dimensions?: {
-    required: boolean;
-    fields: string[];
-  };
-  thread_count?: {
-    required: boolean;
-    type: string;
-    min: number;
-    max: number;
-  };
-  materials?: {
-    required: boolean;
-    multiple: boolean;
-  };
-}
-
-interface ProductType {
-  id: string;
-  name: string;
-  description: string;
-  category_id: string;
-  attributes_schema: AttributeSchema;
-  created_at: string;
-  updated_at: string;
-}
+import { Card, CardContent } from "@/components/ui/card";
 
 interface Material {
   id: string;
@@ -45,81 +13,124 @@ interface Material {
 }
 
 const AdminProductConfig = () => {
-  const [productTypes, setProductTypes] = useState<ProductType[]>([]);
+  const { user } = useAuth();
   const [materials, setMaterials] = useState<Material[]>([]);
-  const { userProfile } = useAuth();
+  const [newMaterialName, setNewMaterialName] = useState('');
+  const [selectedCollection, setSelectedCollection] = useState('');
+	const [collections, setCollections] = useState([]);
 
   useEffect(() => {
-    fetchProductTypes();
     fetchMaterials();
+		fetchCollections();
   }, []);
 
-  const fetchProductTypes = async () => {
-    const { data, error } = await supabase
-      .from('product_types')
-      .select('*');
-    
-    if (error) {
-      toast.error('Error fetching product types');
-      return;
-    }
-    
-    // Transform the data to match the ProductType interface
-    const transformedData: ProductType[] = data.map(item => ({
-      ...item,
-      attributes_schema: typeof item.attributes_schema === 'string' 
-        ? JSON.parse(item.attributes_schema)
-        : item.attributes_schema
-    }));
-    
-    setProductTypes(transformedData);
-  };
+	const fetchCollections = async () => {
+		const { data, error } = await supabase
+			.from('collections')
+			.select('*');
+
+		if (error) {
+			toast.error('Error fetching collections');
+			return;
+		}
+
+		setCollections(data || []);
+	};
 
   const fetchMaterials = async () => {
     const { data, error } = await supabase
       .from('materials')
       .select('*');
-    
+  
     if (error) {
       toast.error('Error fetching materials');
       return;
     }
-    
-    // Transform the data to match the Material interface
-    const transformedData: Material[] = data.map(item => ({
-      ...item,
-      description: item.description || '' // Provide default empty string if description is null
-    }));
-    
-    setMaterials(transformedData);
+  
+    setMaterials(data || []);
+  };
+
+  const handleAddMaterial = async () => {
+    if (!newMaterialName || !selectedCollection) {
+      toast.error('Material name and collection must be selected.');
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from('materials')
+      .insert([{ name: newMaterialName, collection_id: selectedCollection }])
+      .select();
+
+    if (error) {
+      toast.error('Error adding material');
+      console.error(error);
+      return;
+    }
+
+    setMaterials([...materials, data[0]]);
+    setNewMaterialName('');
+		setSelectedCollection('');
+    fetchMaterials();
+  };
+
+  const handleDeleteMaterial = async (id: string) => {
+    const { error } = await supabase
+      .from('materials')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      toast.error('Error deleting material');
+      console.error(error);
+      return;
+    }
+
+    setMaterials(materials.filter(material => material.id !== id));
+    fetchMaterials();
   };
 
   return (
-    <div className="p-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Admin Product Configuration</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div>
-            Product Types:
-            {productTypes.map((productType) => (
-              <div key={productType.id}>
-                {productType.name} - {productType.description}
-              </div>
-            ))}
-          </div>
-          <div>
-            Materials:
-            {materials.map((material) => (
-              <div key={material.id}>
-                {material.name}
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+    <Card>
+      <CardContent>
+        <h2 className="text-2xl font-bold mb-4">Material Management</h2>
+
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="New Material Name"
+            value={newMaterialName}
+            onChange={(e) => setNewMaterialName(e.target.value)}
+            className="border rounded px-2 py-1 mr-2"
+          />
+					<select
+						value={selectedCollection}
+						onChange={(e) => setSelectedCollection(e.target.value)}
+						className="border rounded px-2 py-1 mr-2"
+					>
+						<option value="">Select Collection</option>
+						{collections.map((collection: any) => (
+							<option key={collection.id} value={collection.id}>
+								{collection.name}
+							</option>
+						))}
+					</select>
+          <button onClick={handleAddMaterial} className="bg-green-500 text-white px-4 py-2 rounded">
+            Add Material
+          </button>
+        </div>
+
+        <ul>
+          {materials.map(material => (
+            <li key={material.id} className="flex justify-between items-center py-2 border-b">
+              {material.name} ({material.collection_id})
+              <button onClick={() => handleDeleteMaterial(material.id)} className="bg-red-500 text-white px-3 py-1 rounded">
+                Delete
+              </button>
+            </li>
+          ))}
+        </ul>
+      </CardContent>
+    </Card>
   );
 };
 

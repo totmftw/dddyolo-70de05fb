@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../integrations/supabase/client';
@@ -41,7 +40,7 @@ interface InventoryItem {
   productManagement?: {
     prodName: string;
     prodId: string;
-  };
+  } | null;
 }
 
 const InventoryManagement = () => {
@@ -64,12 +63,12 @@ const InventoryManagement = () => {
         .from('inventory_stock')
         .select(`
           *,
-          productManagement:product_id (prodName, prodId)
+          productManagement(prodName, prodId)
         `)
         .order(sortField, { ascending: sortDirection === 'asc' });
 
       if (error) throw error;
-      return data as InventoryItem[];
+      return (data || []) as InventoryItem[];
     }
   });
 
@@ -114,6 +113,14 @@ const InventoryManagement = () => {
       status: 'active'
     });
     refetch();
+  };
+
+  const handleDownloadTemplate = () => {
+    console.log('Download template');
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('File upload', e.target.files);
   };
 
   const filteredInventory = inventory?.filter(item =>

@@ -1,17 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../integrations/supabase/client';
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
+import { Database } from '../../integrations/supabase/types';
 
-interface Opportunity {
-  id: string;
-  customer_id: number;
-  title: string;
-  status: string;
-  value: number;
-  created_at: string;
-  updated_at: string;
-}
+type Opportunity = Database['public']['Tables']['sales_opportunities']['Row'];
 
 const SalesOpportunityTracking = () => {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
@@ -22,12 +16,13 @@ const SalesOpportunityTracking = () => {
 
   const fetchOpportunities = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: opportunityData, error } = await supabase
         .from('sales_opportunities')
-        .select('*');
+        .select('*')
+        .returns<Opportunity[]>();
 
       if (error) throw error;
-      setOpportunities(data || []);
+      setOpportunities(opportunityData || []);
     } catch (error) {
       toast.error('Error fetching opportunities');
       console.error('Error:', error);
@@ -38,7 +33,8 @@ const SalesOpportunityTracking = () => {
     try {
       const { error } = await supabase
         .from('sales_opportunities')
-        .insert([opportunity]);
+        .insert([opportunity])
+        .returns<Opportunity>();
 
       if (error) throw error;
       toast.success('Opportunity created successfully');
@@ -50,9 +46,11 @@ const SalesOpportunityTracking = () => {
   };
 
   return (
-    <CardContent>
-      <h2 className="text-2xl font-bold mb-4">Sales Opportunities</h2>
-    </CardContent>
+    <Card>
+      <CardContent>
+        <h2 className="text-2xl font-bold mb-4">Sales Opportunities</h2>
+      </CardContent>
+    </Card>
   );
 };
 

@@ -1,16 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../integrations/supabase/client';
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
+import { Database } from '../../integrations/supabase/types';
 
-interface Quotation {
-  id: string;
-  customer_id: number;
-  total_amount: number;
-  status: string;
-  created_at: string;
-  updated_at: string;
-}
+type Quotation = Database['public']['Tables']['quotations']['Row'];
 
 const QuotationOrderProcessing = () => {
   const [quotations, setQuotations] = useState<Quotation[]>([]);
@@ -21,12 +16,13 @@ const QuotationOrderProcessing = () => {
 
   const fetchQuotations = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: quotationData, error } = await supabase
         .from('quotations')
-        .select('*');
+        .select('*')
+        .returns<Quotation[]>();
 
       if (error) throw error;
-      setQuotations(data || []);
+      setQuotations(quotationData || []);
     } catch (error) {
       toast.error('Error fetching quotations');
       console.error('Error:', error);

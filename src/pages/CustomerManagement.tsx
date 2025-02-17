@@ -84,7 +84,7 @@ const CustomerManagement = () => {
         ownerName: customer.custOwnername,
         email: customer.custEmail,
         type: customer.custType,
-        status: customer.custStatus,
+        status: customer.custStatus as 'active' | 'inactive',
         phone: customer.custPhone?.toString() || '',
         whatsapp: customer.custWhatsapp?.toString() || '',
         ownerPhone: customer.custOwnerphone?.toString() || '',
@@ -198,21 +198,21 @@ const CustomerManagement = () => {
     const customerData = {
       custBusinessname: formData.businessName,
       custOwnername: formData.ownerName,
-      custPhone: parseInt(formData.phone, 10),
-      custWhatsapp: parseInt(formData.whatsapp, 10),
-      custOwnerphone: parseInt(formData.ownerPhone, 10),
-      custOwnerwhatsapp: parseInt(formData.ownerWhatsapp, 10),
+      custPhone: formData.phone ? Number(formData.phone) : null,
+      custWhatsapp: formData.whatsapp ? Number(formData.whatsapp) : null,
+      custOwnerphone: formData.ownerPhone ? Number(formData.ownerPhone) : null,
+      custOwnerwhatsapp: formData.ownerWhatsapp ? Number(formData.ownerWhatsapp) : null,
       custEmail: formData.email,
       custOwneremail: formData.ownerEmail,
       custType: formData.type,
       custAddress: formData.address,
       custProvince: formData.province,
       custCity: formData.city,
-      custPincode: parseInt(formData.pincode, 10),
+      custPincode: formData.pincode ? Number(formData.pincode) : null,
       custGST: formData.gst,
       custRemarks: formData.remarks,
-      custStatus: formData.status || 'active',
-      custCreditperiod: parseInt(formData.creditPeriod, 10)
+      custStatus: formData.status as 'active' | 'inactive',
+      custCreditperiod: formData.creditPeriod ? Number(formData.creditPeriod) : null
     };
 
     const { error } = await supabase

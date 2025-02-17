@@ -1358,6 +1358,41 @@ export type Database = {
         }
         Relationships: []
       }
+      quotations: {
+        Row: {
+          created_at: string | null
+          customer_id: number | null
+          id: string
+          status: string
+          total_amount: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          customer_id?: number | null
+          id?: string
+          status?: string
+          total_amount?: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          customer_id?: number | null
+          id?: string
+          status?: string
+          total_amount?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotations_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customerMaster"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       role_permissions: {
         Row: {
           can_create: boolean | null
@@ -1422,6 +1457,44 @@ export type Database = {
             columns: ["collection_id"]
             isOneToOne: false
             referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales_opportunities: {
+        Row: {
+          created_at: string | null
+          customer_id: number | null
+          id: string
+          status: string
+          title: string
+          updated_at: string | null
+          value: number
+        }
+        Insert: {
+          created_at?: string | null
+          customer_id?: number | null
+          id?: string
+          status?: string
+          title: string
+          updated_at?: string | null
+          value?: number
+        }
+        Update: {
+          created_at?: string | null
+          customer_id?: number | null
+          id?: string
+          status?: string
+          title?: string
+          updated_at?: string | null
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_opportunities_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customerMaster"
             referencedColumns: ["id"]
           },
         ]

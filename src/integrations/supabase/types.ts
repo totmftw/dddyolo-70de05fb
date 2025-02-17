@@ -496,6 +496,7 @@ export type Database = {
           notes: string | null
           product_id: string
           quantity: number
+          shipment_id: string | null
           status: string | null
           unit_cost: number | null
           updated_at: string | null
@@ -509,6 +510,7 @@ export type Database = {
           notes?: string | null
           product_id: string
           quantity?: number
+          shipment_id?: string | null
           status?: string | null
           unit_cost?: number | null
           updated_at?: string | null
@@ -522,11 +524,20 @@ export type Database = {
           notes?: string | null
           product_id?: string
           quantity?: number
+          shipment_id?: string | null
           status?: string | null
           unit_cost?: number | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "inventory_stock_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       invoice_table_config: {
         Row: {
@@ -1414,6 +1425,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      shipments: {
+        Row: {
+          awb_number: string | null
+          created_at: string | null
+          eta: string | null
+          id: string
+          sail_date: string | null
+          shipment_number: string
+          status: string | null
+          transport_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          awb_number?: string | null
+          created_at?: string | null
+          eta?: string | null
+          id?: string
+          sail_date?: string | null
+          shipment_number: string
+          status?: string | null
+          transport_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          awb_number?: string | null
+          created_at?: string | null
+          eta?: string | null
+          id?: string
+          sail_date?: string | null
+          shipment_number?: string
+          status?: string | null
+          transport_type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       sizes: {
         Row: {

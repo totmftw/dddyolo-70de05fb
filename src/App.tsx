@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
@@ -19,6 +20,7 @@ import QuantityDiscount from './pages/QuantityDiscount';
 import ProductConfig from './pages/ProductConfig';
 import CollectionConfig from './pages/CollectionConfig';
 import CatalogBuilder from './pages/CatalogBuilder';
+import Shipment from './pages/Shipment';
 import { ThemeProvider } from './theme/ThemeContext';
 import { Toaster } from "sonner";
 import { SidebarProvider } from './context/SidebarContext';
@@ -50,6 +52,10 @@ const router = createBrowserRouter([
       {
         path: "inventory",
         element: <InventoryManagement />,
+      },
+      {
+        path: "shipment",
+        element: <Shipment />,
       },
       {
         path: "sales-opportunities",

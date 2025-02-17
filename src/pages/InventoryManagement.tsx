@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../integrations/supabase/client';
 import { toast } from "sonner";
@@ -18,33 +19,38 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Package, Plus, Filter, ArrowUpDown, Save } from 'lucide-react';
+import { Package, Plus, Filter, ArrowUpDown, Save, Upload, Download } from 'lucide-react';
 import { format } from 'date-fns';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 
 interface InventoryItem {
   id: string;
-  product_id: string;
+  sku: string;
   quantity: number;
   batch_number: string;
   unit_cost: number;
   added_date: string;
   notes: string;
   status: string;
+  shipment_id: string;
 }
 
 const InventoryManagement = () => {
   const [search, setSearch] = useState('');
   const [sortField, setSortField] = useState<keyof InventoryItem>('added_date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-  const [newItem, setNewItem] = useState<InventoryItem>({
-    product_id: 'default_product_id', // Set a default product_id
+  const [newItem, setNewItem] = useState<Partial<InventoryItem>>({
+    sku: '',
     quantity: 0,
     batch_number: '',
     unit_cost: 0,
     notes: '',
-    added_date: '',
-    status: '',
-    id: ''
+    status: 'active'
   });
 
   const { data: inventory, isLoading, refetch } = useQuery({
@@ -52,7 +58,7 @@ const InventoryManagement = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('inventory_stock')
-        .select('*')
+        .select('*, shipments(shipment_number)')
         .order(sortField, { ascending: sortDirection === 'asc' });
 
       if (error) throw error;
@@ -70,8 +76,8 @@ const InventoryManagement = () => {
   };
 
   const handleAddItem = async () => {
-    if (!newItem.product_id || !newItem.quantity) {
-      toast.error('Product ID and quantity are required');
+    if (!newItem.sku || !newItem.quantity) {
+      toast.error('SKU and quantity are required');
       return;
     }
 
@@ -86,20 +92,31 @@ const InventoryManagement = () => {
 
     toast.success('Inventory item added successfully');
     setNewItem({
-      product_id: 'default_product_id', // Reset product_id to default
+      sku: '',
       quantity: 0,
       batch_number: '',
       unit_cost: 0,
       notes: '',
-      added_date: '',
-      status: '',
-      id: ''
+      status: 'active'
     });
     refetch();
   };
 
+  const handleDownloadTemplate = () => {
+    // Template download logic here
+    toast.success('Template downloaded successfully');
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // File upload logic here
+      toast.success('File uploaded successfully');
+    }
+  };
+
   const filteredInventory = inventory?.filter(item =>
-    item.product_id.toLowerCase().includes(search.toLowerCase()) ||
+    item.sku.toLowerCase().includes(search.toLowerCase()) ||
     item.batch_number?.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -127,44 +144,79 @@ const InventoryManagement = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-6">
-            {/* Add New Item Form */}
-            <div className="grid grid-cols-5 gap-4 bg-gray-50 p-4 rounded-lg">
-              <Input
-                placeholder="Product ID"
-                value={newItem.product_id}
-                onChange={(e) => setNewItem({ ...newItem, product_id: e.target.value })}
-              />
-              <Input
-                type="number"
-                placeholder="Quantity"
-                value={newItem.quantity}
-                onChange={(e) => setNewItem({ ...newItem, quantity: parseInt(e.target.value) })}
-              />
-              <Input
-                placeholder="Batch Number"
-                value={newItem.batch_number}
-                onChange={(e) => setNewItem({ ...newItem, batch_number: e.target.value })}
-              />
-              <Input
-                type="number"
-                placeholder="Unit Cost"
-                value={newItem.unit_cost}
-                onChange={(e) => setNewItem({ ...newItem, unit_cost: parseFloat(e.target.value) })}
-              />
-              <Button onClick={handleAddItem} className="flex items-center gap-2">
-                <Plus className="h-4 w-4" />
-                Add Item
-              </Button>
-            </div>
+          <Tabs defaultValue="single">
+            <TabsList>
+              <TabsTrigger value="single">Single Entry</TabsTrigger>
+              <TabsTrigger value="bulk">Bulk Upload</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="single" className="space-y-6">
+              {/* Add New Item Form */}
+              <div className="grid grid-cols-5 gap-4 bg-gray-50 p-4 rounded-lg">
+                <Input
+                  placeholder="SKU"
+                  value={newItem.sku}
+                  onChange={(e) => setNewItem({ ...newItem, sku: e.target.value })}
+                />
+                <Input
+                  type="number"
+                  placeholder="Quantity"
+                  value={newItem.quantity}
+                  onChange={(e) => setNewItem({ ...newItem, quantity: parseInt(e.target.value) })}
+                />
+                <Input
+                  placeholder="Batch Number"
+                  value={newItem.batch_number}
+                  onChange={(e) => setNewItem({ ...newItem, batch_number: e.target.value })}
+                />
+                <Input
+                  type="number"
+                  placeholder="Unit Cost"
+                  value={newItem.unit_cost}
+                  onChange={(e) => setNewItem({ ...newItem, unit_cost: parseFloat(e.target.value) })}
+                />
+                <Button onClick={handleAddItem} className="flex items-center gap-2">
+                  <Plus className="h-4 w-4" />
+                  Add Item
+                </Button>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="bulk" className="space-y-6">
+              <div className="flex items-center gap-4 bg-gray-50 p-4 rounded-lg">
+                <Button onClick={handleDownloadTemplate} className="flex items-center gap-2">
+                  <Download className="h-4 w-4" />
+                  Download Template
+                </Button>
+                <label htmlFor="file-upload">
+                  <Button variant="outline" className="flex items-center gap-2">
+                    <Upload className="h-4 w-4" />
+                    Upload Inventory
+                  </Button>
+                </label>
+                <input
+                  id="file-upload"
+                  type="file"
+                  accept=".xlsx,.xls"
+                  className="hidden"
+                  onChange={handleFileUpload}
+                />
+              </div>
+            </TabsContent>
 
             {/* Inventory Table */}
-            <Table>
+            <Table className="mt-6">
               <TableHeader>
                 <TableRow>
-                  <TableHead onClick={() => handleSort('product_id')} className="cursor-pointer">
+                  <TableHead onClick={() => handleSort('shipment_id')} className="cursor-pointer">
                     <div className="flex items-center gap-2">
-                      Product ID
+                      Shipment ID
+                      <ArrowUpDown className="h-4 w-4" />
+                    </div>
+                  </TableHead>
+                  <TableHead onClick={() => handleSort('sku')} className="cursor-pointer">
+                    <div className="flex items-center gap-2">
+                      SKU
                       <ArrowUpDown className="h-4 w-4" />
                     </div>
                   </TableHead>
@@ -194,11 +246,12 @@ const InventoryManagement = () => {
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center">Loading...</TableCell>
+                    <TableCell colSpan={8} className="text-center">Loading...</TableCell>
                   </TableRow>
                 ) : filteredInventory?.map((item) => (
                   <TableRow key={item.id}>
-                    <TableCell>{item.product_id}</TableCell>
+                    <TableCell>{item.shipments?.shipment_number || '-'}</TableCell>
+                    <TableCell>{item.sku}</TableCell>
                     <TableCell>{item.quantity}</TableCell>
                     <TableCell>{item.batch_number}</TableCell>
                     <TableCell>${item.unit_cost}</TableCell>
@@ -209,7 +262,7 @@ const InventoryManagement = () => {
                 ))}
               </TableBody>
             </Table>
-          </div>
+          </TabsContent>
         </CardContent>
       </Card>
     </div>

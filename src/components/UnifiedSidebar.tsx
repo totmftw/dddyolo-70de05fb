@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from '../theme/ThemeContext';
@@ -17,7 +18,9 @@ import {
   LogOut,
   Edit,
   Percent,
-  Grid
+  Grid,
+  Truck,
+  BookOpen
 } from 'lucide-react';
 import { Button } from './ui/button';
 
@@ -27,25 +30,26 @@ const UnifiedSidebar = () => {
   const { signOut, hasPermission } = useAuth();
 
   const menuItems = [
-    { path: '/dashboard', name: 'Dashboard', icon: LayoutDashboard, permission: { resource: 'dashboard', action: 'view' as const } },
-    { path: '/dashboard/customers', name: 'Customer Management', icon: Users, permission: { resource: 'customers', action: 'view' as const } },
-    { path: '/dashboard/inventory', name: 'Inventory Management', icon: Package, permission: { resource: 'inventory', action: 'view' as const } },
-    { path: '/dashboard/sales-opportunities', name: 'Sales Opportunities', icon: Target, permission: { resource: 'sales', action: 'view' as const } },
-    { path: '/dashboard/account', name: 'Account Management', icon: Settings, permission: { resource: 'settings', action: 'view' as const } },
-    { path: '/dashboard/payments', name: 'Payment Tracking', icon: CreditCard, permission: { resource: 'payments', action: 'view' as const } },
-    { path: '/dashboard/roles', name: 'User Role Management', icon: UserCog, permission: { resource: 'roles', action: 'view' as const } },
-    { path: '/dashboard/catalog-builder', name: 'Catalog Builder', icon: Grid, permission: { resource: 'catalogs', action: 'view' as const } },
-    { path: '/dashboard/quantity-discounts', name: 'Quantity Discounts', icon: Percent, permission: { resource: 'products', action: 'view' as const } },
+    { path: '/app', name: 'Dashboard', icon: LayoutDashboard, permission: { resource: 'dashboard', action: 'view' as const } },
+    { path: '/app/customers', name: 'Customer Management', icon: Users, permission: { resource: 'customers', action: 'view' as const } },
+    { path: '/app/inventory', name: 'Inventory Management', icon: Package, permission: { resource: 'inventory', action: 'view' as const } },
+    { path: '/app/shipment', name: 'Shipment Management', icon: Truck, permission: { resource: 'shipment', action: 'view' as const } },
+    { path: '/app/sales-opportunities', name: 'Sales Opportunities', icon: Target, permission: { resource: 'sales', action: 'view' as const } },
+    { path: '/app/account', name: 'Account Management', icon: Settings, permission: { resource: 'settings', action: 'view' as const } },
+    { path: '/app/payments', name: 'Payment Tracking', icon: CreditCard, permission: { resource: 'payments', action: 'view' as const } },
+    { path: '/app/roles', name: 'User Role Management', icon: UserCog, permission: { resource: 'roles', action: 'view' as const } },
+    { path: '/app/catalog-builder', name: 'Catalog Builder', icon: BookOpen, permission: { resource: 'catalogs', action: 'view' as const } },
+    { path: '/app/quantity-discounts', name: 'Quantity Discounts', icon: Percent, permission: { resource: 'products', action: 'view' as const } },
     {
-      path: '/dashboard/products',
+      path: '/app/products',
       name: 'Product Management',
       icon: FileStack,
       permission: { resource: 'products', action: 'view' as const },
       subItems: [
-        { path: '/dashboard/products', name: 'Add Product', icon: Plus, permission: { resource: 'products', action: 'create' as const } },
-        { path: '/dashboard/products/manage', name: 'Manage Products', icon: Edit, permission: { resource: 'products', action: 'view' as const } },
-        { path: '/dashboard/products/view', name: 'View Products', icon: Eye, permission: { resource: 'products', action: 'view' as const } },
-        { path: '/dashboard/products/admin', name: 'Product Config', icon: Settings, permission: { resource: 'products', action: 'create' as const } }
+        { path: '/app/products', name: 'Add Product', icon: Plus, permission: { resource: 'products', action: 'create' as const } },
+        { path: '/app/products/manage', name: 'Manage Products', icon: Edit, permission: { resource: 'products', action: 'view' as const } },
+        { path: '/app/products/view', name: 'View Products', icon: Eye, permission: { resource: 'products', action: 'view' as const } },
+        { path: '/app/products/admin', name: 'Product Config', icon: Settings, permission: { resource: 'products', action: 'create' as const } }
       ]
     }
   ];
@@ -61,29 +65,28 @@ const UnifiedSidebar = () => {
       <div className="py-4 text-gray-500 dark:text-gray-400">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-2">
-            <CorporateIcon className="h-8 w-8" />
+            <Package className="h-8 w-8" />
+            <span className="text-lg font-bold text-gray-800 dark:text-gray-200">Inventory</span>
           </div>
         </div>
         <ul className="mt-6">
           {menuItems.map((item, index) => (
             hasPermission(item.permission.resource, item.permission.action) && (
-              <li key={index}>
-                <div className="relative px-6 py-3">
-                  {isActive(item.path) && (
-                    <span className="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg" />
-                  )}
-                  <Link
-                    to={item.path}
-                    className={`inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 ${
-                      isActive(item.path)
-                        ? 'text-gray-800 dark:text-gray-100'
-                        : 'text-gray-500 dark:text-gray-400'
-                    }`}
-                  >
-                    <item.icon className="w-5 h-5" />
-                    <span className="ml-4">{item.name}</span>
-                  </Link>
-                </div>
+              <li key={index} className="relative px-6 py-3">
+                {isActive(item.path) && (
+                  <span className="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg" />
+                )}
+                <Link
+                  to={item.path}
+                  className={`inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 ${
+                    isActive(item.path)
+                      ? 'text-gray-800 dark:text-gray-100'
+                      : 'text-gray-500 dark:text-gray-400'
+                  }`}
+                >
+                  <item.icon className="w-5 h-5" />
+                  <span className="ml-4">{item.name}</span>
+                </Link>
                 {item.subItems && (
                   <ul className="pl-10 mt-1">
                     {item.subItems.map((subItem, subIndex) => (

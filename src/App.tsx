@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
@@ -26,46 +26,98 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const queryClient = new QueryClient();
 
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Auth />,
+  },
+  {
+    path: "/app",
+    element: (
+      <AuthGuard>
+        <AdminOneLayout />
+      </AuthGuard>
+    ),
+    children: [
+      {
+        index: true,
+        element: <Dashboard />,
+      },
+      {
+        path: "customers",
+        element: <CustomerManagement />,
+      },
+      {
+        path: "inventory",
+        element: <InventoryManagement />,
+      },
+      {
+        path: "sales-opportunities",
+        element: <SalesOpportunities />,
+      },
+      {
+        path: "account",
+        element: <AccountManagement />,
+      },
+      {
+        path: "payments",
+        element: <PaymentTracking />,
+      },
+      {
+        path: "roles",
+        element: <UserRoleManagement />,
+      },
+      {
+        path: "products",
+        element: <ProductManagement />,
+      },
+      {
+        path: "products/manage",
+        element: <ManageProducts />,
+      },
+      {
+        path: "products/view",
+        element: <ViewProducts />,
+      },
+      {
+        path: "products/admin",
+        element: <ProductConfig />,
+      },
+      {
+        path: "products/collections",
+        element: <CollectionConfig />,
+      },
+      {
+        path: "catalog-builder",
+        element: <CatalogBuilder />,
+      },
+      {
+        path: "sales-management",
+        element: <SalesOpportunityManagement />,
+      },
+      {
+        path: "quantity-discounts",
+        element: <QuantityDiscount />,
+      },
+    ],
+  },
+  {
+    path: "*",
+    element: <div>Page Not Found</div>,
+  },
+]);
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <AuthProvider>
-          <ThemeProvider>
-            <SidebarProvider>
-              <Toaster />
-              <Routes>
-                <Route path="/" element={<Auth />} />
-                <Route
-                  path="/app"
-                  element={
-                    <AuthGuard>
-                      <AdminOneLayout />
-                    </AuthGuard>
-                  }
-                >
-                  <Route index element={<Dashboard />} />
-                  <Route path="customers" element={<CustomerManagement />} />
-                  <Route path="inventory" element={<InventoryManagement />} />
-                  <Route path="sales-opportunities" element={<SalesOpportunities />} />
-                  <Route path="account" element={<AccountManagement />} />
-                  <Route path="payments" element={<PaymentTracking />} />
-                  <Route path="roles" element={<UserRoleManagement />} />
-                  <Route path="products" element={<ProductManagement />} />
-                  <Route path="products/manage" element={<ManageProducts />} />
-                  <Route path="products/view" element={<ViewProducts />} />
-                  <Route path="products/admin" element={<ProductConfig />} />
-                  <Route path="products/collections" element={<CollectionConfig />} />
-                  <Route path="catalog-builder" element={<CatalogBuilder />} />
-                  <Route path="sales-management" element={<SalesOpportunityManagement />} />
-                  <Route path="quantity-discounts" element={<QuantityDiscount />} />
-                </Route>
-                <Route path="*" element={<div>Page Not Found</div>} />
-              </Routes>
-            </SidebarProvider>
-          </ThemeProvider>
-        </AuthProvider>
-      </BrowserRouter>
+      <AuthProvider>
+        <ThemeProvider>
+          <SidebarProvider>
+            <Toaster />
+            <RouterProvider router={router} />
+          </SidebarProvider>
+        </ThemeProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

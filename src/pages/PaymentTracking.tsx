@@ -1,5 +1,5 @@
 import React from 'react';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../integrations/supabase/client';
 
 const PaymentTracking = () => {
     // State and functions to track payments

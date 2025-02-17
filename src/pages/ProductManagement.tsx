@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../integrations/supabase/client';
 import { Package, Download, Upload, Database, Edit2 } from 'lucide-react';
 import { toast } from "sonner";
 import * as XLSX from 'xlsx';

@@ -1,62 +1,142 @@
-import React, { useState, useContext } from 'react';
-import { supabase } from '../../supabaseClient';
-import { useTheme } from '../../theme/ThemeContext';
+import React from 'react';
+import { supabase } from '../../integrations/supabase/client';
+import { toast } from "sonner";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { FileText, Plus } from 'lucide-react';
 
-/**
- * QuotationOrderProcessing component is responsible for generating quotes and orders.
- * It uses the Supabase client to interact with the database.
- */
+interface Quotation {
+  id: string;
+  customer_id: string;
+  total_amount: number;
+  status: 'pending' | 'approved' | 'rejected';
+  created_at: string;
+}
+
 const QuotationOrderProcessing = () => {
-    const { theme } = useTheme();
-    // State variables to store product details, pricing, order ID, and quote ID
-    const [productDetails, setProductDetails] = useState('');
-    const [pricing, setPricing] = useState('');
-    const [orderId, setOrderId] = useState('');
-    const [quoteId, setQuoteId] = useState('');
+  const [quotations, setQuotations] = React.useState<Quotation[]>([]);
+  const [loading, setLoading] = React.useState(false);
 
-    /**
-     * generateQuote method generates a new quote based on the provided product details and pricing.
-     * It inserts a new record into the 'Quotes' table in the database and retrieves the generated quote ID.
-     * If successful, it calls the generateOrder method to create a new order.
-     */
-    const generateQuote = async () => {
-        const { data, error } = await supabase
-            .from('Quotes')
-            .insert([{ product_details: productDetails, pricing }]);
-        if (error) console.error('Error generating quote:', error);
-        if (data) {
-            const quoteId = data[0].id;
-            setQuoteId(quoteId);
-            await generateOrder(quoteId);
-        }
-    };
+  React.useEffect(() => {
+    fetchQuotations();
+  }, []);
 
-    /**
-     * generateOrder method generates a new order based on the provided quote ID.
-     * It inserts a new record into the 'Orders' table in the database and retrieves the generated order ID.
-     * @param {number} quoteId - The ID of the quote to associate with the order.
-     */
-    const generateOrder = async (quoteId) => {
-        const { data, error } = await supabase
-            .from('Orders')
-            .insert([{ quote_id: quoteId, status: 'pending' }]);
-        if (error) console.error('Error generating order:', error);
-        if (data) {
-            const orderId = data[0].id;
-            setOrderId(orderId);
-        }
-    };
+  const fetchQuotations = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('quotations')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    return (
-        <div className={`p-4 ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-black'}`}>
-            <h2 className={`text-lg ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>Quotation & Order Processing</h2>
-            <input type="text" value={productDetails} onChange={(e) => setProductDetails(e.target.value)} placeholder="Product Details" />
-            <input type="text" value={pricing} onChange={(e) => setPricing(e.target.value)} placeholder="Pricing" />
-            <button onClick={generateQuote}>Generate Quote</button>
-            {quoteId && <p>Quote ID: {quoteId}</p>}
-            {orderId && <p>Order ID: {orderId}</p>}
+      if (error) throw error;
+      setQuotations(data || []);
+    } catch (error) {
+      toast.error('Error fetching quotations');
+      console.error('Error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStatusChange = async (quotationId: string, newStatus: 'approved' | 'rejected') => {
+    try {
+      const { error } = await supabase
+        .from('quotations')
+        .update({ status: newStatus })
+        .eq('id', quotationId);
+
+      if (error) throw error;
+      toast.success(`Quotation ${newStatus} successfully`);
+      fetchQuotations();
+    } catch (error) {
+      toast.error('Error updating quotation status');
+      console.error('Error:', error);
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <FileText className="h-6 w-6" />
+            <CardTitle>Quotation & Order Processing</CardTitle>
+          </div>
+          <Button className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            New Quotation
+          </Button>
         </div>
-    );
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div className="flex gap-4">
+            <Input
+              placeholder="Search quotations..."
+              className="max-w-sm"
+            />
+            <select className="border rounded-md px-3 py-2">
+              <option value="">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+
+          <div className="space-y-4">
+            {loading ? (
+              <div>Loading...</div>
+            ) : quotations.length === 0 ? (
+              <div>No quotations found</div>
+            ) : (
+              quotations.map((quotation) => (
+                <div
+                  key={quotation.id}
+                  className="border rounded-lg p-4 flex items-center justify-between"
+                >
+                  <div>
+                    <h3 className="font-medium">Quotation #{quotation.id}</h3>
+                    <p className="text-sm text-gray-500">
+                      Amount: ${quotation.total_amount}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Status: {quotation.status}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    {quotation.status === 'pending' && (
+                      <>
+                        <Button
+                          variant="outline"
+                          onClick={() => handleStatusChange(quotation.id, 'approved')}
+                        >
+                          Approve
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => handleStatusChange(quotation.id, 'rejected')}
+                        >
+                          Reject
+                        </Button>
+                      </>
+                    )}
+                    <Button variant="outline">View Details</Button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
 };
 
 export default QuotationOrderProcessing;

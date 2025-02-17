@@ -50,15 +50,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Error fetching user permissions:', error);
       return;
     }
+    
     // Transform the data to match UserPermissions interface
-    const transformedPermissions: UserPermissions[] = data.map((p: any) => ({
-      resource: p.resource,
-      can_view: p.can_view,
-      can_create: p.can_create,
-      can_edit: p.can_edit,
-      can_delete: p.can_delete,
-      custom_permissions: p.custom_permissions ? JSON.parse(p.custom_permissions) : {}
-    }));
+    const transformedPermissions: UserPermissions[] = data.map((p: any) => {
+      let customPermissions: Record<string, boolean> = {};
+      
+      // Handle custom_permissions based on its type
+      if (p.custom_permissions) {
+        try {
+          if (typeof p.custom_permissions === 'string') {
+            customPermissions = JSON.parse(p.custom_permissions);
+          } else if (typeof p.custom_permissions === 'object') {
+            customPermissions = p.custom_permissions;
+          }
+        } catch (err) {
+          console.error('Error parsing custom permissions:', err);
+          customPermissions = {};
+        }
+      }
+
+      return {
+        resource: p.resource,
+        can_view: Boolean(p.can_view),
+        can_create: Boolean(p.can_create),
+        can_edit: Boolean(p.can_edit),
+        can_delete: Boolean(p.can_delete),
+        custom_permissions: customPermissions
+      };
+    });
+
     setPermissions(transformedPermissions);
   };
 

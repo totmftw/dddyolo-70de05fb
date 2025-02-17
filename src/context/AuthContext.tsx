@@ -1,8 +1,9 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../integrations/supabase/client';
 
-type UserRole = 'business_owner' | 'catalog_manager' | 'accounts_manager' | 'sales_manager' | 'inventory_manager' | 'section_inventory_incharge' | 'it_admin';
+type UserRole = 'business_owner' | 'catalog_manager' | 'accounts_manager' | 'sales_manager' | 'inventory_manager' | 'section_inventory_incharge' | 'it_admin' | 'catalog_builder' | 'business_manager';
 
 interface UserPermissions {
   resource: string;
@@ -49,7 +50,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Error fetching user permissions:', error);
       return;
     }
-    setPermissions(data);
+    // Transform the data to match UserPermissions interface
+    const transformedPermissions: UserPermissions[] = data.map((p: any) => ({
+      resource: p.resource,
+      can_view: p.can_view,
+      can_create: p.can_create,
+      can_edit: p.can_edit,
+      can_delete: p.can_delete,
+      custom_permissions: p.custom_permissions ? JSON.parse(p.custom_permissions) : {}
+    }));
+    setPermissions(transformedPermissions);
   };
 
   const fetchUserProfile = async (userId: string) => {
@@ -64,7 +74,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
 
-    setUserProfile(data);
+    // Transform the data to match UserProfile interface
+    const transformedProfile: UserProfile = {
+      id: data.id,
+      full_name: data.full_name,
+      role: data.role as UserRole
+    };
+
+    setUserProfile(transformedProfile);
     await fetchUserPermissions(userId);
   };
 

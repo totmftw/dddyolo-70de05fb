@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../integrations/supabase/client';
@@ -37,6 +38,10 @@ interface InventoryItem {
   notes: string;
   status: string;
   shipment_id: string;
+  productManagement?: {
+    prodName: string;
+    prodId: string;
+  };
 }
 
 const InventoryManagement = () => {
@@ -57,11 +62,14 @@ const InventoryManagement = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('inventory_stock')
-        .select('*, shipments(shipment_number), products(sku)')
+        .select(`
+          *,
+          productManagement:product_id (prodName, prodId)
+        `)
         .order(sortField, { ascending: sortDirection === 'asc' });
 
       if (error) throw error;
-      return data;
+      return data as InventoryItem[];
     }
   });
 
@@ -108,19 +116,8 @@ const InventoryManagement = () => {
     refetch();
   };
 
-  const handleDownloadTemplate = () => {
-    toast.success('Template downloaded successfully');
-  };
-
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      toast.success('File uploaded successfully');
-    }
-  };
-
   const filteredInventory = inventory?.filter(item =>
-    item.products?.sku.toLowerCase().includes(search.toLowerCase()) ||
+    item.productManagement?.prodName.toLowerCase().includes(search.toLowerCase()) ||
     item.batch_number?.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -187,15 +184,9 @@ const InventoryManagement = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead onClick={() => handleSort('shipment_id')} className="cursor-pointer">
-                      <div className="flex items-center gap-2">
-                        Shipment ID
-                        <ArrowUpDown className="h-4 w-4" />
-                      </div>
-                    </TableHead>
                     <TableHead onClick={() => handleSort('product_id')} className="cursor-pointer">
                       <div className="flex items-center gap-2">
-                        Product ID
+                        Product
                         <ArrowUpDown className="h-4 w-4" />
                       </div>
                     </TableHead>
@@ -229,8 +220,7 @@ const InventoryManagement = () => {
                     </TableRow>
                   ) : filteredInventory?.map((item) => (
                     <TableRow key={item.id}>
-                      <TableCell>{item.shipments?.shipment_number || '-'}</TableCell>
-                      <TableCell>{item.products?.sku || '-'}</TableCell>
+                      <TableCell>{item.productManagement?.prodName || item.product_id}</TableCell>
                       <TableCell>{item.quantity}</TableCell>
                       <TableCell>{item.batch_number}</TableCell>
                       <TableCell>${item.unit_cost}</TableCell>

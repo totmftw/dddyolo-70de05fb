@@ -13,6 +13,9 @@ import {
 interface Product {
     prodId: string;
     prodName: string;
+    prodMrp: number;
+    prodSku: string;
+    prodStatus: string;
     prodBrand?: string;
     prodCategory?: string;
     prodCollection?: string;
@@ -20,36 +23,8 @@ interface Product {
     prodType?: string;
     prodVariant?: string;
     prodMaterial?: string;
-    prodPackaging?: string;
-    prodMoq?: number;
-    prodPackcount?: number;
-    prodCbm?: number;
-    prodUnitweight?: number;
-    prodGrossweight?: number;
-    prodNettweight?: number;
-    prodColor1?: string;
-    prodColor2?: string;
-    prodColor3?: string;
-    prodColor4?: string;
-    prodColor5?: string;
-    prodImages?: string[];
-    prodPromo1?: string;
-    prodPromo2?: string;
-    prodLandingcost?: number;
-    prodVariableprice?: number;
     prodBasePrice?: number;
-    prodSlaborice1?: number;
-    prodSlabprice2?: number;
-    prodSlabprice3?: number;
-    prodSlabprice4?: number;
-    prodSlabprice5?: number;
-    prodBoxstock?: number;
-    prodPiecestock?: number;
-    prodStatus?: string; // Changed from boolean to string
-    prodRestockDate?: string;
-    prodSku?: string;
-    prodShortName?: string;
-    prodMrp?: number;
+    prodImages?: string[];
 }
 
 const ProductManagement = () => {
@@ -57,9 +32,10 @@ const ProductManagement = () => {
     const [formData, setFormData] = useState<Product>({
         prodId: '',
         prodName: '',
-        prodBrand: 'Black Gold',
-        prodStatus: 'active',
+        prodMrp: 0,
         prodSku: '',
+        prodStatus: 'active',
+        prodBrand: 'Black Gold',
     });
     const [loading, setLoading] = useState(false);
     const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
@@ -146,44 +122,27 @@ const ProductManagement = () => {
         }
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-
-        // Generate SKU if not provided
-        if (!formData.prodSku) {
-            const timestamp = Date.now();
-            const randomString = Math.random().toString(36).substring(2, 7).toUpperCase();
-            formData.prodSku = `SKU-${timestamp}-${randomString}`;
+    const handleAddProduct = async () => {
+        if (!formData.prodName || !formData.prodMrp || !formData.prodSku) {
+            toast.error('Product name, MRP and SKU are required');
+            return;
         }
 
-        const images: string[] = [];
-        if (selectedFiles) {
-            for (let i = 0; i < selectedFiles.length; i++) {
-                const file = selectedFiles[i];
-                const fileExt = file.name.split('.').pop();
-                const fileName = `${Date.now()}-${i}.${fileExt}`;
-                const { error: uploadError, data } = await supabase.storage
-                    .from('products')
-                    .upload(fileName, file);
-
-                if (uploadError) {
-                    toast.error(`Error uploading image ${i + 1}`);
-                    console.error(uploadError);
-                } else if (data) {
-                    const { data: { publicUrl } } = supabase.storage
-                        .from('products')
-                        .getPublicUrl(fileName);
-                    images.push(publicUrl);
-                }
-            }
-        }
-
-        const productData = {
-            ...formData,
+        const productData: Product = {
             prodId: formData.prodId || `PROD-${Date.now()}`,
-            prodImages: images,
-            prodStatus: formData.prodStatus || 'active'
+            prodName: formData.prodName,
+            prodMrp: formData.prodMrp,
+            prodSku: formData.prodSku,
+            prodStatus: formData.prodStatus || 'active',
+            prodBrand: formData.prodBrand,
+            prodCategory: formData.prodCategory,
+            prodCollection: formData.prodCollection,
+            prodSubcategory: formData.prodSubcategory,
+            prodType: formData.prodType,
+            prodVariant: formData.prodVariant,
+            prodMaterial: formData.prodMaterial,
+            prodBasePrice: formData.prodBasePrice,
+            prodImages: selectedFiles ? Array.from(selectedFiles).map(file => URL.createObjectURL(file)) : []
         };
 
         const { error } = await supabase
@@ -196,16 +155,8 @@ const ProductManagement = () => {
         } else {
             toast.success('Product added successfully');
             fetchProducts();
-            setFormData({
-                prodId: '',
-                prodName: '',
-                prodBrand: 'Black Gold',
-                prodStatus: 'active',
-                prodSku: '',
-            });
-            setSelectedFiles(null);
+            clearFields();
         }
-        setLoading(false);
     };
 
     const handleTemplateDownload = () => {
@@ -372,6 +323,18 @@ const ProductManagement = () => {
         }
     };
 
+    const clearFields = () => {
+        setFormData({
+            prodId: '',
+            prodName: '',
+            prodMrp: 0,
+            prodSku: '',
+            prodStatus: 'active',
+            prodBrand: 'Black Gold',
+        });
+        setSelectedFiles(null);
+    };
+
     return (
         <div className="p-6 max-w-7xl mx-auto">
             <div className="flex items-center justify-between mb-6">
@@ -407,7 +370,7 @@ const ProductManagement = () => {
                 </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-lg shadow-md">
+            <form onSubmit={handleAddProduct} className="space-y-6 bg-white p-6 rounded-lg shadow-md">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div className="space-y-4">
                         <h3 className="font-semibold text-lg">Basic Information</h3>

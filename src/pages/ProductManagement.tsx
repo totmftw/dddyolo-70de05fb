@@ -211,8 +211,8 @@ const ProductManagement = () => {
         const worksheet = workbook.Sheets[sheetName];
         const data = XLSX.utils.sheet_to_json(worksheet);
 
-        const duplicates = data.filter((item, index, self) =>
-          index !== self.findIndex((t) => (
+        const duplicates = data.filter((item: any, index: number, self: any[]) =>
+          index !== self.findIndex((t: any) => (
             t['SKU'] === item['SKU'] ||
             t['Product Name'] === item['Product Name']
           ))
@@ -223,7 +223,7 @@ const ProductManagement = () => {
             <div>
               <p>Duplicate products found:</p>
               <ul className="mt-2 list-disc list-inside">
-                {duplicates.map((dup: any, index) => (
+                {duplicates.map((dup: any, index: number) => (
                   <li key={index}>
                     {dup['Product Name']} (SKU: {dup['SKU']})
                   </li>
@@ -248,30 +248,29 @@ const ProductManagement = () => {
             continue;
           }
 
-          const productData = {
+          const productData: ProductManagementType = {
             prodId: `PROD-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
             prodName: row['Product Name'],
-            prodBrand: row['Brand'] || 'Black Gold',
+            prodMrp: row['MRP'] || 0,
             prodSku: row['SKU'],
-            prodCollection: row['Collection'],
-            prodSubcategory: row['Subcategory'],
-            prodMaterial: row['Material'],
-            prodType: row['Type'],
-            prodVariant: row['Variant'],
-            prodColor1: row['Color 1'],
-            prodColor2: row['Color 2'],
-            prodColor3: row['Color 3'],
-            prodColor4: row['Color 4'],
-            prodColor5: row['Color 5'],
-            prodBasePrice: row['Base Price'],
-            prodLandingcost: row['Landing Cost'],
-            prodVariableprice: row['Variable Price'],
-            prodMoq: row['MOQ'],
-            prodBoxstock: row['Box Stock'],
-            prodPiecestock: row['Piece Stock'],
-            prodUnitweight: row['Unit Weight (kg)'],
-            prodGrossweight: row['Gross Weight (kg)'],
-            prodNettweight: row['Net Weight (kg)'],
+            prodBrand: row['Brand'] || 'Black Gold',
+            prodCategory: row['Category'] || null,
+            prodCollection: row['Collection'] || null,
+            prodSubcategory: row['Subcategory'] || null,
+            prodMaterial: row['Material'] || null,
+            prodType: row['Type'] || null,
+            prodVariant: row['Variant'] || null,
+            prodColor1: row['Color 1'] || null,
+            prodColor2: row['Color 2'] || null,
+            prodColor3: row['Color 3'] || null,
+            prodColor4: row['Color 4'] || null,
+            prodColor5: row['Color 5'] || null,
+            prodBasePrice: row['Base Price'] || null,
+            prodBoxstock: row['Box Stock'] || null,
+            prodPiecestock: row['Piece Stock'] || null,
+            prodUnitweight: row['Unit Weight'] || null,
+            prodGrossweight: row['Gross Weight'] || null,
+            prodNettweight: row['Net Weight'] || null,
             prodStatus: row['Status'] === 'Active' ? 'active' : 'inactive'
           };
 

@@ -107,10 +107,6 @@ const router = createBrowserRouter([
       },
     ],
   },
-  {
-    path: "*",
-    element: <div>Page Not Found</div>,
-  },
 ]);
 
 function App() {

@@ -1,7 +1,6 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../integrations/supabase/client';
 
 type UserRole = 'business_owner' | 'catalog_manager' | 'accounts_manager' | 'sales_manager' | 'inventory_manager' | 'section_inventory_incharge' | 'it_admin';
 

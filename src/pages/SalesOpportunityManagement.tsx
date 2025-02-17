@@ -46,7 +46,7 @@ const SalesOpportunityManagement = () => {
   const fetchOpportunities = async () => {
     try {
       const { data, error } = await supabase
-        .from('Opportunities')
+        .from('opportunities')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -67,7 +67,7 @@ const SalesOpportunityManagement = () => {
   const addOpportunity = async () => {
     try {
       const { error } = await supabase
-        .from('Opportunities')
+        .from('opportunities')
         .insert([{
           lead_name: leadName,
           status,

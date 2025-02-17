@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../integrations/supabase/client';
@@ -30,7 +29,7 @@ import {
 
 interface InventoryItem {
   id: string;
-  sku: string;
+  product_id: string;
   quantity: number;
   batch_number: string;
   unit_cost: number;
@@ -45,7 +44,7 @@ const InventoryManagement = () => {
   const [sortField, setSortField] = useState<keyof InventoryItem>('added_date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [newItem, setNewItem] = useState<Partial<InventoryItem>>({
-    sku: '',
+    product_id: '',
     quantity: 0,
     batch_number: '',
     unit_cost: 0,
@@ -58,7 +57,7 @@ const InventoryManagement = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('inventory_stock')
-        .select('*, shipments(shipment_number)')
+        .select('*, shipments(shipment_number), products(sku)')
         .order(sortField, { ascending: sortDirection === 'asc' });
 
       if (error) throw error;
@@ -76,14 +75,21 @@ const InventoryManagement = () => {
   };
 
   const handleAddItem = async () => {
-    if (!newItem.sku || !newItem.quantity) {
-      toast.error('SKU and quantity are required');
+    if (!newItem.product_id || !newItem.quantity) {
+      toast.error('Product ID and quantity are required');
       return;
     }
 
     const { error } = await supabase
       .from('inventory_stock')
-      .insert([newItem]);
+      .insert([{
+        product_id: newItem.product_id,
+        quantity: newItem.quantity,
+        batch_number: newItem.batch_number,
+        unit_cost: newItem.unit_cost,
+        notes: newItem.notes,
+        status: 'active'
+      }]);
 
     if (error) {
       toast.error('Error adding inventory item');
@@ -92,7 +98,7 @@ const InventoryManagement = () => {
 
     toast.success('Inventory item added successfully');
     setNewItem({
-      sku: '',
+      product_id: '',
       quantity: 0,
       batch_number: '',
       unit_cost: 0,
@@ -103,20 +109,18 @@ const InventoryManagement = () => {
   };
 
   const handleDownloadTemplate = () => {
-    // Template download logic here
     toast.success('Template downloaded successfully');
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // File upload logic here
       toast.success('File uploaded successfully');
     }
   };
 
   const filteredInventory = inventory?.filter(item =>
-    item.sku.toLowerCase().includes(search.toLowerCase()) ||
+    item.products?.sku.toLowerCase().includes(search.toLowerCase()) ||
     item.batch_number?.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -151,12 +155,11 @@ const InventoryManagement = () => {
             </TabsList>
 
             <TabsContent value="single" className="space-y-6">
-              {/* Add New Item Form */}
               <div className="grid grid-cols-5 gap-4 bg-gray-50 p-4 rounded-lg">
                 <Input
-                  placeholder="SKU"
-                  value={newItem.sku}
-                  onChange={(e) => setNewItem({ ...newItem, sku: e.target.value })}
+                  placeholder="Product ID"
+                  value={newItem.product_id}
+                  onChange={(e) => setNewItem({ ...newItem, product_id: e.target.value })}
                 />
                 <Input
                   type="number"
@@ -181,7 +184,6 @@ const InventoryManagement = () => {
                 </Button>
               </div>
 
-              {/* Inventory Table */}
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -191,9 +193,9 @@ const InventoryManagement = () => {
                         <ArrowUpDown className="h-4 w-4" />
                       </div>
                     </TableHead>
-                    <TableHead onClick={() => handleSort('sku')} className="cursor-pointer">
+                    <TableHead onClick={() => handleSort('product_id')} className="cursor-pointer">
                       <div className="flex items-center gap-2">
-                        SKU
+                        Product ID
                         <ArrowUpDown className="h-4 w-4" />
                       </div>
                     </TableHead>
@@ -228,7 +230,7 @@ const InventoryManagement = () => {
                   ) : filteredInventory?.map((item) => (
                     <TableRow key={item.id}>
                       <TableCell>{item.shipments?.shipment_number || '-'}</TableCell>
-                      <TableCell>{item.sku}</TableCell>
+                      <TableCell>{item.products?.sku || '-'}</TableCell>
                       <TableCell>{item.quantity}</TableCell>
                       <TableCell>{item.batch_number}</TableCell>
                       <TableCell>${item.unit_cost}</TableCell>

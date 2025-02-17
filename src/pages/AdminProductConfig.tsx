@@ -39,7 +39,6 @@ interface ProductType {
 interface Material {
   id: string;
   name: string;
-  description: string;
   collection_id: string;
   created_at: string;
   updated_at: string;
@@ -114,7 +113,7 @@ const AdminProductConfig = () => {
             Materials:
             {materials.map((material) => (
               <div key={material.id}>
-                {material.name} - {material.description}
+                {material.name}
               </div>
             ))}
           </div>

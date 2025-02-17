@@ -78,7 +78,6 @@ const CustomerManagement = () => {
         throw error;
       }
       
-      // Map database fields to interface fields
       const mappedCustomers: Customer[] = data.map(customer => ({
         id: customer.id,
         businessName: customer.custBusinessname,
@@ -145,7 +144,6 @@ const CustomerManagement = () => {
           const worksheet = workbook.Sheets[sheetName];
           const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-          // Process and upload each customer
           for (const row of jsonData) {
             const customerData = {
               custBusinessname: row['Business Name'] || '',
@@ -193,34 +191,34 @@ const CustomerManagement = () => {
   };
 
   const handleFileUpload = () => {
-    // This function is intentionally empty as it's just a click handler for the file input
-    // The actual file handling is done in handleFileChange
+    document.getElementById('fileInput')?.click();
   };
 
   const handleAddCustomer = async () => {
+    const customerData = {
+      custBusinessname: formData.businessName,
+      custOwnername: formData.ownerName,
+      custPhone: Number(formData.phone),
+      custWhatsapp: Number(formData.whatsapp),
+      custOwnerphone: Number(formData.ownerPhone),
+      custOwnerwhatsapp: Number(formData.ownerWhatsapp),
+      custEmail: formData.email,
+      custOwneremail: formData.ownerEmail,
+      custType: formData.type,
+      custAddress: formData.address,
+      custProvince: formData.province,
+      custCity: formData.city,
+      custPincode: Number(formData.pincode),
+      custGST: formData.gst,
+      custRemarks: formData.remarks,
+      custStatus: formData.status || 'active',
+      custCreditperiod: Number(formData.creditPeriod)
+    };
+
     const { error } = await supabase
       .from('customerMaster')
-      .insert([
-        {
-          custBusinessname: formData.businessName,
-          custOwnername: formData.ownerName,
-          custPhone: formData.phone,
-          custWhatsapp: formData.whatsapp,
-          custOwnerphone: formData.ownerPhone,
-          custOwnerwhatsapp: formData.ownerWhatsapp,
-          custEmail: formData.email,
-          custOwneremail: formData.ownerEmail,
-          custType: formData.type,
-          custAddress: formData.address,
-          custProvince: formData.province,
-          custCity: formData.city,
-          custPincode: formData.pincode,
-          custGST: formData.gst,
-          custRemarks: formData.remarks,
-          custStatus: formData.status,
-          custCreditperiod: formData.creditPeriod,
-        },
-      ]);
+      .insert([customerData]);
+
     if (error) {
       toast.error('Failed to add customer');
       console.error('Error adding customer:', error);
@@ -244,7 +242,7 @@ const CustomerManagement = () => {
         pincode: '',
         gst: '',
         remarks: '',
-        status: '',
+        status: 'active',
         creditPeriod: '',
       });
     }

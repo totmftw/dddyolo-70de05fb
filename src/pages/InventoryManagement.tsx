@@ -36,12 +36,15 @@ const InventoryManagement = () => {
   const [search, setSearch] = useState('');
   const [sortField, setSortField] = useState<keyof InventoryItem>('added_date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-  const [newItem, setNewItem] = useState<Partial<InventoryItem>>({
+  const [newItem, setNewItem] = useState<InventoryItem>({
     product_id: '',
     quantity: 0,
     batch_number: '',
     unit_cost: 0,
-    notes: ''
+    notes: '',
+    added_date: '',
+    status: '',
+    id: ''
   });
 
   const { data: inventory, isLoading, refetch } = useQuery({
@@ -87,7 +90,10 @@ const InventoryManagement = () => {
       quantity: 0,
       batch_number: '',
       unit_cost: 0,
-      notes: ''
+      notes: '',
+      added_date: '',
+      status: '',
+      id: ''
     });
     refetch();
   };

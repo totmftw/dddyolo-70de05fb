@@ -10,23 +10,23 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "../components/reused/table";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+} from "../components/reused/card";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Truck, Plus, CalendarIcon } from 'lucide-react';
+} from "../components/ui/select";
+import { Truck, Plus } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface Shipment {
@@ -42,7 +42,8 @@ interface Shipment {
 const Shipment = () => {
   const [newShipment, setNewShipment] = useState<Partial<Shipment>>({
     transport_type: 'sea',
-    status: 'pending'
+    status: 'pending',
+    shipment_number: ''  // Initialize with empty string to satisfy TypeScript
   });
 
   const { data: shipments, isLoading, refetch } = useQuery({
@@ -66,7 +67,12 @@ const Shipment = () => {
 
     const { error } = await supabase
       .from('shipments')
-      .insert([newShipment]);
+      .insert([{
+        shipment_number: newShipment.shipment_number,
+        transport_type: newShipment.transport_type,
+        awb_number: newShipment.awb_number,
+        status: 'pending'
+      }]);
 
     if (error) {
       toast.error('Error adding shipment');
@@ -76,7 +82,8 @@ const Shipment = () => {
     toast.success('Shipment added successfully');
     setNewShipment({
       transport_type: 'sea',
-      status: 'pending'
+      status: 'pending',
+      shipment_number: ''
     });
     refetch();
   };

@@ -58,6 +58,11 @@ interface ProductManagementType {
   prodCbm?: number | null;
   prodShortName?: string | null;
   by_use?: string[] | null;
+  prodColor1?: string | null;
+  prodColor2?: string | null;
+  prodColor3?: string | null;
+  prodColor4?: string | null;
+  prodColor5?: string | null;
 }
 
 const ProductManagement = () => {

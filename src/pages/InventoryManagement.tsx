@@ -37,7 +37,7 @@ const InventoryManagement = () => {
   const [sortField, setSortField] = useState<keyof InventoryItem>('added_date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [newItem, setNewItem] = useState<InventoryItem>({
-    product_id: '',
+    product_id: 'default_product_id', // Set a default product_id
     quantity: 0,
     batch_number: '',
     unit_cost: 0,
@@ -86,7 +86,7 @@ const InventoryManagement = () => {
 
     toast.success('Inventory item added successfully');
     setNewItem({
-      product_id: '',
+      product_id: 'default_product_id', // Reset product_id to default
       quantity: 0,
       batch_number: '',
       unit_cost: 0,

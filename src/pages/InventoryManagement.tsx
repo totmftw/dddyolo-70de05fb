@@ -180,6 +180,65 @@ const InventoryManagement = () => {
                   Add Item
                 </Button>
               </div>
+
+              {/* Inventory Table */}
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead onClick={() => handleSort('shipment_id')} className="cursor-pointer">
+                      <div className="flex items-center gap-2">
+                        Shipment ID
+                        <ArrowUpDown className="h-4 w-4" />
+                      </div>
+                    </TableHead>
+                    <TableHead onClick={() => handleSort('sku')} className="cursor-pointer">
+                      <div className="flex items-center gap-2">
+                        SKU
+                        <ArrowUpDown className="h-4 w-4" />
+                      </div>
+                    </TableHead>
+                    <TableHead onClick={() => handleSort('quantity')} className="cursor-pointer">
+                      <div className="flex items-center gap-2">
+                        Quantity
+                        <ArrowUpDown className="h-4 w-4" />
+                      </div>
+                    </TableHead>
+                    <TableHead>Batch Number</TableHead>
+                    <TableHead onClick={() => handleSort('unit_cost')} className="cursor-pointer">
+                      <div className="flex items-center gap-2">
+                        Unit Cost
+                        <ArrowUpDown className="h-4 w-4" />
+                      </div>
+                    </TableHead>
+                    <TableHead onClick={() => handleSort('added_date')} className="cursor-pointer">
+                      <div className="flex items-center gap-2">
+                        Added Date
+                        <ArrowUpDown className="h-4 w-4" />
+                      </div>
+                    </TableHead>
+                    <TableHead>Notes</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={8} className="text-center">Loading...</TableCell>
+                    </TableRow>
+                  ) : filteredInventory?.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell>{item.shipments?.shipment_number || '-'}</TableCell>
+                      <TableCell>{item.sku}</TableCell>
+                      <TableCell>{item.quantity}</TableCell>
+                      <TableCell>{item.batch_number}</TableCell>
+                      <TableCell>${item.unit_cost}</TableCell>
+                      <TableCell>{format(new Date(item.added_date), 'MMM dd, yyyy')}</TableCell>
+                      <TableCell>{item.notes}</TableCell>
+                      <TableCell>{item.status}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </TabsContent>
 
             <TabsContent value="bulk" className="space-y-6">
@@ -203,66 +262,7 @@ const InventoryManagement = () => {
                 />
               </div>
             </TabsContent>
-
-            {/* Inventory Table */}
-            <Table className="mt-6">
-              <TableHeader>
-                <TableRow>
-                  <TableHead onClick={() => handleSort('shipment_id')} className="cursor-pointer">
-                    <div className="flex items-center gap-2">
-                      Shipment ID
-                      <ArrowUpDown className="h-4 w-4" />
-                    </div>
-                  </TableHead>
-                  <TableHead onClick={() => handleSort('sku')} className="cursor-pointer">
-                    <div className="flex items-center gap-2">
-                      SKU
-                      <ArrowUpDown className="h-4 w-4" />
-                    </div>
-                  </TableHead>
-                  <TableHead onClick={() => handleSort('quantity')} className="cursor-pointer">
-                    <div className="flex items-center gap-2">
-                      Quantity
-                      <ArrowUpDown className="h-4 w-4" />
-                    </div>
-                  </TableHead>
-                  <TableHead>Batch Number</TableHead>
-                  <TableHead onClick={() => handleSort('unit_cost')} className="cursor-pointer">
-                    <div className="flex items-center gap-2">
-                      Unit Cost
-                      <ArrowUpDown className="h-4 w-4" />
-                    </div>
-                  </TableHead>
-                  <TableHead onClick={() => handleSort('added_date')} className="cursor-pointer">
-                    <div className="flex items-center gap-2">
-                      Added Date
-                      <ArrowUpDown className="h-4 w-4" />
-                    </div>
-                  </TableHead>
-                  <TableHead>Notes</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center">Loading...</TableCell>
-                  </TableRow>
-                ) : filteredInventory?.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell>{item.shipments?.shipment_number || '-'}</TableCell>
-                    <TableCell>{item.sku}</TableCell>
-                    <TableCell>{item.quantity}</TableCell>
-                    <TableCell>{item.batch_number}</TableCell>
-                    <TableCell>${item.unit_cost}</TableCell>
-                    <TableCell>{format(new Date(item.added_date), 'MMM dd, yyyy')}</TableCell>
-                    <TableCell>{item.notes}</TableCell>
-                    <TableCell>{item.status}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
     </div>

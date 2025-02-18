@@ -21,17 +21,37 @@ const LiveInventory = () => {
   const { data: products = [], isLoading } = useQuery({
     queryKey: ['products'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('productManagement')
-        .select('*, inventory_stock!inner(*)')
-        .gt('inventory_stock.quantity', 0)  // Only show products with stock > 0
-        .order('prodName', { ascending: true });
+      // First get all inventory items with quantity > 0
+      const { data: inventoryData, error: inventoryError } = await supabase
+        .from('inventory_stock')
+        .select(`
+          quantity,
+          product_id,
+          productManagement!inventory_stock_product_id_fkey (
+            prodId,
+            prodName,
+            prodBrand,
+            prodCategory,
+            prodImages,
+            prodStatus,
+            prodMrp,
+            prodBasePrice
+          )
+        `)
+        .gt('quantity', 0);
 
-      if (error) {
-        toast.error('Error fetching products');
-        throw error;
+      if (inventoryError) {
+        toast.error('Error fetching inventory');
+        throw inventoryError;
       }
-      return data || [];
+
+      // Transform the data to match our Product interface
+      const transformedData = inventoryData?.map(item => ({
+        ...item.productManagement,
+        prodPiecestock: item.quantity
+      })) || [];
+
+      return transformedData;
     }
   });
 

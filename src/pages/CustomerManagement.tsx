@@ -249,28 +249,33 @@ const CustomerManagement = () => {
   };
 
   const handleUpdateCustomer = async () => {
+    const numberFields = {
+      custPhone: formData.phone ? parseInt(formData.phone) : null,
+      custWhatsapp: formData.whatsapp ? parseInt(formData.whatsapp) : null,
+      custOwnerphone: formData.ownerPhone ? parseInt(formData.ownerPhone) : null,
+      custOwnerwhatsapp: formData.ownerWhatsapp ? parseInt(formData.ownerWhatsapp) : null,
+      custPincode: formData.pincode ? parseInt(formData.pincode) : null,
+      custCreditperiod: formData.creditPeriod ? parseInt(formData.creditPeriod) : null,
+    };
+
     const { error } = await supabase
       .from('customerMaster')
       .update({
         custBusinessname: formData.businessName,
         custOwnername: formData.ownerName,
-        custPhone: formData.phone,
-        custWhatsapp: formData.whatsapp,
-        custOwnerphone: formData.ownerPhone,
-        custOwnerwhatsapp: formData.ownerWhatsapp,
+        ...numberFields,
         custEmail: formData.email,
         custOwneremail: formData.ownerEmail,
         custType: formData.type,
         custAddress: formData.address,
         custProvince: formData.province,
         custCity: formData.city,
-        custPincode: formData.pincode,
         custGST: formData.gst,
         custRemarks: formData.remarks,
-        custStatus: formData.status,
-        custCreditperiod: formData.creditPeriod,
+        custStatus: formData.status as 'active' | 'inactive',
       })
       .eq('id', selectedCustomer?.id);
+
     if (error) {
       toast.error('Failed to update customer');
       console.error('Error updating customer:', error);
@@ -302,24 +307,18 @@ const CustomerManagement = () => {
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target;
-    let parsedValue: string | number = value;
-    
-    if (type === 'number') {
-        parsedValue = value === '' ? '' : Number(value);
-    }
-
+    const { name, value } = e.target;
     setFormData(prev => ({
-        ...prev,
-        [name]: parsedValue
+      ...prev,
+      [name]: value
     }));
   };
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
     setFormData(prev => ({
-        ...prev,
-        [name]: checked
+      ...prev,
+      [name]: checked
     }));
   };
 

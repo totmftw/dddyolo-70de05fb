@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../integrations/supabase/client';
@@ -40,10 +41,6 @@ interface InventoryItem {
   added_by: string | null;
   created_at: string | null;
   updated_at: string | null;
-  productManagement?: {
-    prodName: string;
-    prodId: string;
-  } | null;
 }
 
 const InventoryManagement = () => {
@@ -62,16 +59,31 @@ const InventoryManagement = () => {
   const { data: inventory, isLoading, refetch } = useQuery({
     queryKey: ['inventory'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First get inventory items
+      const { data: inventoryData, error: inventoryError } = await supabase
         .from('inventory_stock')
-        .select(`
-          *,
-          productManagement:product_id (prodName, prodId)
-        `)
+        .select('*')
         .order(sortField, { ascending: sortDirection === 'asc' });
 
-      if (error) throw error;
-      return data as unknown as InventoryItem[];
+      if (inventoryError) throw inventoryError;
+
+      // Then get product details for each inventory item
+      const inventoryWithProducts = await Promise.all(
+        (inventoryData || []).map(async (item) => {
+          const { data: productData } = await supabase
+            .from('productManagement')
+            .select('prodName, prodId')
+            .eq('prodId', item.product_id)
+            .single();
+
+          return {
+            ...item,
+            productManagement: productData || null
+          };
+        })
+      );
+
+      return inventoryWithProducts;
     }
   });
 

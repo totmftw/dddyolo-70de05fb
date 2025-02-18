@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../integrations/supabase/client';
@@ -94,13 +93,12 @@ const InventoryManagement = () => {
     const fetchGSTCategories = async () => {
       const { data, error } = await supabase
         .from('gst_categories')
-        .select('*')
-        .order('rate');
+        .select('id, name, rate');
       
       if (error) {
         toast.error('Error fetching GST categories');
-      } else {
-        setGSTCategories(data || []);
+      } else if (data) {
+        setGSTCategories(data);
       }
     };
 
@@ -179,6 +177,25 @@ const InventoryManagement = () => {
       status: 'active'
     });
     refetch();
+  };
+
+  const handleSort = (field: keyof InventoryItem) => {
+    if (field === sortField) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const handleDownloadTemplate = () => {
+    // Template download logic
+    toast.info('Template download coming soon');
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    // File upload logic
+    toast.info('File upload coming soon');
   };
 
   const filteredInventory = inventory?.filter(item =>

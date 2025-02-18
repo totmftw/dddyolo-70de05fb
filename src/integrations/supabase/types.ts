@@ -486,6 +486,33 @@ export type Database = {
           },
         ]
       }
+      gst_categories: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          rate: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          rate: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          rate?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       inventory_stock: {
         Row: {
           added_by: string | null

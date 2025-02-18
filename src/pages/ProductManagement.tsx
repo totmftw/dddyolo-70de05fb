@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/reused/dialog";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@radix-ui/react-select';
 
 interface Product {
   prodId: string;
@@ -65,6 +66,12 @@ interface ProductManagementType {
   prodColor5?: string | null;
 }
 
+interface GSTCategory {
+  id: string;
+  name: string;
+  rate: number;
+}
+
 const ProductManagement = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [formData, setFormData] = useState<ProductManagementType>({
@@ -81,6 +88,8 @@ const ProductManagement = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [additionalColors, setAdditionalColors] = useState<string[]>([]);
   const [mrpPercentage, setMrpPercentage] = useState(25);
+  const [gstCategories, setGSTCategories] = useState<GSTCategory[]>([]);
+  const [selectedGSTCategory, setSelectedGSTCategory] = useState<string>('');
 
   const collections = [
     'Living Room',
@@ -142,6 +151,23 @@ const ProductManagement = () => {
     }
   };
 
+  const fetchGSTCategories = async () => {
+    const { data, error } = await supabase
+      .from('gst_categories')
+      .select('*')
+      .order('rate');
+    
+    if (error) {
+      toast.error('Error fetching GST categories');
+    } else {
+      setGSTCategories(data || []);
+    }
+  };
+
+  useEffect(() => {
+    fetchGSTCategories();
+  }, []);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -161,14 +187,15 @@ const ProductManagement = () => {
   };
 
   const handleAddProduct = async () => {
-    if (!formData.prodName || !formData.prodMrp || !formData.prodSku) {
-      toast.error('Product name, MRP and SKU are required');
+    if (!formData.prodName || !formData.prodMrp || !selectedGSTCategory) {
+      toast.error('Product name, MRP and GST category are required');
       return;
     }
 
-    const productData: ProductManagementType = {
+    const productData = {
       ...formData,
-      prodImages: selectedFiles ? Array.from(selectedFiles).map(file => URL.createObjectURL(file)) : [],
+      gst_category_id: selectedGSTCategory,
+      prodBasePrice: formData.prodBasePrice || formData.prodMrp
     };
 
     const { error } = await supabase
@@ -556,13 +583,28 @@ const ProductManagement = () => {
           </div>
 
           <div className="space-y-4">
-            <h3 className="font-semibold text-lg">Pricing</h3>
+            <h3 className="font-semibold text-lg">Pricing & GST</h3>
+            <Select
+              value={selectedGSTCategory}
+              onValueChange={setSelectedGSTCategory}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select GST Category *" />
+              </SelectTrigger>
+              <SelectContent>
+                {gstCategories.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.name} ({category.rate}%)
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <input
               type="number"
               name="prodMrp"
               value={formData.prodMrp || ''}
               onChange={handleInputChange}
-              placeholder="MRP *"
+              placeholder="MRP (₹) *"
               className="w-full p-2 border rounded"
               required
             />
@@ -570,10 +612,11 @@ const ProductManagement = () => {
               type="number"
               name="prodBasePrice"
               value={formData.prodBasePrice || ''}
-              readOnly
-              className="w-full p-2 border rounded bg-gray-50"
-              placeholder="Base Price (auto-calculated)"
+              onChange={handleInputChange}
+              placeholder="Base Price (₹)"
+              className="w-full p-2 border rounded"
             />
+            <p className="text-sm text-gray-500">All prices are inclusive of GST</p>
           </div>
 
           <div className="space-y-4">

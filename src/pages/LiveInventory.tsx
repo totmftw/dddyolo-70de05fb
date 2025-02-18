@@ -2,7 +2,8 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../integrations/supabase/client';
-import { Package } from 'lucide-react';
+import { Package, AlertTriangle } from 'lucide-react';
+import { toast } from "sonner";
 
 interface Product {
   prodId: string;
@@ -16,16 +17,18 @@ interface Product {
   prodBasePrice?: number;
 }
 
-const ViewProducts = () => {
+const LiveInventory = () => {
   const { data: products = [], isLoading } = useQuery({
     queryKey: ['products'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('productManagement')
-        .select('*')
+        .select('*, inventory_stock!inner(*)')
+        .gt('inventory_stock.quantity', 0)  // Only show products with stock > 0
         .order('prodName', { ascending: true });
 
       if (error) {
+        toast.error('Error fetching products');
         throw error;
       }
       return data || [];
@@ -40,7 +43,7 @@ const ViewProducts = () => {
     <div className="p-6 max-w-7xl mx-auto">
       <div className="flex items-center gap-2 mb-6">
         <Package className="h-6 w-6" />
-        <h2 className="text-2xl font-bold">Product List</h2>
+        <h2 className="text-2xl font-bold">Live Inventory</h2>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -53,7 +56,15 @@ const ViewProducts = () => {
                 className="w-full h-48 object-cover rounded mb-4"
               />
             )}
-            <h4 className="font-semibold">{product.prodName}</h4>
+            <div className="flex justify-between items-start">
+              <h4 className="font-semibold">{product.prodName}</h4>
+              {product.prodPiecestock && product.prodPiecestock <= 5 && (
+                <div className="flex items-center gap-1 text-red-600">
+                  <AlertTriangle className="h-4 w-4" />
+                  <span className="text-xs">Low Stock!</span>
+                </div>
+              )}
+            </div>
             <p className="text-sm text-gray-600">Brand: {product.prodBrand || 'N/A'}</p>
             <p className="text-sm text-gray-600">Category: {product.prodCategory || 'N/A'}</p>
             <p className="text-sm text-gray-600">Stock: {String(product.prodPiecestock || 0)} pieces</p>
@@ -73,4 +84,4 @@ const ViewProducts = () => {
   );
 };
 
-export default ViewProducts;
+export default LiveInventory;

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../integrations/supabase/client';
 import { toast } from "sonner";
@@ -13,6 +13,13 @@ import {
 } from "../components/reused/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Card,
   CardContent,
@@ -47,10 +54,18 @@ interface InventoryItem {
   } | null;
 }
 
+interface GSTCategory {
+  id: string;
+  name: string;
+  rate: number;
+}
+
 const InventoryManagement = () => {
   const [search, setSearch] = useState('');
   const [sortField, setSortField] = useState<keyof InventoryItem>('added_date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [availableProducts, setAvailableProducts] = useState<Array<{ prodId: string; prodName: string }>>([]);
+  const [gstCategories, setGSTCategories] = useState<GSTCategory[]>([]);
   const [newItem, setNewItem] = useState<Partial<InventoryItem>>({
     product_id: '',
     quantity: 0,
@@ -60,10 +75,42 @@ const InventoryManagement = () => {
     status: 'active'
   });
 
+  useEffect(() => {
+    // Fetch available products
+    const fetchProducts = async () => {
+      const { data, error } = await supabase
+        .from('productManagement')
+        .select('prodId, prodName')
+        .order('prodName');
+      
+      if (error) {
+        toast.error('Error fetching products');
+      } else {
+        setAvailableProducts(data || []);
+      }
+    };
+
+    // Fetch GST categories
+    const fetchGSTCategories = async () => {
+      const { data, error } = await supabase
+        .from('gst_categories')
+        .select('*')
+        .order('rate');
+      
+      if (error) {
+        toast.error('Error fetching GST categories');
+      } else {
+        setGSTCategories(data || []);
+      }
+    };
+
+    fetchProducts();
+    fetchGSTCategories();
+  }, []);
+
   const { data: inventory, isLoading, refetch } = useQuery({
     queryKey: ['inventory'],
     queryFn: async () => {
-      // First get inventory items
       const { data: inventoryData, error: inventoryError } = await supabase
         .from('inventory_stock')
         .select('*')
@@ -71,14 +118,13 @@ const InventoryManagement = () => {
 
       if (inventoryError) throw inventoryError;
 
-      // Then get product details for each inventory item
       const inventoryWithProducts = await Promise.all(
         (inventoryData || []).map(async (item) => {
           const { data: productData } = await supabase
             .from('productManagement')
             .select('prodName, prodId')
             .eq('prodId', item.product_id)
-            .maybeSingle();  // Changed from .single() to .maybeSingle()
+            .maybeSingle();
 
           return {
             ...item,
@@ -94,18 +140,16 @@ const InventoryManagement = () => {
     }
   });
 
-  const handleSort = (field: keyof InventoryItem) => {
-    if (field === sortField) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('asc');
-    }
-  };
-
   const handleAddItem = async () => {
     if (!newItem.product_id || !newItem.quantity) {
-      toast.error('Product ID and quantity are required');
+      toast.error('Item Code and quantity are required');
+      return;
+    }
+
+    // Check if product exists
+    const productExists = availableProducts.some(p => p.prodId === newItem.product_id);
+    if (!productExists) {
+      toast.error('Invalid Item Code. Please select from available products.');
       return;
     }
 
@@ -135,14 +179,6 @@ const InventoryManagement = () => {
       status: 'active'
     });
     refetch();
-  };
-
-  const handleDownloadTemplate = () => {
-    console.log('Download template');
-  };
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('File upload', e.target.files);
   };
 
   const filteredInventory = inventory?.filter(item =>
@@ -182,11 +218,21 @@ const InventoryManagement = () => {
 
             <TabsContent value="single" className="space-y-6">
               <div className="grid grid-cols-5 gap-4 bg-gray-50 p-4 rounded-lg">
-                <Input
-                  placeholder="Product ID"
+                <Select
                   value={newItem.product_id}
-                  onChange={(e) => setNewItem({ ...newItem, product_id: e.target.value })}
-                />
+                  onValueChange={(value) => setNewItem({ ...newItem, product_id: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Item Code" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableProducts.map((product) => (
+                      <SelectItem key={product.prodId} value={product.prodId}>
+                        {product.prodId} - {product.prodName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <Input
                   type="number"
                   placeholder="Quantity"
@@ -200,7 +246,7 @@ const InventoryManagement = () => {
                 />
                 <Input
                   type="number"
-                  placeholder="Unit Cost"
+                  placeholder="Unit Cost (₹)"
                   value={newItem.unit_cost}
                   onChange={(e) => setNewItem({ ...newItem, unit_cost: parseFloat(e.target.value) })}
                 />
@@ -215,7 +261,7 @@ const InventoryManagement = () => {
                   <TableRow>
                     <TableHead onClick={() => handleSort('product_id')} className="cursor-pointer">
                       <div className="flex items-center gap-2">
-                        Product
+                        Item Code
                         <ArrowUpDown className="h-4 w-4" />
                       </div>
                     </TableHead>
@@ -228,7 +274,7 @@ const InventoryManagement = () => {
                     <TableHead>Batch Number</TableHead>
                     <TableHead onClick={() => handleSort('unit_cost')} className="cursor-pointer">
                       <div className="flex items-center gap-2">
-                        Unit Cost
+                        Unit Cost (₹)
                         <ArrowUpDown className="h-4 w-4" />
                       </div>
                     </TableHead>
@@ -252,8 +298,8 @@ const InventoryManagement = () => {
                       <TableCell>{item.productManagement?.prodName || item.product_id}</TableCell>
                       <TableCell>{item.quantity}</TableCell>
                       <TableCell>{item.batch_number}</TableCell>
-                      <TableCell>${item.unit_cost}</TableCell>
-                      <TableCell>{item.added_date ? format(new Date(item.added_date), 'MMM dd, yyyy') : 'N/A'}</TableCell>
+                      <TableCell>₹{item.unit_cost}</TableCell>
+                      <TableCell>{item.added_date ? format(new Date(item.added_date), 'dd-MM-yyyy') : 'N/A'}</TableCell>
                       <TableCell>{item.notes}</TableCell>
                       <TableCell>{item.status}</TableCell>
                     </TableRow>

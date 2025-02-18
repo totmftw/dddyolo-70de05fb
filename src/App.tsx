@@ -12,7 +12,7 @@ import PaymentTracking from './pages/PaymentTracking';
 import UserRoleManagement from './components/reused/UserRoleManagement';
 import ProductManagement from './pages/ProductManagement';
 import ManageProducts from './pages/ManageProducts';
-import ViewProducts from './pages/ViewProducts';
+import LiveInventory from './pages/LiveInventory';
 import AdminOneLayout from './layouts/AdminOneLayout';
 import AuthGuard from './components/AuthGuard';
 import SalesOpportunityManagement from './pages/SalesOpportunityManagement';
@@ -83,7 +83,7 @@ const router = createBrowserRouter([
       },
       {
         path: "products/view",
-        element: <ViewProducts />,
+        element: <LiveInventory />,
       },
       {
         path: "products/admin",

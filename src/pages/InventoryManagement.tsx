@@ -41,6 +41,10 @@ interface InventoryItem {
   added_by: string | null;
   created_at: string | null;
   updated_at: string | null;
+  productManagement?: {
+    prodName: string;
+    prodId: string;
+  } | null;
 }
 
 const InventoryManagement = () => {
@@ -74,11 +78,14 @@ const InventoryManagement = () => {
             .from('productManagement')
             .select('prodName, prodId')
             .eq('prodId', item.product_id)
-            .single();
+            .maybeSingle();  // Changed from .single() to .maybeSingle()
 
           return {
             ...item,
-            productManagement: productData || null
+            productManagement: productData || {
+              prodName: 'Unknown Product',
+              prodId: item.product_id
+            }
           };
         })
       );
@@ -188,7 +195,7 @@ const InventoryManagement = () => {
                 />
                 <Input
                   placeholder="Batch Number"
-                  value={newItem.batch_number}
+                  value={newItem.batch_number || ''}
                   onChange={(e) => setNewItem({ ...newItem, batch_number: e.target.value })}
                 />
                 <Input
@@ -246,7 +253,7 @@ const InventoryManagement = () => {
                       <TableCell>{item.quantity}</TableCell>
                       <TableCell>{item.batch_number}</TableCell>
                       <TableCell>${item.unit_cost}</TableCell>
-                      <TableCell>{format(new Date(item.added_date), 'MMM dd, yyyy')}</TableCell>
+                      <TableCell>{item.added_date ? format(new Date(item.added_date), 'MMM dd, yyyy') : 'N/A'}</TableCell>
                       <TableCell>{item.notes}</TableCell>
                       <TableCell>{item.status}</TableCell>
                     </TableRow>

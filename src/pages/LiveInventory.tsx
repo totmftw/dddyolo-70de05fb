@@ -46,10 +46,15 @@ const LiveInventory = () => {
       }
 
       // Transform the data to match our Product interface
-      const transformedData = inventoryData?.map(item => ({
-        ...item.productManagement,
-        prodPiecestock: item.quantity
-      })) || [];
+      const transformedData = inventoryData?.map(item => {
+        if (!item.productManagement) {
+          return null;
+        }
+        return {
+          ...item.productManagement,
+          prodPiecestock: item.quantity
+        };
+      }).filter((item): item is Product => item !== null) || [];
 
       return transformedData;
     }

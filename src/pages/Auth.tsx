@@ -19,7 +19,7 @@ const Auth = () => {
     // Check if user is already logged in
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        navigate('/dashboard');
+        navigate('/app'); // Changed from /dashboard to /app
       }
     });
 
@@ -28,7 +28,7 @@ const Auth = () => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
-        navigate('/dashboard');
+        navigate('/app'); // Changed from /dashboard to /app
       }
     });
 

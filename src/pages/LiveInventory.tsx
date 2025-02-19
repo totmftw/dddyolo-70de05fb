@@ -20,7 +20,6 @@ interface Product {
 interface InventoryItem {
   quantity: number;
   product_id: string;
-  productManagement: Product | null;
 }
 
 const LiveInventory = () => {
@@ -30,39 +29,39 @@ const LiveInventory = () => {
       // First get all inventory items with quantity > 0
       const { data: inventoryData, error: inventoryError } = await supabase
         .from('inventory_stock')
-        .select(`
-          quantity,
-          product_id,
-          productManagement:productManagement!inventory_stock_product_id_fkey (
-            prodId,
-            prodName,
-            prodBrand,
-            prodCategory,
-            prodImages,
-            prodStatus,
-            prodMrp,
-            prodBasePrice
-          )
-        `)
+        .select('quantity, product_id')
         .gt('quantity', 0);
 
       if (inventoryError) {
         toast.error('Error fetching inventory');
+        console.error('Inventory Error:', inventoryError);
         throw inventoryError;
       }
 
-      // Transform the data to match our Product interface
-      const transformedData = (inventoryData || []).map((item: any) => {
-        if (!item.productManagement) {
-          return null;
-        }
-        return {
-          ...item.productManagement,
-          prodPiecestock: item.quantity
-        } as Product;
-      }).filter((item): item is Product => item !== null);
+      // Get all products referenced in inventory
+      const productIds = inventoryData.map(item => item.product_id);
+      
+      const { data: productsData, error: productsError } = await supabase
+        .from('productManagement')
+        .select('prodId, prodName, prodBrand, prodCategory, prodImages, prodStatus, prodMrp, prodBasePrice')
+        .in('prodId', productIds);
 
-      return transformedData;
+      if (productsError) {
+        toast.error('Error fetching products');
+        console.error('Products Error:', productsError);
+        throw productsError;
+      }
+
+      // Combine the data
+      const combinedData = productsData.map(product => {
+        const inventoryItem = inventoryData.find(item => item.product_id === product.prodId);
+        return {
+          ...product,
+          prodPiecestock: inventoryItem?.quantity || 0
+        };
+      });
+
+      return combinedData as Product[];
     }
   });
 

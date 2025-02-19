@@ -20,7 +20,8 @@ import {
   Percent,
   Grid,
   Truck,
-  BookOpen
+  BookOpen,
+  AlertTriangle
 } from 'lucide-react';
 import { Button } from './ui/button';
 
@@ -39,6 +40,7 @@ const UnifiedSidebar = () => {
     { path: '/app/payments', name: 'Payment Tracking', icon: CreditCard, permission: { resource: 'payments', action: 'view' as const } },
     { path: '/app/roles', name: 'User Role Management', icon: UserCog, permission: { resource: 'roles', action: 'view' as const } },
     { path: '/app/catalog-builder', name: 'Catalog Builder', icon: BookOpen, permission: { resource: 'catalogs', action: 'view' as const } },
+    { path: '/app/inventory/low-stock', name: 'Low Stock Items', icon: AlertTriangle, permission: { resource: 'inventory', action: 'view' as const } },
     { path: '/app/quantity-discounts', name: 'Quantity Discounts', icon: Percent, permission: { resource: 'products', action: 'view' as const } },
     {
       path: '/app/products',

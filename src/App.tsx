@@ -75,6 +75,10 @@ const router = createBrowserRouter([
         element: <UserRoleManagement />,
       },
       {
+        path: "catalog-builder",
+        element: <CatalogBuilder />,
+      },
+      {
         path: "products",
         element: <ProductManagement />,
       },
@@ -93,10 +97,6 @@ const router = createBrowserRouter([
       {
         path: "products/collections",
         element: <CollectionConfig />,
-      },
-      {
-        path: "catalog-builder",
-        element: <CatalogBuilder />,
       },
       {
         path: "sales-management",

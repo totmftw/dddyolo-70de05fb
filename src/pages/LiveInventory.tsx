@@ -17,6 +17,21 @@ interface Product {
   prodBasePrice?: number;
 }
 
+interface InventoryItem {
+  quantity: number;
+  product_id: string;
+  productManagement: {
+    prodId: string;
+    prodName: string;
+    prodBrand?: string;
+    prodCategory?: string;
+    prodImages?: string[];
+    prodStatus: string;
+    prodMrp: number;
+    prodBasePrice?: number;
+  } | null;
+}
+
 const LiveInventory = () => {
   const { data: products = [], isLoading } = useQuery({
     queryKey: ['products'],
@@ -46,14 +61,14 @@ const LiveInventory = () => {
       }
 
       // Transform the data to match our Product interface
-      const transformedData = inventoryData?.map(item => {
+      const transformedData = (inventoryData as InventoryItem[] | null)?.map(item => {
         if (!item.productManagement) {
           return null;
         }
         return {
           ...item.productManagement,
           prodPiecestock: item.quantity
-        };
+        } as Product;
       }).filter((item): item is Product => item !== null) || [];
 
       return transformedData;

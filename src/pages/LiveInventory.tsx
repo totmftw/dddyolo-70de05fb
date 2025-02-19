@@ -20,16 +20,7 @@ interface Product {
 interface InventoryItem {
   quantity: number;
   product_id: string;
-  productManagement: {
-    prodId: string;
-    prodName: string;
-    prodBrand?: string;
-    prodCategory?: string;
-    prodImages?: string[];
-    prodStatus: string;
-    prodMrp: number;
-    prodBasePrice?: number;
-  } | null;
+  productManagement: Product | null;
 }
 
 const LiveInventory = () => {
@@ -42,7 +33,7 @@ const LiveInventory = () => {
         .select(`
           quantity,
           product_id,
-          productManagement!inventory_stock_product_id_fkey (
+          productManagement:productManagement!inventory_stock_product_id_fkey (
             prodId,
             prodName,
             prodBrand,
@@ -61,7 +52,7 @@ const LiveInventory = () => {
       }
 
       // Transform the data to match our Product interface
-      const transformedData = (inventoryData as InventoryItem[] | null)?.map(item => {
+      const transformedData = (inventoryData || []).map((item: any) => {
         if (!item.productManagement) {
           return null;
         }
@@ -69,7 +60,7 @@ const LiveInventory = () => {
           ...item.productManagement,
           prodPiecestock: item.quantity
         } as Product;
-      }).filter((item): item is Product => item !== null) || [];
+      }).filter((item): item is Product => item !== null);
 
       return transformedData;
     }

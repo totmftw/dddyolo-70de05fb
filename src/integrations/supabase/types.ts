@@ -558,6 +558,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_inventory_product"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "productManagement"
+            referencedColumns: ["prodId"]
+          },
+          {
             foreignKeyName: "inventory_stock_shipment_id_fkey"
             columns: ["shipment_id"]
             isOneToOne: false

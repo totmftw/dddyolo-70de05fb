@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
@@ -25,6 +24,7 @@ import { ThemeProvider } from './theme/ThemeContext';
 import { Toaster } from "sonner";
 import { SidebarProvider } from './context/SidebarContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import LowStockInventory from './pages/LowStockInventory';
 
 const queryClient = new QueryClient();
 
@@ -104,6 +104,10 @@ const router = createBrowserRouter([
       {
         path: "quantity-discounts",
         element: <QuantityDiscount />,
+      },
+      {
+        path: "inventory/low-stock",
+        element: <LowStockInventory />,
       },
     ],
   },

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { useQuery } from '@tanstack/react-query';
@@ -142,15 +141,23 @@ const Dashboard = () => {
               <AlertTriangle className="h-5 w-5 text-red-500" />
               <h2 className="text-lg font-semibold">Low Stock Alert</h2>
             </div>
-            <div className="flex items-center gap-2">
-              <Search className="h-4 w-4 text-gray-500" />
-              <Input
-                type="text"
-                placeholder="Search by SKU or name..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-48"
-              />
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Search className="h-4 w-4 text-gray-500" />
+                <Input
+                  type="text"
+                  placeholder="Search by SKU or name..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-48"
+                />
+              </div>
+              <button 
+                onClick={() => navigate('/app/inventory/low-stock')}
+                className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400"
+              >
+                View All
+              </button>
             </div>
           </div>
           <Table>

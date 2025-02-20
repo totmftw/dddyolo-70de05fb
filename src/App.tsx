@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
@@ -21,6 +20,7 @@ import ProductConfig from './pages/ProductConfig';
 import CollectionConfig from './pages/CollectionConfig';
 import CatalogBuilder from './pages/CatalogBuilder';
 import Shipment from './pages/Shipment';
+import WhatsappConfig from './pages/WhatsappConfig';
 import { ThemeProvider } from './theme/ThemeContext';
 import { Toaster } from "sonner";
 import { SidebarProvider } from './context/SidebarContext';
@@ -77,6 +77,10 @@ const router = createBrowserRouter([
       {
         path: "catalog-builder",
         element: <CatalogBuilder />,
+      },
+      {
+        path: "whatsapp-config",
+        element: <WhatsappConfig />,
       },
       {
         path: "products",

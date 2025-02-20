@@ -6,7 +6,7 @@ import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { Switch } from '../components/ui/switch';
 import { toast } from "sonner";
-import { Whatsapp } from 'lucide-react';
+import { MessageSquare } from 'lucide-react';
 
 interface WhatsappConfig {
   id: number;
@@ -68,7 +68,7 @@ const WhatsappConfig = () => {
   return (
     <div className="p-6">
       <div className="mb-6 flex items-center gap-2">
-        <Whatsapp className="h-6 w-6" />
+        <MessageSquare className="h-6 w-6" />
         <h1 className="text-2xl font-bold">WhatsApp Configuration</h1>
       </div>
 

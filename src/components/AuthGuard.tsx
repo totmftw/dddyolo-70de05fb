@@ -1,3 +1,4 @@
+
 import { ReactNode, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -17,6 +18,8 @@ const routePermissions: Record<string, { resource: string; action: 'view' | 'cre
   '/app/sales-management': { resource: 'sales', action: 'view' },
   '/app/catalog-builder': { resource: 'catalogs', action: 'view' },
   '/app/dashboard': { resource: 'dashboard', action: 'view' },
+  '/app/whatsapp-config': { resource: 'settings', action: 'view' },
+  '/app/inventory/low-stock': { resource: 'inventory', action: 'view' }
 };
 
 const AuthGuard = ({ children }: AuthGuardProps) => {
@@ -43,7 +46,7 @@ const AuthGuard = ({ children }: AuthGuardProps) => {
       const hasAccess = hasPermission(requiredPermission.resource, requiredPermission.action);
       if (!hasAccess) {
         toast.error("You don't have permission to access this page");
-        navigate('/dashboard');
+        navigate('/app');
       }
     }
   }, [session, location.pathname, hasPermission, navigate, userProfile]);

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../integrations/supabase/client';
-import { Package, Search, Filter, Download, Trash, Edit, Plus, CheckSquare, Square } from 'lucide-react';
+import { Package, Search, Filter, Trash, Edit, CheckSquare, Square } from 'lucide-react';
 import { toast } from "sonner";
 import {
   Table,
@@ -13,11 +13,27 @@ import {
 } from "../components/reused/table";
 import { Button } from "../components/ui/button";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "../components/reused/dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../components/ui/dropdown-menu";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
 
 interface Product {
   prodId: string;
@@ -30,6 +46,8 @@ interface Product {
   prodBrand: string;
   prodCategory: string;
   prodCollection: string;
+  maxColors: number;
+  useCustomColors: boolean;
 }
 
 const ManageProducts = () => {
@@ -40,6 +58,8 @@ const ManageProducts = () => {
     collection: '',
     status: ''
   });
+  const [editProduct, setEditProduct] = useState<Product | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const { data: products, isLoading, refetch } = useQuery({
     queryKey: ['products'],
@@ -54,6 +74,34 @@ const ManageProducts = () => {
       return data as Product[];
     },
   });
+
+  const handleEdit = (product: Product) => {
+    setEditProduct(product);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdateProduct = async () => {
+    if (!editProduct) return;
+
+    const { error } = await supabase
+      .from('productManagement')
+      .update({
+        prodName: editProduct.prodName,
+        prodBasePrice: editProduct.prodBasePrice,
+        prodStatus: editProduct.prodStatus,
+        maxColors: editProduct.maxColors,
+        useCustomColors: editProduct.useCustomColors,
+      })
+      .eq('prodId', editProduct.prodId);
+
+    if (error) {
+      toast.error('Failed to update product');
+    } else {
+      toast.success('Product updated successfully');
+      setIsEditDialogOpen(false);
+      refetch();
+    }
+  };
 
   const handleDelete = async (prodId: string) => {
     const { error } = await supabase
@@ -273,7 +321,7 @@ const ManageProducts = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => window.location.href = `/dashboard/products/edit/${product.prodId}`}
+                        onClick={() => handleEdit(product)}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -292,6 +340,112 @@ const ManageProducts = () => {
           </Table>
         </div>
       </div>
+
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Product</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="name" className="text-right">
+                Name
+              </Label>
+              <Input
+                id="name"
+                value={editProduct?.prodName || ''}
+                onChange={(e) => setEditProduct(prev => prev ? ({
+                  ...prev,
+                  prodName: e.target.value
+                }) : null)}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="price" className="text-right">
+                Base Price
+              </Label>
+              <Input
+                id="price"
+                type="number"
+                value={editProduct?.prodBasePrice || 0}
+                onChange={(e) => setEditProduct(prev => prev ? ({
+                  ...prev,
+                  prodBasePrice: parseFloat(e.target.value)
+                }) : null)}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="status" className="text-right">
+                Status
+              </Label>
+              <Select
+                value={editProduct?.prodStatus || ''}
+                onValueChange={(value) => setEditProduct(prev => prev ? ({
+                  ...prev,
+                  prodStatus: value
+                }) : null)}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">
+                Colors
+              </Label>
+              <div className="col-span-3 space-y-2">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={editProduct?.useCustomColors || false}
+                    onChange={(e) => setEditProduct(prev => prev ? ({
+                      ...prev,
+                      useCustomColors: e.target.checked
+                    }) : null)}
+                    className="w-4 h-4"
+                  />
+                  <Label>Use custom colors</Label>
+                </div>
+                {!editProduct?.useCustomColors && (
+                  <Select
+                    value={String(editProduct?.maxColors || 1)}
+                    onValueChange={(value) => setEditProduct(prev => prev ? ({
+                      ...prev,
+                      maxColors: parseInt(value)
+                    }) : null)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select number of colors" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[1, 2, 3, 4, 5].map(num => (
+                        <SelectItem key={num} value={String(num)}>
+                          {num} color{num > 1 ? 's' : ''}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleUpdateProduct}>
+              Save changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

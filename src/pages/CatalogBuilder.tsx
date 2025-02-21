@@ -66,7 +66,11 @@ const CatalogBuilder = () => {
   const [catalogName, setCatalogName] = useState('');
   const [selectedType, setSelectedType] = useState<'standard' | 'aged_stock' | 'dead_stock' | 'seasonal'>('standard');
   const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>([]);
   const [collections, setCollections] = useState<{ id: string; name: string }[]>([]);
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
+  const [subcategories, setSubcategories] = useState<{ id: string; name: string }[]>([]);
   const [savedCatalogs, setSavedCatalogs] = useState<CatalogType[]>([]);
   const [selectedCatalogProducts, setSelectedCatalogProducts] = useState<Product[]>([]);
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
@@ -74,8 +78,15 @@ const CatalogBuilder = () => {
 
   useEffect(() => {
     fetchCollections();
+    fetchCategories();
     fetchSavedCatalogs();
   }, []);
+
+  useEffect(() => {
+    if (selectedCategories.length > 0) {
+      fetchSubcategories(selectedCategories[0]);
+    }
+  }, [selectedCategories]);
 
   const fetchCollections = async () => {
     const { data, error } = await supabase
@@ -88,6 +99,33 @@ const CatalogBuilder = () => {
     }
     
     setCollections(data || []);
+  };
+
+  const fetchCategories = async () => {
+    const { data, error } = await supabase
+      .from('categories')
+      .select('id, name');
+    
+    if (error) {
+      toast.error('Error fetching categories');
+      return;
+    }
+    
+    setCategories(data || []);
+  };
+
+  const fetchSubcategories = async (categoryId: string) => {
+    const { data, error } = await supabase
+      .from('product_subcategories')
+      .select('id, name')
+      .eq('category_id', categoryId);
+    
+    if (error) {
+      toast.error('Error fetching subcategories');
+      return;
+    }
+    
+    setSubcategories(data || []);
   };
 
   const fetchSavedCatalogs = async () => {
@@ -117,8 +155,24 @@ const CatalogBuilder = () => {
     if (filters.collections?.length) {
       query = query.in('prodCollection', filters.collections);
     }
+    if (filters.categories?.length) {
+      query = query.in('prodCategory', filters.categories);
+    }
+    if (filters.subcategories?.length) {
+      query = query.in('prodSubcategory', filters.subcategories);
+    }
     if (filters.type) {
-      // Add any type-specific filtering logic here
+      switch(filters.type) {
+        case 'aged_stock':
+          // Add aged stock logic
+          break;
+        case 'dead_stock':
+          // Add dead stock logic
+          break;
+        case 'seasonal':
+          // Add seasonal logic
+          break;
+      }
     }
 
     const { data, error } = await query;
@@ -128,7 +182,7 @@ const CatalogBuilder = () => {
       return [];
     }
 
-    return data;
+    return data || [];
   };
 
   const saveCatalog = async () => {
@@ -141,6 +195,8 @@ const CatalogBuilder = () => {
       name: catalogName,
       filters: {
         collections: selectedCollections,
+        categories: selectedCategories,
+        subcategories: selectedSubcategories,
         type: selectedType
       },
       created_by: userProfile?.id
@@ -158,6 +214,8 @@ const CatalogBuilder = () => {
     toast.success('Catalog saved successfully');
     setCatalogName('');
     setSelectedCollections([]);
+    setSelectedCategories([]);
+    setSelectedSubcategories([]);
     setSelectedType('standard');
     fetchSavedCatalogs();
   };
@@ -371,10 +429,48 @@ const CatalogBuilder = () => {
               </Select>
             </div>
 
+            <div>
+              <label className="block text-sm font-medium mb-1">Category</label>
+              <Select value={selectedCategories[0]} onValueChange={(value) => setSelectedCategories([value])}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Subcategory</label>
+              <Select 
+                value={selectedSubcategories[0]} 
+                onValueChange={(value) => setSelectedSubcategories([value])}
+                disabled={!selectedCategories.length}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={selectedCategories.length ? "Select subcategory" : "Select a category first"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {subcategories.map((subcategory) => (
+                    <SelectItem key={subcategory.id} value={subcategory.id}>
+                      {subcategory.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="flex justify-end gap-4">
               <Button variant="outline" onClick={() => {
                 setCatalogName('');
                 setSelectedCollections([]);
+                setSelectedCategories([]);
+                setSelectedSubcategories([]);
                 setSelectedType('standard');
               }}>
                 Reset

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../integrations/supabase/client';
@@ -190,20 +191,20 @@ const CatalogBuilder = () => {
   const { data: configOptions } = useQuery({
     queryKey: ['customer-config-options'],
     queryFn: async () => {
-      const pvQuery = await supabase
-        .from('customer_config')
-        .select('pv_category')
-        .not('pv_category', 'is', null);
-
-      const ptrQuery = await supabase
-        .from('customer_config')
-        .select('ptr_category')
-        .not('ptr_category', 'is', null);
-
-      const tagQuery = await supabase
-        .from('customer_config')
-        .select('product_tags')
-        .not('product_tags', 'is', null);
+      const [pvQuery, ptrQuery, tagQuery] = await Promise.all([
+        supabase
+          .from('customer_config')
+          .select('pv_category')
+          .not('pv_category', 'is', null),
+        supabase
+          .from('customer_config')
+          .select('ptr_category')
+          .not('ptr_category', 'is', null),
+        supabase
+          .from('customer_config')
+          .select('product_tags')
+          .not('product_tags', 'is', null)
+      ]);
 
       // Create unique sets of values
       const pvSet = new Set(pvQuery.data?.map(d => d.pv_category));

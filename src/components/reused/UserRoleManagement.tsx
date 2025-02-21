@@ -22,12 +22,14 @@ interface Role {
 }
 
 interface RolePermission {
-  role_id: string;
-  feature_permission_id: string;
+  id: number;
+  role_name: string;
+  permission_name: string;
   can_create: boolean;
-  can_read: boolean;
-  can_update: boolean;
+  can_view: boolean;
+  can_edit: boolean;
   can_delete: boolean;
+  custom_permissions?: Record<string, any>;
 }
 
 interface FeaturePermission {
@@ -36,7 +38,7 @@ interface FeaturePermission {
   feature_path: string;
 }
 
-type PermissionAction = 'can_create' | 'can_read' | 'can_update' | 'can_delete';
+type PermissionAction = 'can_create' | 'can_view' | 'can_edit' | 'can_delete';
 
 const UserRoleManagement = () => {
   const { theme } = useTheme();
@@ -136,7 +138,7 @@ const UserRoleManagement = () => {
     }
   };
 
-  const handlePermissionToggle = async (roleId: string, featureId: string, action: PermissionAction) => {
+  const handlePermissionToggle = async (roleName: string, featureName: string, action: PermissionAction) => {
     if (!isAdmin) {
       toast.error('Only administrators can modify permissions');
       return;
@@ -144,7 +146,7 @@ const UserRoleManagement = () => {
 
     try {
       const existingPermission = rolePermissions.find(
-        rp => rp.role_id === roleId && rp.feature_permission_id === featureId
+        rp => rp.role_name === roleName && rp.permission_name === featureName
       );
 
       if (existingPermission) {
@@ -153,19 +155,19 @@ const UserRoleManagement = () => {
           .update({ 
             [action]: !existingPermission[action] 
           })
-          .eq('role_id', roleId)
-          .eq('feature_permission_id', featureId);
+          .eq('role_name', roleName)
+          .eq('permission_name', featureName);
 
         if (error) throw error;
       } else {
         const { error } = await supabase
           .from('role_permissions')
           .insert({
-            role_id: roleId,
-            feature_permission_id: featureId,
+            role_name: roleName,
+            permission_name: featureName,
             can_create: action === 'can_create',
-            can_read: action === 'can_read',
-            can_update: action === 'can_update',
+            can_view: action === 'can_view',
+            can_edit: action === 'can_edit',
             can_delete: action === 'can_delete'
           });
 
@@ -180,13 +182,13 @@ const UserRoleManagement = () => {
     }
   };
 
-  const getRolePermission = (roleId: string, featureId: string): RolePermission | undefined => {
+  const getRolePermission = (roleName: string, featureName: string): RolePermission | undefined => {
     return rolePermissions.find(
-      rp => rp.role_id === roleId && rp.feature_permission_id === featureId
+      rp => rp.role_name === roleName && rp.permission_name === featureName
     );
   };
 
-  const permissionActions: PermissionAction[] = ['can_create', 'can_read', 'can_update', 'can_delete'];
+  const permissionActions: PermissionAction[] = ['can_create', 'can_view', 'can_edit', 'can_delete'];
 
   return (
     <div className="p-6">
@@ -266,13 +268,13 @@ const UserRoleManagement = () => {
                         <h4 className="font-medium mb-2">{feature.feature_name}</h4>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                           {permissionActions.map(action => {
-                            const permission = getRolePermission(role.id, feature.id);
+                            const permission = getRolePermission(role.role_name, feature.feature_name);
                             return (
                               <label key={action} className="flex items-center space-x-2">
                                 <input
                                   type="checkbox"
                                   checked={!!permission?.[action]}
-                                  onChange={() => handlePermissionToggle(role.id, feature.id, action)}
+                                  onChange={() => handlePermissionToggle(role.role_name, feature.feature_name, action)}
                                   disabled={!isAdmin}
                                   className="form-checkbox h-4 w-4"
                                 />

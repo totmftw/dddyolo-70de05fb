@@ -91,8 +91,6 @@ const CatalogBuilder = () => {
   const [selectedCatalogName, setSelectedCatalogName] = useState('');
   const [customerConfigs, setCustomerConfigs] = useState<CustomerConfig[]>([]);
   const [workflowConfigs, setWorkflowConfigs] = useState<Map<string, WhatsAppConfig>>(new Map());
-  const [showWorkflowDialog, setShowWorkflowDialog] = useState(false);
-  const [selectedCatalog, setSelectedCatalog] = useState<string | null>(null);
 
   useEffect(() => {
     fetchCollections();
@@ -102,11 +100,29 @@ const CatalogBuilder = () => {
     fetchWorkflowStatus();
   }, []);
 
-  useEffect(() => {
-    if (selectedCategories.length > 0) {
-      fetchSubcategories(selectedCategories[0]);
+  const fetchWorkflowStatus = async () => {
+    const { data, error } = await supabase
+      .from('whatsapp_config')
+      .select('*')
+      .eq('template_name', 'catalog_share');
+
+    if (error) {
+      console.error('Error fetching workflow status:', error);
+      return;
     }
-  }, [selectedCategories]);
+
+    const configMap = new Map<string, WhatsAppConfig>();
+    data?.forEach(config => {
+      if (config.catalog_id) {
+        configMap.set(config.catalog_id, {
+          ...config,
+          status: config.status as WhatsAppConfig['status']
+        });
+      }
+    });
+
+    setWorkflowConfigs(configMap);
+  };
 
   const fetchCollections = async () => {
     const { data, error } = await supabase
@@ -180,27 +196,6 @@ const CatalogBuilder = () => {
     }
 
     setCustomerConfigs(data || []);
-  };
-
-  const fetchWorkflowStatus = async () => {
-    const { data, error } = await supabase
-      .from('whatsapp_config')
-      .select('*')
-      .eq('template_name', 'catalog_share');
-
-    if (error) {
-      console.error('Error fetching workflow status:', error);
-      return;
-    }
-
-    const configMap = new Map<string, WhatsAppConfig>();
-    data?.forEach(config => {
-      if (config.catalog_id) {
-        configMap.set(config.catalog_id, config as WhatsAppConfig);
-      }
-    });
-
-    setWorkflowConfigs(configMap);
   };
 
   const fetchCatalogProducts = async (filters: CatalogType['filters']) => {
@@ -322,8 +317,8 @@ const CatalogBuilder = () => {
     }
   };
 
-  const handleSendToWorkflow = async (event: React.MouseEvent<HTMLButtonElement>, catalogId: string) => {
-    event.preventDefault();
+  const handleSendToWorkflow = async (e: React.MouseEvent<HTMLButtonElement>, catalogId: string) => {
+    e.preventDefault();
     try {
       const { data: existingConfig, error: configError } = await supabase
         .from('whatsapp_config')

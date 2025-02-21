@@ -1970,38 +1970,52 @@ export type Database = {
       whatsapp_config: {
         Row: {
           api_key: string
+          catalog_id: string | null
           created_at: string | null
           from_phone_number_id: string
           id: number
           is_active: boolean | null
           reminder_rules: Json | null
+          status: string | null
           template_name: string
           template_namespace: string
           updated_at: string | null
         }
         Insert: {
           api_key: string
+          catalog_id?: string | null
           created_at?: string | null
           from_phone_number_id: string
           id?: number
           is_active?: boolean | null
           reminder_rules?: Json | null
+          status?: string | null
           template_name: string
           template_namespace: string
           updated_at?: string | null
         }
         Update: {
           api_key?: string
+          catalog_id?: string | null
           created_at?: string | null
           from_phone_number_id?: string
           id?: number
           is_active?: boolean | null
           reminder_rules?: Json | null
+          status?: string | null
           template_name?: string
           template_namespace?: string
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_config_catalog_id_fkey"
+            columns: ["catalog_id"]
+            isOneToOne: false
+            referencedRelation: "catalogs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

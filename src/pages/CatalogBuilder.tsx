@@ -3,8 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../integrations/supabase/client';
 import { toast } from "sonner";
-const pdfMake = require("pdfmake/build/pdfmake");
-const pdfFonts = require("pdfmake/build/vfs_fonts");
 import {
   Card,
   CardContent,
@@ -61,9 +59,6 @@ interface CustomerConfigOption {
   category: string;
   value: string;
 }
-
-// Initialize pdfMake with fonts
-pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 const CatalogBuilder = () => {
   const { userProfile } = useAuth();
@@ -241,6 +236,13 @@ const CatalogBuilder = () => {
 
   const generateCatalogPDF = async (catalogId: string) => {
     try {
+      // Dynamically import pdfMake and fonts
+      const pdfMake = await import('pdfmake/build/pdfmake');
+      const pdfFonts = await import('pdfmake/build/vfs_fonts');
+      
+      // Initialize fonts
+      pdfMake.default.vfs = pdfFonts.pdfMake.vfs;
+
       // First fetch the catalog details
       const { data: catalogData, error: catalogError } = await supabase
         .from('catalogs')
@@ -253,7 +255,7 @@ const CatalogBuilder = () => {
         return;
       }
 
-      // Transform the raw catalog data to ensure it matches our CatalogType
+      // Transform the raw catalog data
       const catalog: CatalogType = {
         id: catalogData.id,
         name: catalogData.name,
@@ -274,14 +276,12 @@ const CatalogBuilder = () => {
               headerRows: 1,
               widths: ['*', '*', '*', 'auto'],
               body: [
-                // Header row
                 [
                   { text: 'SKU', style: 'tableHeader' },
                   { text: 'Name', style: 'tableHeader' },
                   { text: 'Category', style: 'tableHeader' },
                   { text: 'MRP (₹)', style: 'tableHeader' }
                 ],
-                // Product rows
                 ...products.map(product => [
                   product.prodSku,
                   product.prodName,
@@ -310,9 +310,9 @@ const CatalogBuilder = () => {
       };
 
       // Generate PDF
-      const pdfDocGenerator = pdfMake.createPdf(docDefinition);
+      const pdfDocGenerator = pdfMake.default.createPdf(docDefinition);
       
-      pdfDocGenerator.getBlob(async (blob) => {
+      pdfDocGenerator.getBlob((blob) => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;

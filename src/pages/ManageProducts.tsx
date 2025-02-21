@@ -35,7 +35,7 @@ import {
   SelectValue,
 } from "../components/ui/select";
 
-interface DatabaseProduct {
+interface Product {
   prodId: string;
   prodName: string;
   prodSku: string;
@@ -46,6 +46,8 @@ interface DatabaseProduct {
   prodBrand: string;
   prodCategory: string;
   prodCollection: string;
+  maxColors: number;
+  useCustomColors: boolean;
   by_use: string[];
   prodBoxstock: number;
   prodCbm: number;
@@ -55,11 +57,6 @@ interface DatabaseProduct {
   prodColor4: string;
   prodColor5: string;
   [key: string]: any;
-}
-
-interface Product extends DatabaseProduct {
-  maxColors: number;
-  useCustomColors: boolean;
 }
 
 const ManageProducts = () => {
@@ -79,18 +76,13 @@ const ManageProducts = () => {
       const { data, error } = await supabase
         .from('productManagement')
         .select('*');
+      
       if (error) {
         toast.error('Failed to fetch products');
         throw error;
       }
       
-      const transformedData = (data as DatabaseProduct[]).map(product => ({
-        ...product,
-        maxColors: 1,
-        useCustomColors: false
-      }));
-      
-      return transformedData;
+      return (data || []) as Product[];
     },
   });
 

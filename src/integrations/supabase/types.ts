@@ -1216,6 +1216,7 @@ export type Database = {
       productManagement: {
         Row: {
           by_use: string[] | null
+          maxColors: number | null
           prodBasePrice: number | null
           prodBoxstock: number | null
           prodBrand: string | null
@@ -1256,9 +1257,11 @@ export type Database = {
           prodUnitweight: number | null
           prodVariableprice: number | null
           prodVariant: string | null
+          useCustomColors: boolean | null
         }
         Insert: {
           by_use?: string[] | null
+          maxColors?: number | null
           prodBasePrice?: number | null
           prodBoxstock?: number | null
           prodBrand?: string | null
@@ -1299,9 +1302,11 @@ export type Database = {
           prodUnitweight?: number | null
           prodVariableprice?: number | null
           prodVariant?: string | null
+          useCustomColors?: boolean | null
         }
         Update: {
           by_use?: string[] | null
+          maxColors?: number | null
           prodBasePrice?: number | null
           prodBoxstock?: number | null
           prodBrand?: string | null
@@ -1342,6 +1347,7 @@ export type Database = {
           prodUnitweight?: number | null
           prodVariableprice?: number | null
           prodVariant?: string | null
+          useCustomColors?: boolean | null
         }
         Relationships: []
       }

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../integrations/supabase/client';
 import { toast } from "sonner";
@@ -11,6 +11,12 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/reused/dialog";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -18,7 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Grid, Filter, Save } from 'lucide-react';
+import { Grid, Filter, Save, Eye, Trash2 } from 'lucide-react';
 
 interface CatalogType {
   id: string;
@@ -32,15 +38,28 @@ interface CatalogType {
   created_at: Date;
 }
 
+interface Product {
+  prodId: string;
+  prodName: string;
+  prodSku: string;
+  prodCategory: string;
+  prodMrp: number;
+}
+
 const CatalogBuilder = () => {
   const { userProfile } = useAuth();
   const [catalogName, setCatalogName] = useState('');
   const [selectedType, setSelectedType] = useState<'standard' | 'aged_stock' | 'dead_stock' | 'seasonal'>('standard');
   const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
   const [collections, setCollections] = useState<{ id: string; name: string }[]>([]);
+  const [savedCatalogs, setSavedCatalogs] = useState<CatalogType[]>([]);
+  const [selectedCatalogProducts, setSelectedCatalogProducts] = useState<Product[]>([]);
+  const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
+  const [selectedCatalogName, setSelectedCatalogName] = useState('');
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchCollections();
+    fetchSavedCatalogs();
   }, []);
 
   const fetchCollections = async () => {
@@ -54,6 +73,40 @@ const CatalogBuilder = () => {
     }
     
     setCollections(data || []);
+  };
+
+  const fetchSavedCatalogs = async () => {
+    const { data, error } = await supabase
+      .from('catalogs')
+      .select('*')
+      .eq('created_by', userProfile?.id);
+
+    if (error) {
+      toast.error('Error fetching saved catalogs');
+      return;
+    }
+
+    setSavedCatalogs(data || []);
+  };
+
+  const fetchCatalogProducts = async (filters: CatalogType['filters']) => {
+    let query = supabase.from('productManagement').select('prodId, prodName, prodSku, prodCategory, prodMrp');
+
+    if (filters.collections?.length) {
+      query = query.in('prodCollection', filters.collections);
+    }
+    if (filters.type) {
+      // Add any type-specific filtering logic here
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      toast.error('Error fetching catalog products');
+      return [];
+    }
+
+    return data;
   };
 
   const saveCatalog = async () => {
@@ -84,10 +137,33 @@ const CatalogBuilder = () => {
     setCatalogName('');
     setSelectedCollections([]);
     setSelectedType('standard');
+    fetchSavedCatalogs();
+  };
+
+  const deleteCatalog = async (catalogId: string) => {
+    const { error } = await supabase
+      .from('catalogs')
+      .delete()
+      .eq('id', catalogId);
+
+    if (error) {
+      toast.error('Error deleting catalog');
+      return;
+    }
+
+    toast.success('Catalog deleted successfully');
+    fetchSavedCatalogs();
+  };
+
+  const viewCatalogProducts = async (catalog: CatalogType) => {
+    const products = await fetchCatalogProducts(catalog.filters);
+    setSelectedCatalogProducts(products);
+    setSelectedCatalogName(catalog.name);
+    setIsProductDialogOpen(true);
   };
 
   return (
-    <div className="p-6">
+    <div className="p-6 space-y-6">
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
@@ -153,6 +229,78 @@ const CatalogBuilder = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Saved Catalogs Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Saved Catalogs</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {savedCatalogs.map((catalog) => (
+              <div key={catalog.id} className="flex items-center justify-between p-4 border rounded-lg">
+                <div>
+                  <h3 className="font-medium">{catalog.name}</h3>
+                  <p className="text-sm text-gray-500">Type: {catalog.filters.type}</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => viewCatalogProducts(catalog)}
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => deleteCatalog(catalog.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+            {savedCatalogs.length === 0 && (
+              <p className="text-center text-gray-500">No catalogs saved yet</p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Products Dialog */}
+      <Dialog open={isProductDialogOpen} onOpenChange={setIsProductDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-auto">
+          <DialogHeader>
+            <DialogTitle>Products in {selectedCatalogName}</DialogTitle>
+          </DialogHeader>
+          <div className="mt-4">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b">
+                  <th className="text-left p-2">SKU</th>
+                  <th className="text-left p-2">Name</th>
+                  <th className="text-left p-2">Category</th>
+                  <th className="text-right p-2">MRP</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedCatalogProducts.map((product) => (
+                  <tr key={product.prodId} className="border-b">
+                    <td className="p-2">{product.prodSku}</td>
+                    <td className="p-2">{product.prodName}</td>
+                    <td className="p-2">{product.prodCategory}</td>
+                    <td className="p-2 text-right">₹{product.prodMrp.toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {selectedCatalogProducts.length === 0 && (
+              <p className="text-center text-gray-500 py-4">No products found in this catalog</p>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

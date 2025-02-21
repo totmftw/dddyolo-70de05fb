@@ -22,8 +22,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Grid, Filter, Save, Eye, Trash2 } from 'lucide-react';
+import { Grid, Filter, Save, Eye, Trash2, Send, FileDown } from 'lucide-react';
+import { useQuery, useMutation } from '@tanstack/react-query';
 
 interface CatalogFilters {
   collections?: string[];
@@ -45,6 +52,11 @@ interface Product {
   prodSku: string;
   prodCategory: string;
   prodMrp: number;
+}
+
+interface CustomerConfigOption {
+  category: string;
+  value: string;
 }
 
 const CatalogBuilder = () => {
@@ -170,6 +182,60 @@ const CatalogBuilder = () => {
     setIsProductDialogOpen(true);
   };
 
+  const [selectedCatalog, setSelectedCatalog] = useState<string | null>(null);
+  const [showWorkflowDialog, setShowWorkflowDialog] = useState(false);
+  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+
+  // Fetch customer config options
+  const { data: configOptions } = useQuery({
+    queryKey: ['customer-config-options'],
+    queryFn: async () => {
+      const { data: pvData } = await supabase
+        .from('customer_config')
+        .select('pv_category')
+        .distinct();
+
+      const { data: ptrData } = await supabase
+        .from('customer_config')
+        .select('ptr_category')
+        .distinct();
+
+      const { data: tagData } = await supabase
+        .from('customer_config')
+        .select('product_tags')
+        .distinct();
+
+      const options: CustomerConfigOption[] = [
+        ...(pvData?.map(d => ({ category: 'PV Category', value: d.pv_category })) || []),
+        ...(ptrData?.map(d => ({ category: 'PTR Category', value: d.ptr_category })) || []),
+        ...(tagData?.flatMap(d => d.product_tags?.map(tag => ({ category: 'Product Tags', value: tag })) || []))
+      ].filter(option => option.value !== null);
+
+      return options;
+    }
+  });
+
+  const handleSendToWorkflow = async () => {
+    try {
+      // Here you would implement the logic to send the catalog based on selected filters
+      // This is a placeholder for the actual implementation
+      toast.success('Catalog sent to workflow successfully');
+      setShowWorkflowDialog(false);
+    } catch (error) {
+      toast.error('Failed to send catalog to workflow');
+    }
+  };
+
+  const handleDownloadPDF = async (catalogId: string) => {
+    try {
+      // Here you would implement the PDF generation logic
+      // This is a placeholder for the actual implementation
+      toast.success('PDF generated and ready for WhatsApp');
+    } catch (error) {
+      toast.error('Failed to generate PDF');
+    }
+  };
+
   return (
     <div className="p-6 space-y-6">
       <Card>
@@ -262,6 +328,23 @@ const CatalogBuilder = () => {
                   <Button
                     variant="outline"
                     size="sm"
+                    onClick={() => {
+                      setSelectedCatalog(catalog.id);
+                      setShowWorkflowDialog(true);
+                    }}
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDownloadPDF(catalog.id)}
+                  >
+                    <FileDown className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => deleteCatalog(catalog.id)}
                   >
                     <Trash2 className="h-4 w-4" />
@@ -275,6 +358,61 @@ const CatalogBuilder = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Workflow Dialog */}
+      <Dialog open={showWorkflowDialog} onOpenChange={setShowWorkflowDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Send to Workflow</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Select Filters</label>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start">
+                    {selectedFilters.length > 0 
+                      ? `${selectedFilters.length} filters selected`
+                      : 'Select filters'}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56">
+                  {configOptions?.map((option) => (
+                    <DropdownMenuItem
+                      key={`${option.category}-${option.value}`}
+                      onSelect={() => {
+                        const newValue = `${option.category}: ${option.value}`;
+                        setSelectedFilters(prev => 
+                          prev.includes(newValue)
+                            ? prev.filter(f => f !== newValue)
+                            : [...prev, newValue]
+                        );
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={selectedFilters.includes(`${option.category}: ${option.value}`)}
+                          onChange={() => {}}
+                          className="h-4 w-4"
+                        />
+                        <span>{option.category}: {option.value}</span>
+                      </div>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            <Button 
+              className="w-full"
+              onClick={handleSendToWorkflow}
+              disabled={selectedFilters.length === 0}
+            >
+              Send to Workflow
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Products Dialog */}
       <Dialog open={isProductDialogOpen} onOpenChange={setIsProductDialogOpen}>

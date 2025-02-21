@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState } from 'react';
 
 // Define the type for the Sidebar context
@@ -19,8 +20,9 @@ export const useSidebar = () => {
 };
 
 // SidebarProvider component to manage the sidebar state
-export const SidebarProvider = ({ children }) => {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+export const SidebarProvider = ({ children }: { children: React.ReactNode }) => {
+    // Changed initial state to true so sidebar is visible by default
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
     const toggleSidebar = () => {
         setIsSidebarOpen(prev => !prev);

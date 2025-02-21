@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from '../theme/ThemeContext';
@@ -32,7 +31,6 @@ const UnifiedSidebar = () => {
   const { signOut, hasPermission, userProfile } = useAuth();
   const { isSidebarOpen } = useSidebar();
 
-  // Add check for admin roles
   const isAdmin = userProfile?.role === 'it_admin' || userProfile?.role === 'business_owner';
 
   const menuItems = [
@@ -73,9 +71,8 @@ const UnifiedSidebar = () => {
   };
 
   return (
-    <aside className={`z-20 w-64 overflow-y-auto bg-white dark:bg-gray-800 md:block flex-shrink-0 ${
-      isSidebarOpen ? 'block' : 'hidden'
-    }`}>
+    <aside className={`fixed left-0 z-20 h-screen w-64 overflow-y-auto bg-white dark:bg-gray-800 
+      ${isSidebarOpen ? 'block' : 'hidden md:block'}`}>
       <div className="py-4 text-gray-500 dark:text-gray-400">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-2">
@@ -85,7 +82,6 @@ const UnifiedSidebar = () => {
         </div>
         <ul className="mt-6">
           {menuItems.map((item, index) => (
-            // Modified to bypass permission check for admins
             (isAdmin || hasPermission(item.permission.resource, item.permission.action)) && (
               <li key={index} className="relative px-6 py-3">
                 {isActive(item.path) && (
@@ -105,7 +101,6 @@ const UnifiedSidebar = () => {
                 {item.subItems && (
                   <ul className="pl-10 mt-1">
                     {item.subItems.map((subItem, subIndex) => (
-                      // Modified to bypass permission check for admins
                       (isAdmin || hasPermission(subItem.permission.resource, subItem.permission.action)) && (
                         <li key={subIndex} className="relative py-1">
                           <Link

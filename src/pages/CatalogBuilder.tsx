@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../integrations/supabase/client';
@@ -26,15 +25,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { Grid, Filter, Save, Eye, Trash2 } from 'lucide-react';
 
+interface CatalogFilters {
+  collections?: string[];
+  categories?: string[];
+  subcategories?: string[];
+  type?: 'standard' | 'aged_stock' | 'dead_stock' | 'seasonal';
+}
+
 interface CatalogType {
   id: string;
   name: string;
-  filters: {
-    collections?: string[];
-    categories?: string[];
-    subcategories?: string[];
-    type?: 'standard' | 'aged_stock' | 'dead_stock' | 'seasonal';
-  };
+  filters: CatalogFilters;
   created_at: Date;
 }
 
@@ -86,7 +87,14 @@ const CatalogBuilder = () => {
       return;
     }
 
-    setSavedCatalogs(data || []);
+    const transformedData: CatalogType[] = (data || []).map(catalog => ({
+      id: catalog.id,
+      name: catalog.name,
+      filters: catalog.filters as CatalogFilters,
+      created_at: new Date(catalog.created_at)
+    }));
+
+    setSavedCatalogs(transformedData);
   };
 
   const fetchCatalogProducts = async (filters: CatalogType['filters']) => {

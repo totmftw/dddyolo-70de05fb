@@ -100,6 +100,12 @@ const CatalogBuilder = () => {
     fetchWorkflowStatus();
   }, []);
 
+  useEffect(() => {
+    if (selectedCategories.length > 0) {
+      fetchSubcategories(selectedCategories[0]);
+    }
+  }, [selectedCategories]);
+
   const fetchWorkflowStatus = async () => {
     const { data, error } = await supabase
       .from('whatsapp_config')
@@ -317,8 +323,11 @@ const CatalogBuilder = () => {
     }
   };
 
-  const handleSendToWorkflow = async (e: React.MouseEvent<HTMLButtonElement>, catalogId: string) => {
+  const handleSendToWorkflow = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+    const catalogId = (e.currentTarget as HTMLButtonElement).dataset.catalogId;
+    if (!catalogId) return;
+
     try {
       const { data: existingConfig, error: configError } = await supabase
         .from('whatsapp_config')
@@ -578,7 +587,8 @@ const CatalogBuilder = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={(e) => handleSendToWorkflow(e, catalog.id)}
+                    data-catalog-id={catalog.id}
+                    onClick={handleSendToWorkflow}
                   >
                     <Send className="h-4 w-4" />
                   </Button>
@@ -605,60 +615,6 @@ const CatalogBuilder = () => {
           </div>
         </CardContent>
       </Card>
-
-      <Dialog open={showWorkflowDialog} onOpenChange={setShowWorkflowDialog}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Send to Workflow</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Select Filters</label>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start">
-                    {selectedFilters.length > 0 
-                      ? `${selectedFilters.length} filters selected`
-                      : 'Select filters'}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56">
-                  {configOptions?.map((option) => (
-                    <DropdownMenuItem
-                      key={`${option.category}-${option.value}`}
-                      onSelect={() => {
-                        const newValue = `${option.category}: ${option.value}`;
-                        setSelectedFilters(prev => 
-                          prev.includes(newValue)
-                            ? prev.filter(f => f !== newValue)
-                            : [...prev, newValue]
-                        );
-                      }}
-                    >
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={selectedFilters.includes(`${option.category}: ${option.value}`)}
-                          onChange={() => {}}
-                          className="h-4 w-4"
-                        />
-                        <span>{option.category}: {option.value}</span>
-                      </div>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-            <Button 
-              className="w-full"
-              onClick={handleSendToWorkflow}
-              disabled={selectedFilters.length === 0}
-            >
-              Send to Workflow
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       <Dialog open={isProductDialogOpen} onOpenChange={setIsProductDialogOpen}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-auto">

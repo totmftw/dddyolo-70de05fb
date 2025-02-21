@@ -1,8 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../integrations/supabase/client';
 import { toast } from "sonner";
+import pdfMake from "pdfmake/build/pdfmake";
+import pdfFonts from "pdfmake/build/vfs_fonts";
 import {
   Card,
   CardContent,
@@ -59,6 +60,9 @@ interface CustomerConfigOption {
   category: string;
   value: string;
 }
+
+// Initialize pdfMake with fonts
+pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 const CatalogBuilder = () => {
   const { userProfile } = useAuth();
@@ -234,14 +238,94 @@ const CatalogBuilder = () => {
     }
   };
 
-  const handleDownloadPDF = async (catalogId: string) => {
+  const generateCatalogPDF = async (catalogId: string) => {
     try {
-      // Here you would implement the PDF generation logic
-      // This is a placeholder for the actual implementation
-      toast.success('PDF generated and ready for WhatsApp');
+      // First fetch the catalog details
+      const { data: catalog } = await supabase
+        .from('catalogs')
+        .select('*')
+        .eq('id', catalogId)
+        .single();
+
+      if (!catalog) {
+        toast.error('Catalog not found');
+        return;
+      }
+
+      // Fetch products for this catalog
+      const products = await fetchCatalogProducts(catalog.filters);
+
+      // Define the document definition
+      const docDefinition = {
+        content: [
+          { text: catalog.name, style: 'header' },
+          { text: '\n' },
+          {
+            table: {
+              headerRows: 1,
+              widths: ['*', '*', '*', 'auto'],
+              body: [
+                // Header row
+                [
+                  { text: 'SKU', style: 'tableHeader' },
+                  { text: 'Name', style: 'tableHeader' },
+                  { text: 'Category', style: 'tableHeader' },
+                  { text: 'MRP (₹)', style: 'tableHeader' }
+                ],
+                // Product rows
+                ...products.map(product => [
+                  product.prodSku,
+                  product.prodName,
+                  product.prodCategory,
+                  product.prodMrp.toFixed(2)
+                ])
+              ]
+            }
+          }
+        ],
+        styles: {
+          header: {
+            fontSize: 18,
+            bold: true,
+            margin: [0, 0, 0, 10]
+          },
+          tableHeader: {
+            bold: true,
+            fontSize: 13,
+            color: 'black'
+          }
+        },
+        defaultStyle: {
+          fontSize: 12
+        }
+      };
+
+      // Generate PDF
+      const pdfDocGenerator = pdfMake.createPdf(docDefinition);
+      
+      // Get the blob
+      pdfDocGenerator.getBlob(async (blob) => {
+        // Create a download link
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${catalog.name.replace(/\s+/g, '_')}_catalog.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        toast.success('PDF generated successfully');
+      });
+
     } catch (error) {
+      console.error('Error generating PDF:', error);
       toast.error('Failed to generate PDF');
     }
+  };
+
+  const handleDownloadPDF = async (catalogId: string) => {
+    await generateCatalogPDF(catalogId);
   };
 
   return (

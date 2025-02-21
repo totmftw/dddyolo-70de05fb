@@ -73,11 +73,20 @@ const ProductManagement = () => {
     }
 
     const productToInsert = {
-      ...newProduct,
-      prodId: `PROD_${Date.now()}`, // Generate a unique ID
+      prodId: `PROD_${Date.now()}`,
+      prodName: newProduct.prodName,
+      prodSku: newProduct.prodSku,
+      prodBasePrice: newProduct.prodBasePrice || 0,
       prodStatus: newProduct.prodStatus || 'active',
+      prodCategory: newProduct.prodCategory || '',
+      prodCollection: newProduct.prodCollection || '',
+      maxColors: newProduct.maxColors || 1,
       prodMrp: newProduct.prodMrp || 0,
-      maxColors: newProduct.maxColors || 1
+      prodBoxstock: 0,
+      by_use: [],
+      prodBrand: '',
+      prodCbm: 0,
+      useCustomColors: false
     };
 
     const { error } = await supabase

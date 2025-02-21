@@ -40,6 +40,8 @@ interface CatalogType {
   name: string;
   filters: CatalogFilters;
   created_at: Date;
+  is_active: boolean;
+  created_by: string | null;
 }
 
 interface Product {
@@ -48,6 +50,8 @@ interface Product {
   prodSku: string;
   prodCategory: string;
   prodMrp: number;
+  maxColors: number;
+  useCustomColors: boolean;
 }
 
 interface CustomerConfig {
@@ -71,6 +75,7 @@ interface WhatsAppConfig {
 
 const CatalogBuilder = () => {
   const { userProfile } = useAuth();
+
   const [catalogName, setCatalogName] = useState('');
   const [selectedType, setSelectedType] = useState<'standard' | 'aged_stock' | 'dead_stock' | 'seasonal'>('standard');
   const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
@@ -189,7 +194,9 @@ const CatalogBuilder = () => {
       id: catalog.id,
       name: catalog.name,
       filters: catalog.filters as CatalogFilters,
-      created_at: new Date(catalog.created_at)
+      created_at: new Date(catalog.created_at),
+      is_active: catalog.is_active,
+      created_by: catalog.created_by
     }));
 
     setSavedCatalogs(transformedData);
@@ -209,7 +216,15 @@ const CatalogBuilder = () => {
   };
 
   const fetchCatalogProducts = async (filters: CatalogType['filters']) => {
-    let query = supabase.from('productManagement').select('prodId, prodName, prodSku, prodCategory, prodMrp');
+    let query = supabase.from('productManagement').select(`
+      prodId, 
+      prodName, 
+      prodSku, 
+      prodCategory, 
+      prodMrp,
+      maxColors,
+      useCustomColors
+    `);
 
     if (filters.collections?.length && filters.collections[0] !== 'none') {
       query = query.in('prodCollection', filters.collections);
@@ -252,6 +267,12 @@ const CatalogBuilder = () => {
       return [];
     }
 
+    const hasFullAccess = userProfile?.role === 'business_owner' || userProfile?.role === 'it_admin';
+
+    if (hasFullAccess) {
+      return data;
+    }
+
     const filteredProducts = data.filter(product => {
       const relevantConfig = customerConfigs.find(config => 
         config.pv_category === product.prodCategory ||
@@ -279,7 +300,8 @@ const CatalogBuilder = () => {
         subcategories: selectedSubcategories,
         type: selectedType
       },
-      created_by: userProfile?.id
+      created_by: userProfile?.id,
+      is_active: true
     };
 
     const { error } = await supabase
@@ -348,16 +370,16 @@ const CatalogBuilder = () => {
         .eq('is_active', true)
         .single();
 
-      if (configError) {
+      if (configError && !hasFullAccess) {
         toast.error('No active WhatsApp configuration found');
         return;
       }
 
       const workflowConfig = {
-        api_key: existingConfig.api_key,
+        api_key: existingConfig?.api_key || 'admin_override',
         template_name: 'catalog_share',
-        template_namespace: existingConfig.template_namespace,
-        from_phone_number_id: existingConfig.from_phone_number_id,
+        template_namespace: existingConfig?.template_namespace || 'admin_override',
+        from_phone_number_id: existingConfig?.from_phone_number_id || 'admin_override',
         catalog_id: catalogId,
         status: 'pending' as const,
         is_active: true
@@ -394,7 +416,9 @@ const CatalogBuilder = () => {
         id: catalogData.id,
         name: catalogData.name,
         filters: catalogData.filters as CatalogFilters,
-        created_at: new Date(catalogData.created_at)
+        created_at: new Date(catalogData.created_at),
+        is_active: catalogData.is_active,
+        created_by: catalogData.created_by
       };
 
       const products = await fetchCatalogProducts(catalog.filters);

@@ -25,7 +25,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Package, Plus, Filter, ArrowUpDown, Save, Upload, Download } from 'lucide-react';
+import { Package, Plus, Filter, ArrowUpDown, Save, Upload, Download, Edit } from 'lucide-react';
 import { format } from 'date-fns';
 import {
   Tabs,
@@ -75,7 +75,6 @@ const InventoryManagement = () => {
   });
 
   useEffect(() => {
-    // Fetch available products
     const fetchProducts = async () => {
       const { data, error } = await supabase
         .from('productManagement')
@@ -89,7 +88,6 @@ const InventoryManagement = () => {
       }
     };
 
-    // Fetch GST categories
     const fetchGSTCategories = async () => {
       const { data, error } = await supabase
         .from('gst_categories')
@@ -144,7 +142,6 @@ const InventoryManagement = () => {
       return;
     }
 
-    // Check if product exists
     const productExists = availableProducts.some(p => p.prodId === newItem.product_id);
     if (!productExists) {
       toast.error('Invalid Item Code. Please select from available products.');
@@ -189,13 +186,38 @@ const InventoryManagement = () => {
   };
 
   const handleDownloadTemplate = () => {
-    // Template download logic
     toast.info('Template download coming soon');
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    // File upload logic
     toast.info('File upload coming soon');
+  };
+
+  const handleUpdateStock = async (id: string, currentQuantity: number) => {
+    const newQuantity = window.prompt('Enter new quantity:', currentQuantity.toString());
+    
+    if (newQuantity === null) return;
+    
+    const quantity = parseInt(newQuantity);
+    if (isNaN(quantity)) {
+      toast.error('Please enter a valid number');
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('inventory_stock')
+        .update({ quantity })
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      toast.success('Stock updated successfully');
+      refetch();
+    } catch (err) {
+      console.error('Error updating stock:', err);
+      toast.error('Failed to update stock');
+    }
   };
 
   const filteredInventory = inventory?.filter(item =>
@@ -303,12 +325,13 @@ const InventoryManagement = () => {
                     </TableHead>
                     <TableHead>Notes</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {isLoading ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center">Loading...</TableCell>
+                      <TableCell colSpan={9} className="text-center">Loading...</TableCell>
                     </TableRow>
                   ) : filteredInventory?.map((item) => (
                     <TableRow key={item.id}>
@@ -319,6 +342,17 @@ const InventoryManagement = () => {
                       <TableCell>{item.added_date ? format(new Date(item.added_date), 'dd-MM-yyyy') : 'N/A'}</TableCell>
                       <TableCell>{item.notes}</TableCell>
                       <TableCell>{item.status}</TableCell>
+                      <TableCell>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleUpdateStock(item.id, item.quantity)}
+                          className="flex items-center gap-2"
+                        >
+                          <Edit className="h-4 w-4" />
+                          Edit Stock
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

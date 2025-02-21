@@ -85,6 +85,10 @@ const CatalogBuilder = () => {
   const [selectedCatalogName, setSelectedCatalogName] = useState('');
   const [customerConfigs, setCustomerConfigs] = useState<CustomerConfig[]>([]);
   const [workflowStatus, setWorkflowStatus] = useState<CatalogWorkflowStatus[]>([]);
+  const [showWorkflowDialog, setShowWorkflowDialog] = useState(false);
+  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+  const [selectedCatalog, setSelectedCatalog] = useState<string | null>(null);
+  const [configOptions, setConfigOptions] = useState<{ category: string; value: string }[] | null>(null);
 
   useEffect(() => {
     fetchCollections();

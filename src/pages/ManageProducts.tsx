@@ -18,6 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
 } from "../components/reused/dialog";
 import {
   DropdownMenu,
@@ -47,15 +48,6 @@ interface Product {
   prodCategory: string;
   prodCollection: string;
   maxColors: number;
-  useCustomColors: boolean;
-  by_use: string[];
-  prodBoxstock: number;
-  prodCbm: number;
-  prodColor1: string;
-  prodColor2: string;
-  prodColor3: string;
-  prodColor4: string;
-  prodColor5: string;
   [key: string]: any;
 }
 
@@ -101,7 +93,6 @@ const ManageProducts = () => {
         prodBasePrice: editProduct.prodBasePrice,
         prodStatus: editProduct.prodStatus,
         maxColors: editProduct.maxColors,
-        useCustomColors: editProduct.useCustomColors,
       })
       .eq('prodId', editProduct.prodId);
 
@@ -353,9 +344,12 @@ const ManageProducts = () => {
       </div>
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Product</DialogTitle>
+            <DialogDescription>
+              Make changes to your product here. Click save when you're done.
+            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
@@ -408,43 +402,27 @@ const ManageProducts = () => {
               </Select>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">
-                Colors
+              <Label htmlFor="maxColors" className="text-right">
+                Number of Colors
               </Label>
-              <div className="col-span-3 space-y-2">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={editProduct?.useCustomColors || false}
-                    onChange={(e) => setEditProduct(prev => prev ? ({
-                      ...prev,
-                      useCustomColors: e.target.checked
-                    }) : null)}
-                    className="w-4 h-4"
-                  />
-                  <Label>Use custom colors</Label>
-                </div>
-                {!editProduct?.useCustomColors && (
-                  <Select
-                    value={String(editProduct?.maxColors || 1)}
-                    onValueChange={(value) => setEditProduct(prev => prev ? ({
-                      ...prev,
-                      maxColors: parseInt(value)
-                    }) : null)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select number of colors" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[1, 2, 3, 4, 5].map(num => (
-                        <SelectItem key={num} value={String(num)}>
-                          {num} color{num > 1 ? 's' : ''}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              </div>
+              <Select
+                value={String(editProduct?.maxColors || 1)}
+                onValueChange={(value) => setEditProduct(prev => prev ? ({
+                  ...prev,
+                  maxColors: parseInt(value)
+                }) : null)}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select number of colors" />
+                </SelectTrigger>
+                <SelectContent>
+                  {[1, 2, 3, 4, 5].map(num => (
+                    <SelectItem key={num} value={String(num)}>
+                      {num} color{num > 1 ? 's' : ''}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <DialogFooter>

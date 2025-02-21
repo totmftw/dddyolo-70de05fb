@@ -1483,49 +1483,40 @@ export type Database = {
         Row: {
           can_create: boolean | null
           can_delete: boolean | null
-          can_read: boolean | null
-          can_update: boolean | null
-          created_at: string
-          feature_permission_id: string
-          role_id: string
-          updated_at: string
+          can_edit: boolean | null
+          can_view: boolean | null
+          created_at: string | null
+          custom_permissions: Json | null
+          id: number
+          permission_name: string
+          role_name: string
+          updated_at: string | null
         }
         Insert: {
           can_create?: boolean | null
           can_delete?: boolean | null
-          can_read?: boolean | null
-          can_update?: boolean | null
-          created_at?: string
-          feature_permission_id: string
-          role_id: string
-          updated_at?: string
+          can_edit?: boolean | null
+          can_view?: boolean | null
+          created_at?: string | null
+          custom_permissions?: Json | null
+          id?: number
+          permission_name: string
+          role_name: string
+          updated_at?: string | null
         }
         Update: {
           can_create?: boolean | null
           can_delete?: boolean | null
-          can_read?: boolean | null
-          can_update?: boolean | null
-          created_at?: string
-          feature_permission_id?: string
-          role_id?: string
-          updated_at?: string
+          can_edit?: boolean | null
+          can_view?: boolean | null
+          created_at?: string | null
+          custom_permissions?: Json | null
+          id?: number
+          permission_name?: string
+          role_name?: string
+          updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "role_permissions_feature_permission_id_fkey"
-            columns: ["feature_permission_id"]
-            isOneToOne: false
-            referencedRelation: "feature_permissions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "role_permissions_role_id_fkey"
-            columns: ["role_id"]
-            isOneToOne: false
-            referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       room_types: {
         Row: {

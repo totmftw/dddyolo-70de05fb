@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../integrations/supabase/client';
@@ -35,6 +36,7 @@ import {
   SelectValue,
 } from "../components/ui/select";
 
+// Update the interface to match the database structure
 interface Product {
   prodId: string;
   prodName: string;
@@ -46,8 +48,17 @@ interface Product {
   prodBrand: string;
   prodCategory: string;
   prodCollection: string;
-  maxColors: number;
-  useCustomColors: boolean;
+  maxColors?: number;
+  useCustomColors?: boolean;
+  by_use?: string[];
+  prodBoxstock?: number;
+  prodCbm?: number;
+  prodColor1?: string;
+  prodColor2?: string;
+  prodColor3?: string;
+  prodColor4?: string;
+  prodColor5?: string;
+  [key: string]: any; // Allow for additional properties
 }
 
 const ManageProducts = () => {
@@ -71,12 +82,26 @@ const ManageProducts = () => {
         toast.error('Failed to fetch products');
         throw error;
       }
-      return data as Product[];
+      
+      // Transform the data to ensure maxColors and useCustomColors are present
+      const transformedData = (data || []).map(product => ({
+        ...product,
+        maxColors: product.maxColors || 1,
+        useCustomColors: product.useCustomColors || false
+      }));
+      
+      return transformedData as Product[];
     },
   });
 
   const handleEdit = (product: Product) => {
-    setEditProduct(product);
+    // Ensure the product has the required fields before editing
+    const editableProduct = {
+      ...product,
+      maxColors: product.maxColors || 1,
+      useCustomColors: product.useCustomColors || false
+    };
+    setEditProduct(editableProduct);
     setIsEditDialogOpen(true);
   };
 
@@ -89,8 +114,8 @@ const ManageProducts = () => {
         prodName: editProduct.prodName,
         prodBasePrice: editProduct.prodBasePrice,
         prodStatus: editProduct.prodStatus,
-        maxColors: editProduct.maxColors,
-        useCustomColors: editProduct.useCustomColors,
+        maxColors: editProduct.maxColors || 1,
+        useCustomColors: editProduct.useCustomColors || false,
       })
       .eq('prodId', editProduct.prodId);
 

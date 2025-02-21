@@ -29,8 +29,11 @@ import { Button } from './ui/button';
 const UnifiedSidebar = () => {
   const { theme } = useTheme();
   const location = useLocation();
-  const { signOut, hasPermission } = useAuth();
+  const { signOut, hasPermission, userProfile } = useAuth();
   const { isSidebarOpen } = useSidebar();
+
+  // Add check for admin roles
+  const isAdmin = userProfile?.role === 'it_admin' || userProfile?.role === 'business_owner';
 
   const menuItems = [
     { path: '/app', name: 'Dashboard', icon: LayoutDashboard, permission: { resource: 'dashboard', action: 'view' as const } },
@@ -82,7 +85,8 @@ const UnifiedSidebar = () => {
         </div>
         <ul className="mt-6">
           {menuItems.map((item, index) => (
-            hasPermission(item.permission.resource, item.permission.action) && (
+            // Modified to bypass permission check for admins
+            (isAdmin || hasPermission(item.permission.resource, item.permission.action)) && (
               <li key={index} className="relative px-6 py-3">
                 {isActive(item.path) && (
                   <span className="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg" />
@@ -101,7 +105,8 @@ const UnifiedSidebar = () => {
                 {item.subItems && (
                   <ul className="pl-10 mt-1">
                     {item.subItems.map((subItem, subIndex) => (
-                      hasPermission(subItem.permission.resource, subItem.permission.action) && (
+                      // Modified to bypass permission check for admins
+                      (isAdmin || hasPermission(subItem.permission.resource, subItem.permission.action)) && (
                         <li key={subIndex} className="relative py-1">
                           <Link
                             to={subItem.path}

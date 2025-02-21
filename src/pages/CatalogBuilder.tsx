@@ -63,10 +63,16 @@ interface CustomerConfig {
   product_tags: string[];
 }
 
-interface CatalogWorkflowStatus {
-  catalog_id: string;
-  status: 'pending' | 'sent' | 'delivered' | 'failed';
-  last_updated: Date;
+interface WhatsAppConfig {
+  id: number;
+  catalog_id?: string;
+  status?: 'pending' | 'sent' | 'delivered' | 'failed';
+  api_key: string;
+  template_name: string;
+  template_namespace: string;
+  from_phone_number_id: string;
+  is_active: boolean;
+  updated_at: string;
 }
 
 const CatalogBuilder = () => {
@@ -84,11 +90,9 @@ const CatalogBuilder = () => {
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [selectedCatalogName, setSelectedCatalogName] = useState('');
   const [customerConfigs, setCustomerConfigs] = useState<CustomerConfig[]>([]);
-  const [workflowStatus, setWorkflowStatus] = useState<CatalogWorkflowStatus[]>([]);
+  const [workflowConfigs, setWorkflowConfigs] = useState<Map<string, WhatsAppConfig>>(new Map());
   const [showWorkflowDialog, setShowWorkflowDialog] = useState(false);
-  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [selectedCatalog, setSelectedCatalog] = useState<string | null>(null);
-  const [configOptions, setConfigOptions] = useState<{ category: string; value: string }[] | null>(null);
 
   useEffect(() => {
     fetchCollections();
@@ -189,13 +193,14 @@ const CatalogBuilder = () => {
       return;
     }
 
-    const statusData = (data || []).map(item => ({
-      catalog_id: item.id,
-      status: item.status || 'pending',
-      last_updated: new Date(item.updated_at)
-    }));
+    const configMap = new Map<string, WhatsAppConfig>();
+    data?.forEach(config => {
+      if (config.catalog_id) {
+        configMap.set(config.catalog_id, config as WhatsAppConfig);
+      }
+    });
 
-    setWorkflowStatus(statusData);
+    setWorkflowConfigs(configMap);
   };
 
   const fetchCatalogProducts = async (filters: CatalogType['filters']) => {
@@ -307,25 +312,43 @@ const CatalogBuilder = () => {
     setSelectedCatalogName(catalog.name);
     setIsProductDialogOpen(true);
 
-    const catalogStatus = workflowStatus.find(status => status.catalog_id === catalog.id);
-    if (catalogStatus) {
-      const statusMessage = `Catalog workflow status: ${catalogStatus.status}`;
-      const statusType = catalogStatus.status === 'delivered' ? 'success' : 
-                        catalogStatus.status === 'failed' ? 'error' : 'info';
+    const workflowConfig = workflowConfigs.get(catalog.id);
+    if (workflowConfig?.status) {
+      const statusMessage = `Catalog workflow status: ${workflowConfig.status}`;
+      const statusType = workflowConfig.status === 'delivered' ? 'success' : 
+                        workflowConfig.status === 'failed' ? 'error' : 'info';
       
       toast[statusType](statusMessage);
     }
   };
 
-  const handleSendToWorkflow = async (catalogId: string) => {
+  const handleSendToWorkflow = async (event: React.MouseEvent<HTMLButtonElement>, catalogId: string) => {
+    event.preventDefault();
     try {
+      const { data: existingConfig, error: configError } = await supabase
+        .from('whatsapp_config')
+        .select('*')
+        .eq('is_active', true)
+        .single();
+
+      if (configError) {
+        toast.error('No active WhatsApp configuration found');
+        return;
+      }
+
+      const workflowConfig = {
+        api_key: existingConfig.api_key,
+        template_name: 'catalog_share',
+        template_namespace: existingConfig.template_namespace,
+        from_phone_number_id: existingConfig.from_phone_number_id,
+        catalog_id: catalogId,
+        status: 'pending' as const,
+        is_active: true
+      };
+
       const { error } = await supabase
         .from('whatsapp_config')
-        .insert([{
-          template_name: 'catalog_share',
-          status: 'pending',
-          catalog_id: catalogId
-        }]);
+        .insert([workflowConfig]);
 
       if (error) throw error;
 
@@ -543,6 +566,11 @@ const CatalogBuilder = () => {
                 <div>
                   <h3 className="font-medium">{catalog.name}</h3>
                   <p className="text-sm text-gray-500">Type: {catalog.filters.type}</p>
+                  {workflowConfigs.get(catalog.id)?.status && (
+                    <p className="text-sm text-blue-500">
+                      Status: {workflowConfigs.get(catalog.id)?.status}
+                    </p>
+                  )}
                 </div>
                 <div className="flex gap-2">
                   <Button
@@ -555,10 +583,7 @@ const CatalogBuilder = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => {
-                      setSelectedCatalog(catalog.id);
-                      setShowWorkflowDialog(true);
-                    }}
+                    onClick={(e) => handleSendToWorkflow(e, catalog.id)}
                   >
                     <Send className="h-4 w-4" />
                   </Button>

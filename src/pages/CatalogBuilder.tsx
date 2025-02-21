@@ -190,26 +190,33 @@ const CatalogBuilder = () => {
   const { data: configOptions } = useQuery({
     queryKey: ['customer-config-options'],
     queryFn: async () => {
-      const { data: pvData } = await supabase
+      const pvQuery = await supabase
         .from('customer_config')
         .select('pv_category')
-        .distinct();
+        .not('pv_category', 'is', null);
 
-      const { data: ptrData } = await supabase
+      const ptrQuery = await supabase
         .from('customer_config')
         .select('ptr_category')
-        .distinct();
+        .not('ptr_category', 'is', null);
 
-      const { data: tagData } = await supabase
+      const tagQuery = await supabase
         .from('customer_config')
         .select('product_tags')
-        .distinct();
+        .not('product_tags', 'is', null);
+
+      // Create unique sets of values
+      const pvSet = new Set(pvQuery.data?.map(d => d.pv_category));
+      const ptrSet = new Set(ptrQuery.data?.map(d => d.ptr_category));
+      const tagSet = new Set(tagQuery.data?.flatMap(d => d.product_tags || []));
 
       const options: CustomerConfigOption[] = [
-        ...(pvData?.map(d => ({ category: 'PV Category', value: d.pv_category })) || []),
-        ...(ptrData?.map(d => ({ category: 'PTR Category', value: d.ptr_category })) || []),
-        ...(tagData?.flatMap(d => d.product_tags?.map(tag => ({ category: 'Product Tags', value: tag })) || []))
-      ].filter(option => option.value !== null);
+        ...(Array.from(pvSet).map(value => ({ category: 'PV Category', value })) || []),
+        ...(Array.from(ptrSet).map(value => ({ category: 'PTR Category', value })) || []),
+        ...(Array.from(tagSet).map(value => ({ category: 'Product Tags', value })) || [])
+      ].filter((option): option is CustomerConfigOption => 
+        option.value !== null && option.value !== undefined
+      );
 
       return options;
     }

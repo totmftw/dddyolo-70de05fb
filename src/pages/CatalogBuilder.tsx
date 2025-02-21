@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../integrations/supabase/client';
@@ -75,6 +76,9 @@ interface WhatsAppConfig {
 
 const CatalogBuilder = () => {
   const { userProfile } = useAuth();
+  
+  // Define hasFullAccess at the top of the component
+  const hasFullAccess = userProfile?.role === 'business_owner' || userProfile?.role === 'it_admin';
 
   const [catalogName, setCatalogName] = useState('');
   const [selectedType, setSelectedType] = useState<'standard' | 'aged_stock' | 'dead_stock' | 'seasonal'>('standard');
@@ -267,12 +271,12 @@ const CatalogBuilder = () => {
       return [];
     }
 
-    const hasFullAccess = userProfile?.role === 'business_owner' || userProfile?.role === 'it_admin';
-
+    // Admin users can see all products
     if (hasFullAccess) {
       return data;
     }
 
+    // For non-admin users, apply customer config filters
     const filteredProducts = data.filter(product => {
       const relevantConfig = customerConfigs.find(config => 
         config.pv_category === product.prodCategory ||

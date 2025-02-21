@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../integrations/supabase/client';
@@ -62,7 +63,7 @@ interface CustomerConfigOption {
 }
 
 // Initialize pdfMake with fonts
-(pdfMake as any).vfs = (pdfFonts as any).pdfMake.vfs;
+(pdfMake as any).vfs = pdfFonts.pdfMake.vfs;
 
 const CatalogBuilder = () => {
   const { userProfile } = useAuth();

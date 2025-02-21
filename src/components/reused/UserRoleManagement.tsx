@@ -84,6 +84,48 @@ const UserRoleManagement = () => {
       
       if (error) throw error;
       if (data) {
+        // Add new feature permissions if they don't exist
+        const newFeatures = [
+          {
+            id: 'inventory',
+            feature_name: 'Inventory Management',
+            feature_path: '/app/inventory'
+          },
+          {
+            id: 'catalog-config',
+            feature_name: 'Catalog Configuration',
+            feature_path: '/app/catalog-config'
+          },
+          {
+            id: 'catalog-builder',
+            feature_name: 'Catalog Builder',
+            feature_path: '/app/catalog-builder'
+          }
+        ];
+
+        const existingFeatureNames = data.map(f => f.feature_name);
+        const missingFeatures = newFeatures.filter(f => !existingFeatureNames.includes(f.feature_name));
+
+        if (missingFeatures.length > 0) {
+          const { error: insertError } = await supabase
+            .from('feature_permissions')
+            .insert(missingFeatures);
+
+          if (insertError) {
+            console.error('Error adding new features:', insertError);
+          } else {
+            // Refetch features after adding new ones
+            const { data: updatedData } = await supabase
+              .from('feature_permissions')
+              .select('id, feature_name, feature_path')
+              .order('feature_name');
+            
+            if (updatedData) {
+              setFeatures(updatedData);
+              return;
+            }
+          }
+        }
         setFeatures(data);
       }
     } catch (error) {
@@ -127,11 +169,28 @@ const UserRoleManagement = () => {
 
       if (error) throw error;
       
+      // After adding the role, create default permissions for all features
+      const defaultPermissions = features.map(feature => ({
+        role_name: newRoleName,
+        permission_name: feature.feature_name,
+        can_create: false,
+        can_view: false,
+        can_edit: false,
+        can_delete: false
+      }));
+
+      const { error: permError } = await supabase
+        .from('role_permissions')
+        .insert(defaultPermissions);
+
+      if (permError) throw permError;
+      
       toast.success('Role added successfully');
       setNewRoleName('');
       setNewRoleDescription('');
       setShowAddForm(false);
       fetchRoles();
+      fetchRolePermissions();
     } catch (err) {
       console.error('Error adding role:', err);
       toast.error('Failed to add role');
@@ -150,6 +209,12 @@ const UserRoleManagement = () => {
       );
 
       if (existingPermission) {
+        // Bypass RLS for it_admin and business_owner roles
+        if (roleName === 'it_admin' || roleName === 'business_owner') {
+          toast.info('Permissions for IT Admin and Business Owner roles cannot be modified');
+          return;
+        }
+
         const { error } = await supabase
           .from('role_permissions')
           .update({ 
@@ -183,6 +248,19 @@ const UserRoleManagement = () => {
   };
 
   const getRolePermission = (roleName: string, featureName: string): RolePermission | undefined => {
+    // For it_admin and business_owner, always return full permissions
+    if (roleName === 'it_admin' || roleName === 'business_owner') {
+      return {
+        id: 0,
+        role_name: roleName,
+        permission_name: featureName,
+        can_create: true,
+        can_view: true,
+        can_edit: true,
+        can_delete: true
+      };
+    }
+
     return rolePermissions.find(
       rp => rp.role_name === roleName && rp.permission_name === featureName
     );

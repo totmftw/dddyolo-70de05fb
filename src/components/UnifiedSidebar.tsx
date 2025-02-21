@@ -3,6 +3,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from '../theme/ThemeContext';
 import { useAuth } from '../context/AuthContext';
+import { useSidebar } from '../context/SidebarContext';
 import {
   LayoutDashboard,
   Users,
@@ -29,6 +30,7 @@ const UnifiedSidebar = () => {
   const { theme } = useTheme();
   const location = useLocation();
   const { signOut, hasPermission } = useAuth();
+  const { isSidebarOpen } = useSidebar();
 
   const menuItems = [
     { path: '/app', name: 'Dashboard', icon: LayoutDashboard, permission: { resource: 'dashboard', action: 'view' as const } },
@@ -68,7 +70,9 @@ const UnifiedSidebar = () => {
   };
 
   return (
-    <aside className="z-20 hidden w-64 overflow-y-auto bg-white dark:bg-gray-800 md:block flex-shrink-0">
+    <aside className={`z-20 w-64 overflow-y-auto bg-white dark:bg-gray-800 md:block flex-shrink-0 ${
+      isSidebarOpen ? 'block' : 'hidden'
+    }`}>
       <div className="py-4 text-gray-500 dark:text-gray-400">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-2">
@@ -135,4 +139,3 @@ const UnifiedSidebar = () => {
 };
 
 export default UnifiedSidebar;
-

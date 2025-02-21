@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../integrations/supabase/client';
@@ -241,16 +242,24 @@ const CatalogBuilder = () => {
   const generateCatalogPDF = async (catalogId: string) => {
     try {
       // First fetch the catalog details
-      const { data: catalog } = await supabase
+      const { data: catalogData, error: catalogError } = await supabase
         .from('catalogs')
         .select('*')
         .eq('id', catalogId)
         .single();
 
-      if (!catalog) {
+      if (catalogError || !catalogData) {
         toast.error('Catalog not found');
         return;
       }
+
+      // Transform the raw catalog data to ensure it matches our CatalogType
+      const catalog: CatalogType = {
+        id: catalogData.id,
+        name: catalogData.name,
+        filters: catalogData.filters as CatalogFilters,
+        created_at: new Date(catalogData.created_at)
+      };
 
       // Fetch products for this catalog
       const products = await fetchCatalogProducts(catalog.filters);
@@ -303,9 +312,7 @@ const CatalogBuilder = () => {
       // Generate PDF
       const pdfDocGenerator = pdfMake.createPdf(docDefinition);
       
-      // Get the blob
       pdfDocGenerator.getBlob(async (blob) => {
-        // Create a download link
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;

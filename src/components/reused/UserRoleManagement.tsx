@@ -4,7 +4,7 @@ import { supabase } from '../../integrations/supabase/client';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from "sonner";
-import { Plus, Settings } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import {
@@ -36,6 +36,8 @@ interface FeaturePermission {
   feature_path: string;
 }
 
+type PermissionAction = 'can_create' | 'can_read' | 'can_update' | 'can_delete';
+
 const UserRoleManagement = () => {
   const { theme } = useTheme();
   const { userProfile } = useAuth();
@@ -63,7 +65,9 @@ const UserRoleManagement = () => {
         .order('role_name');
       
       if (error) throw error;
-      setRoles(data || []);
+      if (data) {
+        setRoles(data as Role[]);
+      }
     } catch (error) {
       toast.error('Error fetching roles');
     }
@@ -77,7 +81,9 @@ const UserRoleManagement = () => {
         .order('feature_name');
       
       if (error) throw error;
-      setFeatures(data || []);
+      if (data) {
+        setFeatures(data);
+      }
     } catch (error) {
       toast.error('Error fetching features');
     }
@@ -90,7 +96,9 @@ const UserRoleManagement = () => {
         .select('*');
       
       if (error) throw error;
-      setRolePermissions(data || []);
+      if (data) {
+        setRolePermissions(data as RolePermission[]);
+      }
     } catch (error) {
       toast.error('Error fetching role permissions');
     }
@@ -128,7 +136,7 @@ const UserRoleManagement = () => {
     }
   };
 
-  const handlePermissionToggle = async (roleId: string, featureId: string, action: keyof RolePermission) => {
+  const handlePermissionToggle = async (roleId: string, featureId: string, action: PermissionAction) => {
     if (!isAdmin) {
       toast.error('Only administrators can modify permissions');
       return;
@@ -142,7 +150,9 @@ const UserRoleManagement = () => {
       if (existingPermission) {
         const { error } = await supabase
           .from('role_permissions')
-          .update({ [action]: !existingPermission[action] })
+          .update({ 
+            [action]: !existingPermission[action] 
+          })
           .eq('role_id', roleId)
           .eq('feature_permission_id', featureId);
 
@@ -150,11 +160,14 @@ const UserRoleManagement = () => {
       } else {
         const { error } = await supabase
           .from('role_permissions')
-          .insert([{
+          .insert({
             role_id: roleId,
             feature_permission_id: featureId,
-            [action]: true
-          }]);
+            can_create: action === 'can_create',
+            can_read: action === 'can_read',
+            can_update: action === 'can_update',
+            can_delete: action === 'can_delete'
+          });
 
         if (error) throw error;
       }
@@ -172,6 +185,8 @@ const UserRoleManagement = () => {
       rp => rp.role_id === roleId && rp.feature_permission_id === featureId
     );
   };
+
+  const permissionActions: PermissionAction[] = ['can_create', 'can_read', 'can_update', 'can_delete'];
 
   return (
     <div className="p-6">
@@ -250,7 +265,7 @@ const UserRoleManagement = () => {
                       <div key={feature.id} className="border rounded p-4">
                         <h4 className="font-medium mb-2">{feature.feature_name}</h4>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                          {(['can_create', 'can_read', 'can_update', 'can_delete'] as const).map(action => {
+                          {permissionActions.map(action => {
                             const permission = getRolePermission(role.id, feature.id);
                             return (
                               <label key={action} className="flex items-center space-x-2">

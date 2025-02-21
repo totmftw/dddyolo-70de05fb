@@ -1483,34 +1483,49 @@ export type Database = {
         Row: {
           can_create: boolean | null
           can_delete: boolean | null
-          can_edit: boolean | null
-          can_view: boolean | null
+          can_read: boolean | null
+          can_update: boolean | null
           created_at: string
-          id: string
-          resource: string
+          feature_permission_id: string
+          role_id: string
           updated_at: string
         }
         Insert: {
           can_create?: boolean | null
           can_delete?: boolean | null
-          can_edit?: boolean | null
-          can_view?: boolean | null
+          can_read?: boolean | null
+          can_update?: boolean | null
           created_at?: string
-          id?: string
-          resource: string
+          feature_permission_id: string
+          role_id: string
           updated_at?: string
         }
         Update: {
           can_create?: boolean | null
           can_delete?: boolean | null
-          can_edit?: boolean | null
-          can_view?: boolean | null
+          can_read?: boolean | null
+          can_update?: boolean | null
           created_at?: string
-          id?: string
-          resource?: string
+          feature_permission_id?: string
+          role_id?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "role_permissions_feature_permission_id_fkey"
+            columns: ["feature_permission_id"]
+            isOneToOne: false
+            referencedRelation: "feature_permissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_permissions_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       room_types: {
         Row: {
@@ -1915,19 +1930,25 @@ export type Database = {
       }
       user_roles: {
         Row: {
+          created_at: string
           description: string | null
-          id: number
+          id: string
           role_name: string
+          updated_at: string
         }
         Insert: {
+          created_at?: string
           description?: string | null
-          id?: number
+          id?: string
           role_name: string
+          updated_at?: string
         }
         Update: {
+          created_at?: string
           description?: string | null
-          id?: number
+          id?: string
           role_name?: string
+          updated_at?: string
         }
         Relationships: []
       }

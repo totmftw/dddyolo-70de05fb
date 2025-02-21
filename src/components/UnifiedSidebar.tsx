@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from '../theme/ThemeContext';
@@ -71,8 +72,7 @@ const UnifiedSidebar = () => {
   };
 
   return (
-    <aside className={`fixed left-0 z-20 h-screen w-64 overflow-y-auto bg-white dark:bg-gray-800 
-      ${isSidebarOpen ? 'block' : 'hidden md:block'}`}>
+    <aside className="h-screen w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-y-auto">
       <div className="py-4 text-gray-500 dark:text-gray-400">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-2">

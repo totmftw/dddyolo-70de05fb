@@ -5,10 +5,12 @@ import UnifiedSidebar from '../components/UnifiedSidebar';
 
 const AdminOneLayout = () => {
   return (
-    <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900">
+    <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
       <UnifiedSidebar />
-      <div className="flex-1 p-8">
-        <Outlet />
+      <div className="flex-1 h-full overflow-x-hidden overflow-y-auto">
+        <main className="p-6">
+          <Outlet />
+        </main>
       </div>
     </div>
   );

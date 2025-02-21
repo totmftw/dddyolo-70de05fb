@@ -44,8 +44,8 @@ const productTags = ['Regular', 'Seasonal', 'Premium', 'Basic'];
 
 const WhatsappCustomerConfig = () => {
   const [search, setSearch] = useState('');
-  const [filterPV, setFilterPV] = useState<string>('');
-  const [filterPTR, setFilterPTR] = useState<string>('');
+  const [filterPV, setFilterPV] = useState<string>('all');  // Changed from empty string to 'all'
+  const [filterPTR, setFilterPTR] = useState<string>('all'); // Changed from empty string to 'all'
 
   const { data: customers, isLoading } = useQuery({
     queryKey: ['customer-configs'],
@@ -90,8 +90,8 @@ const WhatsappCustomerConfig = () => {
 
   const filteredCustomers = customers?.filter(customer => {
     const matchesSearch = customer.custBusinessname.toLowerCase().includes(search.toLowerCase());
-    const matchesPV = !filterPV || customer.customer_config?.pv_category === filterPV;
-    const matchesPTR = !filterPTR || customer.customer_config?.ptr_category === filterPTR;
+    const matchesPV = filterPV === 'all' || customer.customer_config?.pv_category === filterPV; // Updated condition
+    const matchesPTR = filterPTR === 'all' || customer.customer_config?.ptr_category === filterPTR; // Updated condition
     return matchesSearch && matchesPV && matchesPTR;
   });
 
@@ -119,7 +119,7 @@ const WhatsappCustomerConfig = () => {
                   <SelectValue placeholder="Filter by PV" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All PV Categories</SelectItem>
+                  <SelectItem value="all">All PV Categories</SelectItem>  {/* Changed from empty string to 'all' */}
                   {pvCategories.map(cat => (
                     <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                   ))}
@@ -130,7 +130,7 @@ const WhatsappCustomerConfig = () => {
                   <SelectValue placeholder="Filter by PTR" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All PTR Categories</SelectItem>
+                  <SelectItem value="all">All PTR Categories</SelectItem>  {/* Changed from empty string to 'all' */}
                   {ptrCategories.map(cat => (
                     <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                   ))}
@@ -163,13 +163,14 @@ const WhatsappCustomerConfig = () => {
                   <TableCell>{customer.custBusinessname}</TableCell>
                   <TableCell>
                     <Select
-                      value={customer.customer_config?.pv_category || ''}
+                      value={customer.customer_config?.pv_category || "none"}  {/* Changed from empty string to 'none' */}
                       onValueChange={(value) => handleUpdateConfig(customer.id, 'pv_category', value)}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select PV Category" />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="none">Select Category</SelectItem>  {/* Added a non-empty default value */}
                         {pvCategories.map(cat => (
                           <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                         ))}
@@ -178,13 +179,14 @@ const WhatsappCustomerConfig = () => {
                   </TableCell>
                   <TableCell>
                     <Select
-                      value={customer.customer_config?.ptr_category || ''}
+                      value={customer.customer_config?.ptr_category || "none"}  {/* Changed from empty string to 'none' */}
                       onValueChange={(value) => handleUpdateConfig(customer.id, 'ptr_category', value)}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select PTR Category" />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="none">Select Category</SelectItem>  {/* Added a non-empty default value */}
                         {ptrCategories.map(cat => (
                           <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                         ))}
@@ -193,13 +195,14 @@ const WhatsappCustomerConfig = () => {
                   </TableCell>
                   <TableCell>
                     <Select
-                      value={customer.customer_config?.product_tags?.[0] || ''}
+                      value={customer.customer_config?.product_tags?.[0] || "none"}  {/* Changed from empty string to 'none' */}
                       onValueChange={(value) => handleUpdateConfig(customer.id, 'product_tags', [value])}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select Product Tags" />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="none">Select Tag</SelectItem>  {/* Added a non-empty default value */}
                         {productTags.map(tag => (
                           <SelectItem key={tag} value={tag}>{tag}</SelectItem>
                         ))}

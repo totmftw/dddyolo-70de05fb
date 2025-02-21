@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../integrations/supabase/client';
@@ -36,8 +35,7 @@ import {
   SelectValue,
 } from "../components/ui/select";
 
-// Update the interface to match the database structure
-interface Product {
+interface DatabaseProduct {
   prodId: string;
   prodName: string;
   prodSku: string;
@@ -48,17 +46,20 @@ interface Product {
   prodBrand: string;
   prodCategory: string;
   prodCollection: string;
-  maxColors?: number;
-  useCustomColors?: boolean;
-  by_use?: string[];
-  prodBoxstock?: number;
-  prodCbm?: number;
-  prodColor1?: string;
-  prodColor2?: string;
-  prodColor3?: string;
-  prodColor4?: string;
-  prodColor5?: string;
-  [key: string]: any; // Allow for additional properties
+  by_use: string[];
+  prodBoxstock: number;
+  prodCbm: number;
+  prodColor1: string;
+  prodColor2: string;
+  prodColor3: string;
+  prodColor4: string;
+  prodColor5: string;
+  [key: string]: any;
+}
+
+interface Product extends DatabaseProduct {
+  maxColors: number;
+  useCustomColors: boolean;
 }
 
 const ManageProducts = () => {
@@ -83,25 +84,18 @@ const ManageProducts = () => {
         throw error;
       }
       
-      // Transform the data to ensure maxColors and useCustomColors are present
-      const transformedData = (data || []).map(product => ({
+      const transformedData = (data as DatabaseProduct[]).map(product => ({
         ...product,
-        maxColors: product.maxColors || 1,
-        useCustomColors: product.useCustomColors || false
+        maxColors: 1,
+        useCustomColors: false
       }));
       
-      return transformedData as Product[];
+      return transformedData;
     },
   });
 
   const handleEdit = (product: Product) => {
-    // Ensure the product has the required fields before editing
-    const editableProduct = {
-      ...product,
-      maxColors: product.maxColors || 1,
-      useCustomColors: product.useCustomColors || false
-    };
-    setEditProduct(editableProduct);
+    setEditProduct(product);
     setIsEditDialogOpen(true);
   };
 
@@ -114,8 +108,8 @@ const ManageProducts = () => {
         prodName: editProduct.prodName,
         prodBasePrice: editProduct.prodBasePrice,
         prodStatus: editProduct.prodStatus,
-        maxColors: editProduct.maxColors || 1,
-        useCustomColors: editProduct.useCustomColors || false,
+        maxColors: editProduct.maxColors,
+        useCustomColors: editProduct.useCustomColors,
       })
       .eq('prodId', editProduct.prodId);
 

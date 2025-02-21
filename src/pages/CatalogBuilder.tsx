@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../integrations/supabase/client';
@@ -32,6 +31,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Grid, Filter, Save, Eye, Trash2, Send, FileDown } from 'lucide-react';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import pdfMake from 'pdfmake/build/pdfmake';
+import 'pdfmake/build/vfs_fonts';
 
 interface CatalogFilters {
   collections?: string[];
@@ -187,7 +188,6 @@ const CatalogBuilder = () => {
   const [showWorkflowDialog, setShowWorkflowDialog] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
 
-  // Fetch customer config options
   const { data: configOptions } = useQuery({
     queryKey: ['customer-config-options'],
     queryFn: async () => {
@@ -206,7 +206,6 @@ const CatalogBuilder = () => {
           .not('product_tags', 'is', null)
       ]);
 
-      // Create unique sets of values
       const pvSet = new Set(pvQuery.data?.map(d => d.pv_category));
       const ptrSet = new Set(ptrQuery.data?.map(d => d.ptr_category));
       const tagSet = new Set(tagQuery.data?.flatMap(d => d.product_tags || []));
@@ -225,8 +224,6 @@ const CatalogBuilder = () => {
 
   const handleSendToWorkflow = async () => {
     try {
-      // Here you would implement the logic to send the catalog based on selected filters
-      // This is a placeholder for the actual implementation
       toast.success('Catalog sent to workflow successfully');
       setShowWorkflowDialog(false);
     } catch (error) {
@@ -236,14 +233,6 @@ const CatalogBuilder = () => {
 
   const generateCatalogPDF = async (catalogId: string) => {
     try {
-      // Dynamically import pdfMake and fonts
-      const pdfMake = await import('pdfmake/build/pdfmake');
-      const pdfFonts = await import('pdfmake/build/vfs_fonts');
-      
-      // Initialize fonts
-      pdfMake.default.vfs = pdfFonts.pdfMake.vfs;
-
-      // First fetch the catalog details
       const { data: catalogData, error: catalogError } = await supabase
         .from('catalogs')
         .select('*')
@@ -255,7 +244,6 @@ const CatalogBuilder = () => {
         return;
       }
 
-      // Transform the raw catalog data
       const catalog: CatalogType = {
         id: catalogData.id,
         name: catalogData.name,
@@ -263,10 +251,8 @@ const CatalogBuilder = () => {
         created_at: new Date(catalogData.created_at)
       };
 
-      // Fetch products for this catalog
       const products = await fetchCatalogProducts(catalog.filters);
 
-      // Define the document definition
       const docDefinition = {
         content: [
           { text: catalog.name, style: 'header' },
@@ -309,8 +295,7 @@ const CatalogBuilder = () => {
         }
       };
 
-      // Generate PDF
-      const pdfDocGenerator = pdfMake.default.createPdf(docDefinition);
+      const pdfDocGenerator = pdfMake.createPdf(docDefinition);
       
       pdfDocGenerator.getBlob((blob) => {
         const url = URL.createObjectURL(blob);
@@ -403,7 +388,6 @@ const CatalogBuilder = () => {
         </CardContent>
       </Card>
 
-      {/* Saved Catalogs Section */}
       <Card>
         <CardHeader>
           <CardTitle>Saved Catalogs</CardTitle>
@@ -458,7 +442,6 @@ const CatalogBuilder = () => {
         </CardContent>
       </Card>
 
-      {/* Workflow Dialog */}
       <Dialog open={showWorkflowDialog} onOpenChange={setShowWorkflowDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -513,7 +496,6 @@ const CatalogBuilder = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Products Dialog */}
       <Dialog open={isProductDialogOpen} onOpenChange={setIsProductDialogOpen}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-auto">
           <DialogHeader>

@@ -72,6 +72,7 @@ const UserRoleManagement = () => {
       }
     } catch (error) {
       toast.error('Error fetching roles');
+      console.error('Error fetching roles:', error);
     }
   };
 
@@ -84,52 +85,11 @@ const UserRoleManagement = () => {
       
       if (error) throw error;
       if (data) {
-        // Add new feature permissions if they don't exist
-        const newFeatures = [
-          {
-            id: 'inventory',
-            feature_name: 'Inventory Management',
-            feature_path: '/app/inventory'
-          },
-          {
-            id: 'catalog-config',
-            feature_name: 'Catalog Configuration',
-            feature_path: '/app/catalog-config'
-          },
-          {
-            id: 'catalog-builder',
-            feature_name: 'Catalog Builder',
-            feature_path: '/app/catalog-builder'
-          }
-        ];
-
-        const existingFeatureNames = data.map(f => f.feature_name);
-        const missingFeatures = newFeatures.filter(f => !existingFeatureNames.includes(f.feature_name));
-
-        if (missingFeatures.length > 0) {
-          const { error: insertError } = await supabase
-            .from('feature_permissions')
-            .insert(missingFeatures);
-
-          if (insertError) {
-            console.error('Error adding new features:', insertError);
-          } else {
-            // Refetch features after adding new ones
-            const { data: updatedData } = await supabase
-              .from('feature_permissions')
-              .select('id, feature_name, feature_path')
-              .order('feature_name');
-            
-            if (updatedData) {
-              setFeatures(updatedData);
-              return;
-            }
-          }
-        }
         setFeatures(data);
       }
     } catch (error) {
       toast.error('Error fetching features');
+      console.error('Error fetching features:', error);
     }
   };
 
@@ -145,6 +105,7 @@ const UserRoleManagement = () => {
       }
     } catch (error) {
       toast.error('Error fetching role permissions');
+      console.error('Error fetching role permissions:', error);
     }
   };
 
@@ -203,18 +164,18 @@ const UserRoleManagement = () => {
       return;
     }
 
+    // Bypass permission changes for protected roles
+    if (roleName === 'it_admin' || roleName === 'business_owner') {
+      toast.info('Permissions for IT Admin and Business Owner roles cannot be modified');
+      return;
+    }
+
     try {
       const existingPermission = rolePermissions.find(
         rp => rp.role_name === roleName && rp.permission_name === featureName
       );
 
       if (existingPermission) {
-        // Bypass RLS for it_admin and business_owner roles
-        if (roleName === 'it_admin' || roleName === 'business_owner') {
-          toast.info('Permissions for IT Admin and Business Owner roles cannot be modified');
-          return;
-        }
-
         const { error } = await supabase
           .from('role_permissions')
           .update({ 
@@ -225,22 +186,24 @@ const UserRoleManagement = () => {
 
         if (error) throw error;
       } else {
+        const newPermission = {
+          role_name: roleName,
+          permission_name: featureName,
+          can_create: action === 'can_create',
+          can_view: action === 'can_view',
+          can_edit: action === 'can_edit',
+          can_delete: action === 'can_delete'
+        };
+
         const { error } = await supabase
           .from('role_permissions')
-          .insert({
-            role_name: roleName,
-            permission_name: featureName,
-            can_create: action === 'can_create',
-            can_view: action === 'can_view',
-            can_edit: action === 'can_edit',
-            can_delete: action === 'can_delete'
-          });
+          .insert([newPermission]);
 
         if (error) throw error;
       }
 
       toast.success('Permission updated successfully');
-      fetchRolePermissions();
+      await fetchRolePermissions();
     } catch (err) {
       console.error('Error updating permission:', err);
       toast.error('Failed to update permission');
@@ -265,8 +228,6 @@ const UserRoleManagement = () => {
       rp => rp.role_name === roleName && rp.permission_name === featureName
     );
   };
-
-  const permissionActions: PermissionAction[] = ['can_create', 'can_view', 'can_edit', 'can_delete'];
 
   return (
     <div className="p-6">
@@ -345,15 +306,21 @@ const UserRoleManagement = () => {
                       <div key={feature.id} className="border rounded p-4">
                         <h4 className="font-medium mb-2">{feature.feature_name}</h4>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                          {permissionActions.map(action => {
+                          {['can_create', 'can_view', 'can_edit', 'can_delete'].map(action => {
                             const permission = getRolePermission(role.role_name, feature.feature_name);
+                            const isChecked = permission ? permission[action as PermissionAction] : false;
+                            
                             return (
                               <label key={action} className="flex items-center space-x-2">
                                 <input
                                   type="checkbox"
-                                  checked={!!permission?.[action]}
-                                  onChange={() => handlePermissionToggle(role.role_name, feature.feature_name, action)}
-                                  disabled={!isAdmin}
+                                  checked={isChecked}
+                                  onChange={() => handlePermissionToggle(
+                                    role.role_name, 
+                                    feature.feature_name, 
+                                    action as PermissionAction
+                                  )}
+                                  disabled={!isAdmin || role.role_name === 'it_admin' || role.role_name === 'business_owner'}
                                   className="form-checkbox h-4 w-4"
                                 />
                                 <span className="text-sm capitalize">

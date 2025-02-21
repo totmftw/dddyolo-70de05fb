@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../integrations/supabase/client';
 import { toast } from "sonner";
@@ -10,13 +10,13 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "../components/reused/table";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "../components/reused/card";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -26,14 +26,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Search, Filter, MessageSquare, Settings } from 'lucide-react';
+import { Search, MessageSquare, Settings } from 'lucide-react';
 
 interface CustomerConfig {
   id: number;
   custBusinessname: string;
-  pv_category: string;
-  ptr_category: string;
-  product_tags: string[];
+  customer_config: {
+    pv_category: string | null;
+    ptr_category: string | null;
+    product_tags: string[];
+  } | null;
 }
 
 const pvCategories = ['High', 'Medium', 'Low'];
@@ -50,10 +52,21 @@ const WhatsappCustomerConfig = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('customerMaster')
-        .select('id, custBusinessname, whatsapp_config:customer_config(pv_category, ptr_category, product_tags)');
+        .select(`
+          id,
+          custBusinessname,
+          customer_config (
+            pv_category,
+            ptr_category,
+            product_tags
+          )
+        `);
       
-      if (error) throw error;
-      return data;
+      if (error) {
+        console.error('Error fetching customers:', error);
+        throw error;
+      }
+      return data as CustomerConfig[];
     }
   });
 
@@ -77,8 +90,8 @@ const WhatsappCustomerConfig = () => {
 
   const filteredCustomers = customers?.filter(customer => {
     const matchesSearch = customer.custBusinessname.toLowerCase().includes(search.toLowerCase());
-    const matchesPV = !filterPV || customer.whatsapp_config?.pv_category === filterPV;
-    const matchesPTR = !filterPTR || customer.whatsapp_config?.ptr_category === filterPTR;
+    const matchesPV = !filterPV || customer.customer_config?.pv_category === filterPV;
+    const matchesPTR = !filterPTR || customer.customer_config?.ptr_category === filterPTR;
     return matchesSearch && matchesPV && matchesPTR;
   });
 
@@ -150,7 +163,7 @@ const WhatsappCustomerConfig = () => {
                   <TableCell>{customer.custBusinessname}</TableCell>
                   <TableCell>
                     <Select
-                      value={customer.whatsapp_config?.pv_category || ''}
+                      value={customer.customer_config?.pv_category || ''}
                       onValueChange={(value) => handleUpdateConfig(customer.id, 'pv_category', value)}
                     >
                       <SelectTrigger>
@@ -165,7 +178,7 @@ const WhatsappCustomerConfig = () => {
                   </TableCell>
                   <TableCell>
                     <Select
-                      value={customer.whatsapp_config?.ptr_category || ''}
+                      value={customer.customer_config?.ptr_category || ''}
                       onValueChange={(value) => handleUpdateConfig(customer.id, 'ptr_category', value)}
                     >
                       <SelectTrigger>
@@ -180,7 +193,7 @@ const WhatsappCustomerConfig = () => {
                   </TableCell>
                   <TableCell>
                     <Select
-                      value={customer.whatsapp_config?.product_tags?.[0] || ''}
+                      value={customer.customer_config?.product_tags?.[0] || ''}
                       onValueChange={(value) => handleUpdateConfig(customer.id, 'product_tags', [value])}
                     >
                       <SelectTrigger>

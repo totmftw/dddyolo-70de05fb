@@ -180,6 +180,44 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_config: {
+        Row: {
+          created_at: string | null
+          customer_id: number
+          id: number
+          product_tags: string[] | null
+          ptr_category: string | null
+          pv_category: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          customer_id: number
+          id?: number
+          product_tags?: string[] | null
+          ptr_category?: string | null
+          pv_category?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          customer_id?: number
+          id?: number
+          product_tags?: string[] | null
+          ptr_category?: string | null
+          pv_category?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_config_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: true
+            referencedRelation: "customerMaster"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_ledger: {
         Row: {
           amount: number | null

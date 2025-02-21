@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { createBrowserRouter, RouterProvider, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
@@ -64,6 +65,10 @@ const router = createBrowserRouter([
         element: <SalesOpportunities />,
       },
       {
+        path: "sales-management",
+        element: <SalesOpportunityManagement />,
+      },
+      {
         path: "account",
         element: <AccountManagement />,
       },
@@ -106,10 +111,6 @@ const router = createBrowserRouter([
       {
         path: "products/collections",
         element: <CollectionConfig />,
-      },
-      {
-        path: "sales-management",
-        element: <SalesOpportunityManagement />,
       },
       {
         path: "quantity-discounts",

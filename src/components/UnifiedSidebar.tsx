@@ -39,6 +39,7 @@ const UnifiedSidebar = () => {
     { path: '/app/customers', name: 'Customer Management', icon: Users, permission: { resource: 'customers', action: 'view' as const } },
     { path: '/app/inventory', name: 'Inventory Management', icon: Package, permission: { resource: 'inventory', action: 'view' as const } },
     { path: '/app/shipment', name: 'Shipment Management', icon: Truck, permission: { resource: 'shipment', action: 'view' as const } },
+    { path: '/app/sales-management', name: 'Sales Management', icon: ClipboardList, permission: { resource: 'sales', action: 'view' as const } },
     { path: '/app/account', name: 'Account Management', icon: Settings, permission: { resource: 'settings', action: 'view' as const } },
     { path: '/app/payments', name: 'Payment Tracking', icon: CreditCard, permission: { resource: 'payments', action: 'view' as const } },
     { path: '/app/roles', name: 'User Role Management', icon: UserCog, permission: { resource: 'roles', action: 'view' as const } },

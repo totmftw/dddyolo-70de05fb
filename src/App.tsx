@@ -1,5 +1,5 @@
 import React from 'react';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
@@ -21,6 +21,7 @@ import CollectionConfig from './pages/CollectionConfig';
 import CatalogBuilder from './pages/CatalogBuilder';
 import Shipment from './pages/Shipment';
 import WhatsappConfig from './pages/WhatsappConfig';
+import WhatsappCustomerConfig from './pages/WhatsappCustomerConfig';
 import { ThemeProvider } from './theme/ThemeContext';
 import { Toaster } from "sonner";
 import { SidebarProvider } from './context/SidebarContext';
@@ -81,6 +82,10 @@ const router = createBrowserRouter([
       {
         path: "whatsapp-config",
         element: <WhatsappConfig />,
+      },
+      {
+        path: "whatsapp-config/customer",
+        element: <WhatsappCustomerConfig />,
       },
       {
         path: "products",

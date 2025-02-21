@@ -1,12 +1,12 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../integrations/supabase/client';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { Switch } from '../components/ui/switch';
+import { Link } from 'react-router-dom';
 import { toast } from "sonner";
-import { MessageSquare } from 'lucide-react';
+import { MessageSquare, Users } from 'lucide-react';
 
 interface WhatsappConfig {
   id: number;
@@ -67,9 +67,17 @@ const WhatsappConfig = () => {
 
   return (
     <div className="p-6">
-      <div className="mb-6 flex items-center gap-2">
-        <MessageSquare className="h-6 w-6" />
-        <h1 className="text-2xl font-bold">WhatsApp Configuration</h1>
+      <div className="mb-6 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <MessageSquare className="h-6 w-6" />
+          <h1 className="text-2xl font-bold">WhatsApp Configuration</h1>
+        </div>
+        <Link to="/app/whatsapp-config/customer">
+          <Button className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            Customer Configuration
+          </Button>
+        </Link>
       </div>
 
       <form onSubmit={handleSubmit} className="max-w-2xl space-y-4">

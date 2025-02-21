@@ -565,6 +565,13 @@ export type Database = {
             referencedColumns: ["prodId"]
           },
           {
+            foreignKeyName: "fk_inventory_product"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "stock_discrepancy_check"
+            referencedColumns: ["prodId"]
+          },
+          {
             foreignKeyName: "inventory_stock_shipment_id_fkey"
             columns: ["shipment_id"]
             isOneToOne: false
@@ -1360,6 +1367,13 @@ export type Database = {
             referencedRelation: "productManagement"
             referencedColumns: ["prodId"]
           },
+          {
+            foreignKeyName: "productquantitydiscounts_prodId_fkey"
+            columns: ["prodId"]
+            isOneToOne: false
+            referencedRelation: "stock_discrepancy_check"
+            referencedColumns: ["prodId"]
+          },
         ]
       }
       products: {
@@ -1970,6 +1984,16 @@ export type Database = {
           invDuedate: string | null
           invId: number | null
           invoice_number: string | null
+        }
+        Relationships: []
+      }
+      stock_discrepancy_check: {
+        Row: {
+          has_discrepancy: boolean | null
+          inventory_total: number | null
+          prodId: string | null
+          prodName: string | null
+          prodPiecestock: number | null
         }
         Relationships: []
       }

@@ -56,9 +56,17 @@ interface Product {
   prodMrp: number;
 }
 
-interface CustomerConfigOption {
-  category: string;
-  value: string;
+interface CustomerConfig {
+  customer_id: number;
+  pv_category: string;
+  ptr_category: string;
+  product_tags: string[];
+}
+
+interface CatalogWorkflowStatus {
+  catalog_id: string;
+  status: 'pending' | 'sent' | 'delivered' | 'failed';
+  last_updated: Date;
 }
 
 const CatalogBuilder = () => {
@@ -75,11 +83,15 @@ const CatalogBuilder = () => {
   const [selectedCatalogProducts, setSelectedCatalogProducts] = useState<Product[]>([]);
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [selectedCatalogName, setSelectedCatalogName] = useState('');
+  const [customerConfigs, setCustomerConfigs] = useState<CustomerConfig[]>([]);
+  const [workflowStatus, setWorkflowStatus] = useState<CatalogWorkflowStatus[]>([]);
 
   useEffect(() => {
     fetchCollections();
     fetchCategories();
     fetchSavedCatalogs();
+    fetchCustomerConfigs();
+    fetchWorkflowStatus();
   }, []);
 
   useEffect(() => {
@@ -149,6 +161,39 @@ const CatalogBuilder = () => {
     setSavedCatalogs(transformedData);
   };
 
+  const fetchCustomerConfigs = async () => {
+    const { data, error } = await supabase
+      .from('customer_config')
+      .select('*');
+
+    if (error) {
+      toast.error('Error fetching customer configurations');
+      return;
+    }
+
+    setCustomerConfigs(data || []);
+  };
+
+  const fetchWorkflowStatus = async () => {
+    const { data, error } = await supabase
+      .from('whatsapp_config')
+      .select('*')
+      .eq('template_name', 'catalog_share');
+
+    if (error) {
+      console.error('Error fetching workflow status:', error);
+      return;
+    }
+
+    const statusData = (data || []).map(item => ({
+      catalog_id: item.id,
+      status: item.status || 'pending',
+      last_updated: new Date(item.updated_at)
+    }));
+
+    setWorkflowStatus(statusData);
+  };
+
   const fetchCatalogProducts = async (filters: CatalogType['filters']) => {
     let query = supabase.from('productManagement').select('prodId, prodName, prodSku, prodCategory, prodMrp');
 
@@ -164,13 +209,15 @@ const CatalogBuilder = () => {
     if (filters.type) {
       switch(filters.type) {
         case 'aged_stock':
-          // Add aged stock logic
+          const sixMonthsAgo = new Date();
+          sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+          query = query.lt('created_at', sixMonthsAgo.toISOString());
           break;
         case 'dead_stock':
-          // Add dead stock logic
+          query = query.eq('prodStatus', 'dead_stock');
           break;
         case 'seasonal':
-          // Add seasonal logic
+          query = query.eq('prodStatus', 'seasonal');
           break;
       }
     }
@@ -182,7 +229,17 @@ const CatalogBuilder = () => {
       return [];
     }
 
-    return data || [];
+    const filteredProducts = data?.filter(product => {
+      const relevantConfig = customerConfigs.find(config => 
+        config.pv_category === product.prodCategory ||
+        config.ptr_category === product.prodCategory ||
+        (config.product_tags && config.product_tags.some(tag => product.prodId.includes(tag)))
+      );
+
+      return !relevantConfig || filters.type === 'standard';
+    });
+
+    return filteredProducts || [];
   };
 
   const saveCatalog = async () => {
@@ -237,55 +294,42 @@ const CatalogBuilder = () => {
 
   const viewCatalogProducts = async (catalog: CatalogType) => {
     const products = await fetchCatalogProducts(catalog.filters);
+    
+    if (products.length === 0) {
+      toast.info('No products found matching the catalog criteria');
+    }
+    
     setSelectedCatalogProducts(products);
     setSelectedCatalogName(catalog.name);
     setIsProductDialogOpen(true);
+
+    const catalogStatus = workflowStatus.find(status => status.catalog_id === catalog.id);
+    if (catalogStatus) {
+      const statusMessage = `Catalog workflow status: ${catalogStatus.status}`;
+      const statusType = catalogStatus.status === 'delivered' ? 'success' : 
+                        catalogStatus.status === 'failed' ? 'error' : 'info';
+      
+      toast[statusType](statusMessage);
+    }
   };
 
-  const [selectedCatalog, setSelectedCatalog] = useState<string | null>(null);
-  const [showWorkflowDialog, setShowWorkflowDialog] = useState(false);
-  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
-
-  const { data: configOptions } = useQuery({
-    queryKey: ['customer-config-options'],
-    queryFn: async () => {
-      const [pvQuery, ptrQuery, tagQuery] = await Promise.all([
-        supabase
-          .from('customer_config')
-          .select('pv_category')
-          .not('pv_category', 'is', null),
-        supabase
-          .from('customer_config')
-          .select('ptr_category')
-          .not('ptr_category', 'is', null),
-        supabase
-          .from('customer_config')
-          .select('product_tags')
-          .not('product_tags', 'is', null)
-      ]);
-
-      const pvSet = new Set(pvQuery.data?.map(d => d.pv_category));
-      const ptrSet = new Set(ptrQuery.data?.map(d => d.ptr_category));
-      const tagSet = new Set(tagQuery.data?.flatMap(d => d.product_tags || []));
-
-      const options: CustomerConfigOption[] = [
-        ...(Array.from(pvSet).map(value => ({ category: 'PV Category', value })) || []),
-        ...(Array.from(ptrSet).map(value => ({ category: 'PTR Category', value })) || []),
-        ...(Array.from(tagSet).map(value => ({ category: 'Product Tags', value })) || [])
-      ].filter((option): option is CustomerConfigOption => 
-        option.value !== null && option.value !== undefined
-      );
-
-      return options;
-    }
-  });
-
-  const handleSendToWorkflow = async () => {
+  const handleSendToWorkflow = async (catalogId: string) => {
     try {
-      toast.success('Catalog sent to workflow successfully');
-      setShowWorkflowDialog(false);
-    } catch (error) {
-      toast.error('Failed to send catalog to workflow');
+      const { error } = await supabase
+        .from('whatsapp_config')
+        .insert([{
+          template_name: 'catalog_share',
+          status: 'pending',
+          catalog_id: catalogId
+        }]);
+
+      if (error) throw error;
+
+      toast.success('Catalog added to workflow queue');
+      fetchWorkflowStatus();
+    } catch (err) {
+      console.error('Error sending catalog to workflow:', err);
+      toast.error('Failed to add catalog to workflow');
     }
   };
 

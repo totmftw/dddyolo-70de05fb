@@ -134,7 +134,10 @@ const CatalogBuilder = () => {
       return;
     }
     
-    setCollections(data || []);
+    setCollections([
+      { id: 'none', name: 'None' },
+      ...(data || [])
+    ]);
   };
 
   const fetchCategories = async () => {
@@ -151,6 +154,13 @@ const CatalogBuilder = () => {
   };
 
   const fetchSubcategories = async (categoryId: string) => {
+    setSubcategories([]);
+    setSelectedSubcategories([]);
+
+    if (!categoryId) {
+      return;
+    }
+
     const { data, error } = await supabase
       .from('product_subcategories')
       .select('id, name')
@@ -201,15 +211,18 @@ const CatalogBuilder = () => {
   const fetchCatalogProducts = async (filters: CatalogType['filters']) => {
     let query = supabase.from('productManagement').select('prodId, prodName, prodSku, prodCategory, prodMrp');
 
-    if (filters.collections?.length) {
+    if (filters.collections?.length && filters.collections[0] !== 'none') {
       query = query.in('prodCollection', filters.collections);
     }
+    
     if (filters.categories?.length) {
       query = query.in('prodCategory', filters.categories);
     }
+    
     if (filters.subcategories?.length) {
       query = query.in('prodSubcategory', filters.subcategories);
     }
+
     if (filters.type) {
       switch(filters.type) {
         case 'aged_stock':
@@ -230,10 +243,16 @@ const CatalogBuilder = () => {
 
     if (error) {
       toast.error('Error fetching catalog products');
+      console.error('Error fetching products:', error);
       return [];
     }
 
-    const filteredProducts = data?.filter(product => {
+    if (!data || data.length === 0) {
+      toast.info('No products found matching the catalog criteria');
+      return [];
+    }
+
+    const filteredProducts = data.filter(product => {
       const relevantConfig = customerConfigs.find(config => 
         config.pv_category === product.prodCategory ||
         config.ptr_category === product.prodCategory ||
@@ -243,7 +262,7 @@ const CatalogBuilder = () => {
       return !relevantConfig || filters.type === 'standard';
     });
 
-    return filteredProducts || [];
+    return filteredProducts;
   };
 
   const saveCatalog = async () => {
@@ -484,7 +503,10 @@ const CatalogBuilder = () => {
 
             <div>
               <label className="block text-sm font-medium mb-1">Collections</label>
-              <Select value={selectedCollections[0]} onValueChange={(value) => setSelectedCollections([value])}>
+              <Select 
+                value={selectedCollections[0]} 
+                onValueChange={(value) => setSelectedCollections([value])}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select collection" />
                 </SelectTrigger>
@@ -500,7 +522,13 @@ const CatalogBuilder = () => {
 
             <div>
               <label className="block text-sm font-medium mb-1">Category</label>
-              <Select value={selectedCategories[0]} onValueChange={(value) => setSelectedCategories([value])}>
+              <Select 
+                value={selectedCategories[0]} 
+                onValueChange={(value) => {
+                  setSelectedCategories([value]);
+                  fetchSubcategories(value);
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
@@ -519,10 +547,16 @@ const CatalogBuilder = () => {
               <Select 
                 value={selectedSubcategories[0]} 
                 onValueChange={(value) => setSelectedSubcategories([value])}
-                disabled={!selectedCategories.length}
+                disabled={!selectedCategories.length || subcategories.length === 0}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={selectedCategories.length ? "Select subcategory" : "Select a category first"} />
+                  <SelectValue placeholder={
+                    !selectedCategories.length 
+                      ? "Select a category first" 
+                      : subcategories.length === 0 
+                        ? "No subcategories available" 
+                        : "Select subcategory"
+                  } />
                 </SelectTrigger>
                 <SelectContent>
                   {subcategories.map((subcategory) => (

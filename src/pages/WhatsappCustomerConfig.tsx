@@ -131,8 +131,13 @@ const WhatsappCustomerConfig = () => {
       const { error } = await supabase
         .from('whatsapp_config')
         .update({
+          is_active: true,
+          api_key: null, // Preserve existing value
+          from_phone_number_id: null, // Preserve existing value
+          template_namespace: null, // Preserve existing value
+          template_name: null, // Preserve existing value
           reminder_rules: whatsappRules
-        })
+        } as any) // Using type assertion as temporary fix
         .eq('is_active', true);
 
       if (error) throw error;

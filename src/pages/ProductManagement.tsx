@@ -39,12 +39,15 @@ interface Product {
   prodCategory: string;
   prodCollection: string;
   maxColors: number;
+  prodMrp: number;
 }
 
 const ProductManagement = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newProduct, setNewProduct] = useState<Partial<Product>>({
-    maxColors: 1
+    maxColors: 1,
+    prodStatus: 'active',
+    prodMrp: 0
   });
 
   const { data: products, isLoading, refetch } = useQuery({
@@ -69,19 +72,25 @@ const ProductManagement = () => {
       return;
     }
 
+    const productToInsert = {
+      ...newProduct,
+      prodId: `PROD_${Date.now()}`, // Generate a unique ID
+      prodStatus: newProduct.prodStatus || 'active',
+      prodMrp: newProduct.prodMrp || 0,
+      maxColors: newProduct.maxColors || 1
+    };
+
     const { error } = await supabase
       .from('productManagement')
-      .insert([{
-        ...newProduct,
-        prodStatus: newProduct.prodStatus || 'active',
-      }]);
+      .insert([productToInsert]);
 
     if (error) {
       toast.error('Failed to add product');
+      console.error('Error adding product:', error);
     } else {
       toast.success('Product added successfully');
       setIsAddDialogOpen(false);
-      setNewProduct({ maxColors: 1 });
+      setNewProduct({ maxColors: 1, prodStatus: 'active', prodMrp: 0 });
       refetch();
     }
   };
@@ -106,6 +115,7 @@ const ProductManagement = () => {
                 <TableHead>Category</TableHead>
                 <TableHead>Collection</TableHead>
                 <TableHead>Base Price</TableHead>
+                <TableHead>MRP</TableHead>
                 <TableHead>Colors</TableHead>
                 <TableHead>Status</TableHead>
               </TableRow>
@@ -118,6 +128,7 @@ const ProductManagement = () => {
                   <TableCell>{product.prodCategory}</TableCell>
                   <TableCell>{product.prodCollection}</TableCell>
                   <TableCell>₹{product.prodBasePrice}</TableCell>
+                  <TableCell>₹{product.prodMrp}</TableCell>
                   <TableCell>{product.maxColors}</TableCell>
                   <TableCell>{product.prodStatus}</TableCell>
                 </TableRow>
@@ -166,6 +177,19 @@ const ProductManagement = () => {
                 onChange={(e) => setNewProduct(prev => ({
                   ...prev,
                   prodBasePrice: parseFloat(e.target.value)
+                }))}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="mrp" className="text-right">MRP</Label>
+              <Input
+                id="mrp"
+                type="number"
+                value={newProduct.prodMrp || ''}
+                onChange={(e) => setNewProduct(prev => ({
+                  ...prev,
+                  prodMrp: parseFloat(e.target.value)
                 }))}
                 className="col-span-3"
               />

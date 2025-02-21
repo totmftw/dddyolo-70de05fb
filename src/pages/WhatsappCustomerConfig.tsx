@@ -62,25 +62,25 @@ const WhatsappCustomerConfig = () => {
           )
         `);
       
-      if (error) {
-        console.error('Error fetching customers:', error);
-        throw error;
-      }
+      if (error) throw error;
       return data as CustomerConfig[];
     }
   });
 
   const handleUpdateConfig = async (customerId: number, field: string, value: string | string[]) => {
     try {
-      const { error } = await supabase
+      // First try to update if record exists
+      const { error: upsertError } = await supabase
         .from('customer_config')
         .upsert({
           customer_id: customerId,
           [field]: value,
           updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'customer_id'
         });
 
-      if (error) throw error;
+      if (upsertError) throw upsertError;
       toast.success('Customer configuration updated');
     } catch (err) {
       console.error('Error updating config:', err);

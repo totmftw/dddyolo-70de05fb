@@ -36,45 +36,44 @@ const AuthGuard = ({ children }: AuthGuardProps) => {
   const location = useLocation();
 
   useEffect(() => {
-    if (!session) {
-      navigate('/');
-      return;
-    }
-
-    // Super admin roles bypass permission checks
-    if (userProfile?.role === 'it_admin' || userProfile?.role === 'business_owner') {
-      return;
-    }
-
-    const currentPath = location.pathname;
-    
-    // If we're at the root app path, allow access
-    if (currentPath === '/app') {
-      return;
-    }
-
-    // First try exact route match
-    let permission = routePermissions[currentPath];
-
-    // If no exact match, try to find a parent route
-    if (!permission) {
-      const parentRoute = Object.keys(routePermissions)
-        .filter(route => currentPath.startsWith(route) && route !== '/app')
-        .sort((a, b) => b.length - a.length)[0]; // Get the most specific matching route
-
-      if (parentRoute) {
-        permission = routePermissions[parentRoute];
+    const checkPermissions = () => {
+      if (!session) {
+        navigate('/');
+        return;
       }
-    }
 
-    // Only check permissions if we found a matching route
-    if (permission) {
-      const hasAccess = hasPermission(permission.resource, permission.action);
-      if (!hasAccess) {
-        toast.error("You don't have permission to access this page");
-        navigate('/app/dashboard');
+      // Super admin roles bypass all permission checks
+      if (userProfile?.role === 'it_admin' || userProfile?.role === 'business_owner') {
+        return;
       }
-    }
+
+      const currentPath = location.pathname;
+
+      // Special handling for root app path
+      if (currentPath === '/app' || currentPath === '/app/dashboard') {
+        return;
+      }
+
+      // Find the most specific matching route permission
+      const matchingRoutes = Object.keys(routePermissions)
+        .filter(route => currentPath.startsWith(route))
+        .sort((a, b) => b.length - a.length);
+
+      if (matchingRoutes.length > 0) {
+        const matchedRoute = matchingRoutes[0];
+        const permission = routePermissions[matchedRoute];
+        
+        const hasAccess = hasPermission(permission.resource, permission.action);
+        if (!hasAccess) {
+          toast.error("You don't have permission to access this page");
+          navigate('/app/dashboard');
+        }
+      }
+    };
+
+    // Add a small delay to ensure the session and userProfile are loaded
+    const timer = setTimeout(checkPermissions, 100);
+    return () => clearTimeout(timer);
   }, [session, location.pathname, hasPermission, navigate, userProfile]);
 
   if (!session) {

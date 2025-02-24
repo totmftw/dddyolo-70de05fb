@@ -24,3 +24,18 @@ export interface Product {
   maxColors: number;
   useCustomColors: boolean;
 }
+
+export interface Collection {
+  id: string;
+  name: string;
+}
+
+export interface Category {
+  id: string;
+  name: string;
+}
+
+export interface Subcategory {
+  id: string;
+  name: string;
+}

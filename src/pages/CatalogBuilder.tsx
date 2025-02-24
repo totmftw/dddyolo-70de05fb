@@ -23,7 +23,14 @@ import 'pdfmake/build/vfs_fonts';
 import CatalogFilters from '@/components/catalog/CatalogFilters';
 import CatalogList from '@/components/catalog/CatalogList';
 import ProductTable from '@/components/catalog/ProductTable';
-import type { CatalogType, Product } from '@/types/catalog';
+import type { 
+  CatalogType, 
+  Product, 
+  CatalogFilters as CatalogFiltersType,
+  Collection,
+  Category,
+  Subcategory 
+} from '@/types/catalog';
 import type { WhatsAppConfig } from '@/types/whatsapp';
 
 interface CustomerConfig {
@@ -230,7 +237,7 @@ const CatalogBuilder = () => {
       const catalog: CatalogType = {
         id: catalogData.id,
         name: catalogData.name,
-        filters: catalogData.filters as CatalogFilters,
+        filters: catalogData.filters as CatalogFiltersType,
         created_at: new Date(catalogData.created_at),
         is_active: catalogData.is_active,
         created_by: catalogData.created_by

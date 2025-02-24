@@ -36,44 +36,32 @@ const AuthGuard = ({ children }: AuthGuardProps) => {
   const location = useLocation();
 
   useEffect(() => {
-    const checkPermissions = () => {
-      if (!session) {
-        navigate('/');
-        return;
-      }
+    if (!session) {
+      navigate('/');
+      return;
+    }
 
-      // Super admin roles bypass all permission checks
-      if (userProfile?.role === 'it_admin' || userProfile?.role === 'business_owner') {
-        return;
-      }
+    // Super admin roles bypass all permission checks
+    if (userProfile?.role === 'it_admin' || userProfile?.role === 'business_owner') {
+      return;
+    }
 
-      const currentPath = location.pathname;
+    const currentPath = location.pathname;
 
-      // Special handling for root app path
-      if (currentPath === '/app' || currentPath === '/app/dashboard') {
-        return;
-      }
+    // Handle root paths - always allow access to dashboard routes
+    if (currentPath === '/app' || currentPath === '/app/dashboard') {
+      return;
+    }
 
-      // Find the most specific matching route permission
-      const matchingRoutes = Object.keys(routePermissions)
-        .filter(route => currentPath.startsWith(route))
-        .sort((a, b) => b.length - a.length);
+    // Find matching route permission
+    const permission = routePermissions[currentPath];
+    
+    if (permission && !hasPermission(permission.resource, permission.action)) {
+      console.log('Permission denied for:', currentPath);
+      toast.error("You don't have permission to access this page");
+      navigate('/app/dashboard');
+    }
 
-      if (matchingRoutes.length > 0) {
-        const matchedRoute = matchingRoutes[0];
-        const permission = routePermissions[matchedRoute];
-        
-        const hasAccess = hasPermission(permission.resource, permission.action);
-        if (!hasAccess) {
-          toast.error("You don't have permission to access this page");
-          navigate('/app/dashboard');
-        }
-      }
-    };
-
-    // Add a small delay to ensure the session and userProfile are loaded
-    const timer = setTimeout(checkPermissions, 100);
-    return () => clearTimeout(timer);
   }, [session, location.pathname, hasPermission, navigate, userProfile]);
 
   if (!session) {

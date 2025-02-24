@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../integrations/supabase/client';
@@ -15,44 +16,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/reused/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Grid, Filter, Save, Eye, Trash2, Send, FileDown } from 'lucide-react';
+import { Grid, Save } from 'lucide-react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import pdfMake from 'pdfmake/build/pdfmake';
 import 'pdfmake/build/vfs_fonts';
-
-interface CatalogFilters {
-  collections?: string[];
-  categories?: string[];
-  subcategories?: string[];
-  type?: 'standard' | 'aged_stock' | 'dead_stock' | 'seasonal';
-}
-
-interface CatalogType {
-  id: string;
-  name: string;
-  filters: CatalogFilters;
-  created_at: Date;
-  is_active: boolean;
-  created_by: string | null;
-}
-
-interface Product {
-  prodId: string;
-  prodName: string;
-  prodSku: string;
-  prodCategory: string;
-  prodMrp: number;
-  maxColors: number;
-  useCustomColors: boolean;
-}
+import CatalogFilters from '@/components/catalog/CatalogFilters';
+import CatalogList from '@/components/catalog/CatalogList';
+import ProductTable from '@/components/catalog/ProductTable';
+import type { CatalogType, Product } from '@/types/catalog';
+import type { WhatsAppConfig } from '@/types/whatsapp';
 
 interface CustomerConfig {
   customer_id: number;
@@ -61,21 +33,8 @@ interface CustomerConfig {
   product_tags: string[];
 }
 
-interface WhatsAppConfig {
-  id: number;
-  catalog_id?: string;
-  status?: 'pending' | 'sent' | 'delivered' | 'failed';
-  api_key: string;
-  template_name: string;
-  template_namespace: string;
-  from_phone_number_id: string;
-  is_active: boolean;
-  updated_at: string;
-}
-
 const CatalogBuilder = () => {
   const { userProfile } = useAuth();
-  
   const hasFullAccess = userProfile?.role === 'business_owner' || userProfile?.role === 'it_admin';
 
   const [catalogName, setCatalogName] = useState('');
@@ -83,29 +42,112 @@ const CatalogBuilder = () => {
   const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>([]);
-  const [collections, setCollections] = useState<{ id: string; name: string }[]>([]);
-  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
-  const [subcategories, setSubcategories] = useState<{ id: string; name: string }[]>([]);
-  const [savedCatalogs, setSavedCatalogs] = useState<CatalogType[]>([]);
-  const [selectedCatalogProducts, setSelectedCatalogProducts] = useState<Product[]>([]);
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [selectedCatalogName, setSelectedCatalogName] = useState('');
-  const [customerConfigs, setCustomerConfigs] = useState<CustomerConfig[]>([]);
+  const [selectedCatalogProducts, setSelectedCatalogProducts] = useState<Product[]>([]);
   const [workflowConfigs, setWorkflowConfigs] = useState<Map<string, WhatsAppConfig>>(new Map());
 
+  // Query for collections
+  const { data: collections = [] } = useQuery({
+    queryKey: ['collections'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('collections').select('id, name');
+      if (error) throw error;
+      return [{ id: 'none', name: 'None' }, ...(data || [])];
+    }
+  });
+
+  // Query for categories
+  const { data: categories = [] } = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('categories').select('id, name');
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  // Query for subcategories
+  const { data: subcategories = [] } = useQuery({
+    queryKey: ['subcategories', selectedCategories[0]],
+    queryFn: async () => {
+      if (!selectedCategories[0]) return [];
+      const { data, error } = await supabase
+        .from('product_subcategories')
+        .select('id, name')
+        .eq('category_id', selectedCategories[0]);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!selectedCategories[0]
+  });
+
+  // Query for saved catalogs
+  const { data: savedCatalogs = [], refetch: refetchCatalogs } = useQuery({
+    queryKey: ['catalogs'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('catalogs')
+        .select('*')
+        .eq('created_by', userProfile?.id);
+      if (error) throw error;
+      return (data || []).map(catalog => ({
+        ...catalog,
+        created_at: new Date(catalog.created_at)
+      })) as CatalogType[];
+    }
+  });
+
+  // Query for customer configs
+  const { data: customerConfigs = [] } = useQuery({
+    queryKey: ['customer-configs'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('customer_config').select('*');
+      if (error) throw error;
+      return data as CustomerConfig[];
+    }
+  });
+
+  // Mutation for saving catalog
+  const saveCatalogMutation = useMutation({
+    mutationFn: async () => {
+      if (!catalogName) {
+        throw new Error('Please enter a catalog name');
+      }
+
+      const newCatalog = {
+        name: catalogName,
+        filters: {
+          collections: selectedCollections,
+          categories: selectedCategories,
+          subcategories: selectedSubcategories,
+          type: selectedType
+        },
+        created_by: userProfile?.id,
+        is_active: true
+      };
+
+      const { error } = await supabase.from('catalogs').insert([newCatalog]);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success('Catalog saved successfully');
+      setCatalogName('');
+      setSelectedCollections([]);
+      setSelectedCategories([]);
+      setSelectedSubcategories([]);
+      setSelectedType('standard');
+      refetchCatalogs();
+    },
+    onError: (error) => {
+      toast.error(`Error saving catalog: ${error.message}`);
+    }
+  });
+
+  // Effects
   useEffect(() => {
-    fetchCollections();
-    fetchCategories();
-    fetchSavedCatalogs();
-    fetchCustomerConfigs();
     fetchWorkflowStatus();
   }, []);
-
-  useEffect(() => {
-    if (selectedCategories.length > 0) {
-      fetchSubcategories(selectedCategories[0]);
-    }
-  }, [selectedCategories]);
 
   const fetchWorkflowStatus = async () => {
     const { data, error } = await supabase
@@ -131,90 +173,149 @@ const CatalogBuilder = () => {
     setWorkflowConfigs(configMap);
   };
 
-  const fetchCollections = async () => {
-    const { data, error } = await supabase
-      .from('collections')
-      .select('id, name');
-    
-    if (error) {
-      toast.error('Error fetching collections');
-      return;
+  const handleSendToWorkflow = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    const catalogId = (e.currentTarget as HTMLButtonElement).dataset.catalogId;
+    if (!catalogId) return;
+
+    try {
+      const { data: existingConfig, error: configError } = await supabase
+        .from('whatsapp_config')
+        .select('*')
+        .eq('is_active', true)
+        .single();
+
+      if (configError && !hasFullAccess) {
+        toast.error('No active WhatsApp configuration found');
+        return;
+      }
+
+      const workflowConfig = {
+        api_key: existingConfig?.api_key || 'admin_override',
+        template_name: 'catalog_share',
+        template_namespace: existingConfig?.template_namespace || 'admin_override',
+        from_phone_number_id: existingConfig?.from_phone_number_id || 'admin_override',
+        catalog_id: catalogId,
+        status: 'pending' as const,
+        is_active: true
+      };
+
+      const { error } = await supabase
+        .from('whatsapp_config')
+        .insert([workflowConfig]);
+
+      if (error) throw error;
+
+      toast.success('Catalog added to workflow queue');
+      fetchWorkflowStatus();
+    } catch (err) {
+      console.error('Error sending catalog to workflow:', err);
+      toast.error('Failed to add catalog to workflow');
     }
-    
-    setCollections([
-      { id: 'none', name: 'None' },
-      ...(data || [])
-    ]);
   };
 
-  const fetchCategories = async () => {
-    const { data, error } = await supabase
-      .from('categories')
-      .select('id, name');
-    
-    if (error) {
-      toast.error('Error fetching categories');
-      return;
+  const generateCatalogPDF = async (catalogId: string) => {
+    try {
+      const { data: catalogData, error: catalogError } = await supabase
+        .from('catalogs')
+        .select('*')
+        .eq('id', catalogId)
+        .single();
+
+      if (catalogError || !catalogData) {
+        toast.error('Catalog not found');
+        return;
+      }
+
+      const catalog: CatalogType = {
+        id: catalogData.id,
+        name: catalogData.name,
+        filters: catalogData.filters as CatalogFilters,
+        created_at: new Date(catalogData.created_at),
+        is_active: catalogData.is_active,
+        created_by: catalogData.created_by
+      };
+
+      const products = await fetchCatalogProducts(catalog.filters);
+      
+      const docDefinition = {
+        content: [
+          { 
+            text: catalog.name, 
+            style: 'header',
+            alignment: 'center' 
+          },
+          { text: '\n' },
+          {
+            table: {
+              headerRows: 1,
+              widths: ['*', '*', '*', 'auto'],
+              body: [
+                [
+                  { text: 'SKU', style: 'tableHeader', alignment: 'left' },
+                  { text: 'Name', style: 'tableHeader', alignment: 'left' },
+                  { text: 'Category', style: 'tableHeader', alignment: 'left' },
+                  { text: 'MRP (₹)', style: 'tableHeader', alignment: 'right' }
+                ],
+                ...products.map(product => [
+                  { text: product.prodSku, alignment: 'left' },
+                  { text: product.prodName, alignment: 'left' },
+                  { text: product.prodCategory, alignment: 'left' },
+                  { text: product.prodMrp.toFixed(2), alignment: 'right' }
+                ])
+              ]
+            }
+          }
+        ],
+        styles: {
+          header: {
+            fontSize: 18,
+            bold: true,
+            margin: [0, 0, 0, 10]
+          },
+          tableHeader: {
+            bold: true,
+            fontSize: 13,
+            color: 'black',
+            fillColor: '#f3f4f6'
+          }
+        },
+        defaultStyle: {
+          fontSize: 12
+        }
+      };
+
+      pdfMake.createPdf(docDefinition as any).getBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${catalog.name.replace(/\s+/g, '_')}_catalog.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        toast.success('PDF generated successfully');
+      });
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast.error('Failed to generate PDF');
     }
-    
-    setCategories(data || []);
   };
 
-  const fetchSubcategories = async (categoryId: string) => {
-    setSubcategories([]);
-    setSelectedSubcategories([]);
+  const viewCatalogProducts = async (catalog: CatalogType) => {
+    const products = await fetchCatalogProducts(catalog.filters);
+    setSelectedCatalogProducts(products);
+    setSelectedCatalogName(catalog.name);
+    setIsProductDialogOpen(true);
 
-    if (!categoryId) {
-      return;
+    const workflowConfig = workflowConfigs.get(catalog.id);
+    if (workflowConfig?.status) {
+      const statusMessage = `Catalog workflow status: ${workflowConfig.status}`;
+      const statusType = workflowConfig.status === 'delivered' ? 'success' : 
+                        workflowConfig.status === 'failed' ? 'error' : 'info';
+      toast[statusType](statusMessage);
     }
-
-    const { data, error } = await supabase
-      .from('product_subcategories')
-      .select('id, name')
-      .eq('category_id', categoryId);
-    
-    if (error) {
-      toast.error('Error fetching subcategories');
-      return;
-    }
-    
-    setSubcategories(data || []);
-  };
-
-  const fetchSavedCatalogs = async () => {
-    const { data, error } = await supabase
-      .from('catalogs')
-      .select('*')
-      .eq('created_by', userProfile?.id);
-
-    if (error) {
-      toast.error('Error fetching saved catalogs');
-      return;
-    }
-
-    const transformedData: CatalogType[] = (data || []).map(catalog => ({
-      id: catalog.id,
-      name: catalog.name,
-      filters: catalog.filters as CatalogFilters,
-      created_at: new Date(catalog.created_at),
-      is_active: catalog.is_active,
-      created_by: catalog.created_by
-    }));
-
-    setSavedCatalogs(transformedData);
-  };
-
-  const fetchCustomerConfigs = async () => {
-    const { data, error } = await supabase
-      .from('customer_config')
-      .select('*');
-
-    if (error) {
-      toast.error('Error fetching customer configurations');
-      return;
-    }
-
-    setCustomerConfigs(data || []);
   };
 
   const fetchCatalogProducts = async (filters: CatalogType['filters']) => {
@@ -289,210 +390,6 @@ const CatalogBuilder = () => {
     return filteredProducts;
   };
 
-  const saveCatalog = async () => {
-    if (!catalogName) {
-      toast.error('Please enter a catalog name');
-      return;
-    }
-
-    const newCatalog = {
-      name: catalogName,
-      filters: {
-        collections: selectedCollections,
-        categories: selectedCategories,
-        subcategories: selectedSubcategories,
-        type: selectedType
-      },
-      created_by: userProfile?.id,
-      is_active: true
-    };
-
-    const { error } = await supabase
-      .from('catalogs')
-      .insert([newCatalog]);
-
-    if (error) {
-      toast.error('Error saving catalog');
-      return;
-    }
-
-    toast.success('Catalog saved successfully');
-    setCatalogName('');
-    setSelectedCollections([]);
-    setSelectedCategories([]);
-    setSelectedSubcategories([]);
-    setSelectedType('standard');
-    fetchSavedCatalogs();
-  };
-
-  const deleteCatalog = async (catalogId: string) => {
-    const { error } = await supabase
-      .from('catalogs')
-      .delete()
-      .eq('id', catalogId);
-
-    if (error) {
-      toast.error('Error deleting catalog');
-      return;
-    }
-
-    toast.success('Catalog deleted successfully');
-    fetchSavedCatalogs();
-  };
-
-  const viewCatalogProducts = async (catalog: CatalogType) => {
-    const products = await fetchCatalogProducts(catalog.filters);
-    
-    if (products.length === 0) {
-      toast.info('No products found matching the catalog criteria');
-    }
-    
-    setSelectedCatalogProducts(products);
-    setSelectedCatalogName(catalog.name);
-    setIsProductDialogOpen(true);
-
-    const workflowConfig = workflowConfigs.get(catalog.id);
-    if (workflowConfig?.status) {
-      const statusMessage = `Catalog workflow status: ${workflowConfig.status}`;
-      const statusType = workflowConfig.status === 'delivered' ? 'success' : 
-                        workflowConfig.status === 'failed' ? 'error' : 'info';
-      
-      toast[statusType](statusMessage);
-    }
-  };
-
-  const handleSendToWorkflow = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    const catalogId = (e.currentTarget as HTMLButtonElement).dataset.catalogId;
-    if (!catalogId) return;
-
-    try {
-      const { data: existingConfig, error: configError } = await supabase
-        .from('whatsapp_config')
-        .select('*')
-        .eq('is_active', true)
-        .single();
-
-      if (configError && !hasFullAccess) {
-        toast.error('No active WhatsApp configuration found');
-        return;
-      }
-
-      const workflowConfig = {
-        api_key: existingConfig?.api_key || 'admin_override',
-        template_name: 'catalog_share',
-        template_namespace: existingConfig?.template_namespace || 'admin_override',
-        from_phone_number_id: existingConfig?.from_phone_number_id || 'admin_override',
-        catalog_id: catalogId,
-        status: 'pending' as const,
-        is_active: true
-      };
-
-      const { error } = await supabase
-        .from('whatsapp_config')
-        .insert([workflowConfig]);
-
-      if (error) throw error;
-
-      toast.success('Catalog added to workflow queue');
-      fetchWorkflowStatus();
-    } catch (err) {
-      console.error('Error sending catalog to workflow:', err);
-      toast.error('Failed to add catalog to workflow');
-    }
-  };
-
-  const generateCatalogPDF = async (catalogId: string) => {
-    try {
-      const { data: catalogData, error: catalogError } = await supabase
-        .from('catalogs')
-        .select('*')
-        .eq('id', catalogId)
-        .single();
-
-      if (catalogError || !catalogData) {
-        toast.error('Catalog not found');
-        return;
-      }
-
-      const catalog: CatalogType = {
-        id: catalogData.id,
-        name: catalogData.name,
-        filters: catalogData.filters as CatalogFilters,
-        created_at: new Date(catalogData.created_at),
-        is_active: catalogData.is_active,
-        created_by: catalogData.created_by
-      };
-
-      const products = await fetchCatalogProducts(catalog.filters);
-
-      const docDefinition = {
-        content: [
-          { text: catalog.name, style: 'header' },
-          { text: '\n' },
-          {
-            table: {
-              headerRows: 1,
-              widths: ['*', '*', '*', 'auto'],
-              body: [
-                [
-                  { text: 'SKU', style: 'tableHeader' },
-                  { text: 'Name', style: 'tableHeader' },
-                  { text: 'Category', style: 'tableHeader' },
-                  { text: 'MRP (₹)', style: 'tableHeader' }
-                ],
-                ...products.map(product => [
-                  product.prodSku,
-                  product.prodName,
-                  product.prodCategory,
-                  product.prodMrp.toFixed(2)
-                ])
-              ]
-            }
-          }
-        ],
-        styles: {
-          header: {
-            fontSize: 18,
-            bold: true,
-            margin: [0, 0, 0, 10]
-          },
-          tableHeader: {
-            bold: true,
-            fontSize: 13,
-            color: 'black'
-          }
-        },
-        defaultStyle: {
-          fontSize: 12
-        }
-      };
-
-      const pdfDocGenerator = pdfMake.createPdf(docDefinition);
-      
-      pdfDocGenerator.getBlob((blob) => {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${catalog.name.replace(/\s+/g, '_')}_catalog.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        
-        toast.success('PDF generated successfully');
-      });
-
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-      toast.error('Failed to generate PDF');
-    }
-  };
-
-  const handleDownloadPDF = async (catalogId: string) => {
-    await generateCatalogPDF(catalogId);
-  };
-
   return (
     <div className="p-6 space-y-6">
       <Card>
@@ -503,113 +400,39 @@ const CatalogBuilder = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium mb-1">Catalog Name</label>
-              <Input
-                placeholder="Enter catalog name"
-                value={catalogName}
-                onChange={(e) => setCatalogName(e.target.value)}
-              />
-            </div>
+          <CatalogFilters
+            catalogName={catalogName}
+            selectedType={selectedType}
+            selectedCollections={selectedCollections}
+            selectedCategories={selectedCategories}
+            selectedSubcategories={selectedSubcategories}
+            collections={collections}
+            categories={categories}
+            subcategories={subcategories}
+            onNameChange={setCatalogName}
+            onTypeChange={setSelectedType}
+            onCollectionChange={(value) => setSelectedCollections([value])}
+            onCategoryChange={(value) => {
+              setSelectedCategories([value]);
+              setSelectedSubcategories([]);
+            }}
+            onSubcategoryChange={(value) => setSelectedSubcategories([value])}
+          />
 
-            <div>
-              <label className="block text-sm font-medium mb-1">Catalog Type</label>
-              <Select value={selectedType} onValueChange={(value: 'standard' | 'aged_stock' | 'dead_stock' | 'seasonal') => setSelectedType(value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select catalog type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="standard">Standard</SelectItem>
-                  <SelectItem value="aged_stock">Aged Stock</SelectItem>
-                  <SelectItem value="dead_stock">Dead Stock</SelectItem>
-                  <SelectItem value="seasonal">Seasonal</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">Collections</label>
-              <Select 
-                value={selectedCollections[0]} 
-                onValueChange={(value) => setSelectedCollections([value])}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select collection" />
-                </SelectTrigger>
-                <SelectContent>
-                  {collections.map((collection) => (
-                    <SelectItem key={collection.id} value={collection.id}>
-                      {collection.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">Category</label>
-              <Select 
-                value={selectedCategories[0]} 
-                onValueChange={(value) => {
-                  setSelectedCategories([value]);
-                  fetchSubcategories(value);
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">Subcategory</label>
-              <Select 
-                value={selectedSubcategories[0]} 
-                onValueChange={(value) => setSelectedSubcategories([value])}
-                disabled={!selectedCategories.length || subcategories.length === 0}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={
-                    !selectedCategories.length 
-                      ? "Select a category first" 
-                      : subcategories.length === 0 
-                        ? "No subcategories available" 
-                        : "Select subcategory"
-                  } />
-                </SelectTrigger>
-                <SelectContent>
-                  {subcategories.map((subcategory) => (
-                    <SelectItem key={subcategory.id} value={subcategory.id}>
-                      {subcategory.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex justify-end gap-4">
-              <Button variant="outline" onClick={() => {
-                setCatalogName('');
-                setSelectedCollections([]);
-                setSelectedCategories([]);
-                setSelectedSubcategories([]);
-                setSelectedType('standard');
-              }}>
-                Reset
-              </Button>
-              <Button onClick={saveCatalog} className="flex items-center gap-2">
-                <Save className="h-4 w-4" />
-                Save Catalog
-              </Button>
-            </div>
+          <div className="flex justify-end gap-4 mt-6">
+            <Button variant="outline" onClick={() => {
+              setCatalogName('');
+              setSelectedCollections([]);
+              setSelectedCategories([]);
+              setSelectedSubcategories([]);
+              setSelectedType('standard');
+            }}>
+              Reset
+            </Button>
+            <Button onClick={() => saveCatalogMutation.mutate()} className="flex items-center gap-2">
+              <Save className="h-4 w-4" />
+              Save Catalog
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -619,55 +442,27 @@ const CatalogBuilder = () => {
           <CardTitle>Saved Catalogs</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {savedCatalogs.map((catalog) => (
-              <div key={catalog.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div>
-                  <h3 className="font-medium">{catalog.name}</h3>
-                  <p className="text-sm text-gray-500">Type: {catalog.filters.type}</p>
-                  {workflowConfigs.get(catalog.id)?.status && (
-                    <p className="text-sm text-blue-500">
-                      Status: {workflowConfigs.get(catalog.id)?.status}
-                    </p>
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => viewCatalogProducts(catalog)}
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    data-catalog-id={catalog.id}
-                    onClick={handleSendToWorkflow}
-                  >
-                    <Send className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDownloadPDF(catalog.id)}
-                  >
-                    <FileDown className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => deleteCatalog(catalog.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-            {savedCatalogs.length === 0 && (
-              <p className="text-center text-gray-500">No catalogs saved yet</p>
-            )}
-          </div>
+          <CatalogList
+            catalogs={savedCatalogs}
+            workflowConfigs={workflowConfigs}
+            onView={viewCatalogProducts}
+            onSendToWorkflow={handleSendToWorkflow}
+            onDownload={generateCatalogPDF}
+            onDelete={async (catalogId) => {
+              const { error } = await supabase
+                .from('catalogs')
+                .delete()
+                .eq('id', catalogId);
+
+              if (error) {
+                toast.error('Error deleting catalog');
+                return;
+              }
+
+              toast.success('Catalog deleted successfully');
+              refetchCatalogs();
+            }}
+          />
         </CardContent>
       </Card>
 
@@ -677,26 +472,7 @@ const CatalogBuilder = () => {
             <DialogTitle>Products in {selectedCatalogName}</DialogTitle>
           </DialogHeader>
           <div className="mt-4">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left p-2">SKU</th>
-                  <th className="text-left p-2">Name</th>
-                  <th className="text-left p-2">Category</th>
-                  <th className="text-right p-2">MRP</th>
-                </tr>
-              </thead>
-              <tbody>
-                {selectedCatalogProducts.map((product) => (
-                  <tr key={product.prodId} className="border-b">
-                    <td className="p-2">{product.prodSku}</td>
-                    <td className="p-2">{product.prodName}</td>
-                    <td className="p-2">{product.prodCategory}</td>
-                    <td className="p-2 text-right">₹{product.prodMrp.toFixed(2)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <ProductTable products={selectedCatalogProducts} />
             {selectedCatalogProducts.length === 0 && (
               <p className="text-center text-gray-500 py-4">No products found in this catalog</p>
             )}

@@ -1216,6 +1216,7 @@ export type Database = {
       productManagement: {
         Row: {
           by_use: string[] | null
+          created_at: string | null
           maxColors: number | null
           prodBasePrice: number | null
           prodBoxstock: number | null
@@ -1257,10 +1258,12 @@ export type Database = {
           prodUnitweight: number | null
           prodVariableprice: number | null
           prodVariant: string | null
+          updated_at: string | null
           useCustomColors: boolean | null
         }
         Insert: {
           by_use?: string[] | null
+          created_at?: string | null
           maxColors?: number | null
           prodBasePrice?: number | null
           prodBoxstock?: number | null
@@ -1302,10 +1305,12 @@ export type Database = {
           prodUnitweight?: number | null
           prodVariableprice?: number | null
           prodVariant?: string | null
+          updated_at?: string | null
           useCustomColors?: boolean | null
         }
         Update: {
           by_use?: string[] | null
+          created_at?: string | null
           maxColors?: number | null
           prodBasePrice?: number | null
           prodBoxstock?: number | null
@@ -1347,6 +1352,7 @@ export type Database = {
           prodUnitweight?: number | null
           prodVariableprice?: number | null
           prodVariant?: string | null
+          updated_at?: string | null
           useCustomColors?: boolean | null
         }
         Relationships: []
@@ -2014,6 +2020,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_catalog"
+            columns: ["catalog_id"]
+            isOneToOne: false
+            referencedRelation: "catalogs"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "whatsapp_config_catalog_id_fkey"
             columns: ["catalog_id"]

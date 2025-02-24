@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../integrations/supabase/client';
@@ -26,8 +25,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Grid, Filter, Save, Eye, Trash2, Send, FileDown } from 'lucide-react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import pdfMake from 'pdfmake/build/pdfmake';
-import 'pdfmake/build/vfs_fonts';
+import pdfMake from 'pdfMake/build/pdfmake';
+import 'pdfMake/build/vfs_fonts';
 
 interface CatalogFilters {
   collections?: string[];
@@ -77,7 +76,6 @@ interface WhatsAppConfig {
 const CatalogBuilder = () => {
   const { userProfile } = useAuth();
   
-  // Define hasFullAccess at the top of the component
   const hasFullAccess = userProfile?.role === 'business_owner' || userProfile?.role === 'it_admin';
 
   const [catalogName, setCatalogName] = useState('');
@@ -227,7 +225,8 @@ const CatalogBuilder = () => {
       prodCategory, 
       prodMrp,
       maxColors,
-      useCustomColors
+      useCustomColors,
+      created_at
     `);
 
     if (filters.collections?.length && filters.collections[0] !== 'none') {
@@ -250,11 +249,13 @@ const CatalogBuilder = () => {
           query = query.lt('created_at', sixMonthsAgo.toISOString());
           break;
         case 'dead_stock':
-          query = query.eq('prodStatus', 'dead_stock');
+          query = query.eq('prodStatus', 'inactive');
           break;
         case 'seasonal':
           query = query.eq('prodStatus', 'seasonal');
           break;
+        default:
+          query = query.eq('prodStatus', 'active');
       }
     }
 
@@ -271,12 +272,10 @@ const CatalogBuilder = () => {
       return [];
     }
 
-    // Admin users can see all products
     if (hasFullAccess) {
       return data;
     }
 
-    // For non-admin users, apply customer config filters
     const filteredProducts = data.filter(product => {
       const relevantConfig = customerConfigs.find(config => 
         config.pv_category === product.prodCategory ||

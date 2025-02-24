@@ -10,24 +10,24 @@ interface AuthGuardProps {
 
 // Map each route to its required permission
 const routePermissions: Record<string, { resource: string; action: 'view' | 'create' | 'edit' | 'delete' }> = {
-  '/app': { resource: 'dashboard', action: 'view' },
-  '/app/dashboard': { resource: 'dashboard', action: 'view' },
-  '/app/customers': { resource: 'customers', action: 'view' },
-  '/app/inventory': { resource: 'inventory', action: 'view' },
-  '/app/inventory/low-stock': { resource: 'inventory', action: 'view' },
-  '/app/payments': { resource: 'payments', action: 'view' },
-  '/app/products': { resource: 'products', action: 'view' },
-  '/app/products/manage': { resource: 'products', action: 'view' },
-  '/app/products/view': { resource: 'products', action: 'view' },
-  '/app/products/admin': { resource: 'products', action: 'view' },
-  '/app/products/collections': { resource: 'products', action: 'view' },
-  '/app/quantity-discounts': { resource: 'products', action: 'view' },
-  '/app/roles': { resource: 'roles', action: 'view' },
-  '/app/sales-opportunities': { resource: 'sales', action: 'view' },
-  '/app/sales-management': { resource: 'sales', action: 'view' },
-  '/app/catalog-builder': { resource: 'catalogs', action: 'view' },
-  '/app/whatsapp-config': { resource: 'settings', action: 'view' },
-  '/app/whatsapp-config/customer': { resource: 'settings', action: 'view' }
+  'app': { resource: 'dashboard', action: 'view' },
+  'dashboard': { resource: 'dashboard', action: 'view' },
+  'customers': { resource: 'customers', action: 'view' },
+  'inventory': { resource: 'inventory', action: 'view' },
+  'inventory/low-stock': { resource: 'inventory', action: 'view' },
+  'payments': { resource: 'payments', action: 'view' },
+  'products': { resource: 'products', action: 'view' },
+  'products/manage': { resource: 'products', action: 'view' },
+  'products/view': { resource: 'products', action: 'view' },
+  'products/admin': { resource: 'products', action: 'view' },
+  'products/collections': { resource: 'products', action: 'view' },
+  'quantity-discounts': { resource: 'products', action: 'view' },
+  'roles': { resource: 'roles', action: 'view' },
+  'sales-opportunities': { resource: 'sales', action: 'view' },
+  'sales-management': { resource: 'sales', action: 'view' },
+  'catalog-builder': { resource: 'catalogs', action: 'view' },
+  'whatsapp-config': { resource: 'settings', action: 'view' },
+  'whatsapp-config/customer': { resource: 'settings', action: 'view' }
 };
 
 const AuthGuard = ({ children }: AuthGuardProps) => {
@@ -36,7 +36,6 @@ const AuthGuard = ({ children }: AuthGuardProps) => {
   const location = useLocation();
 
   useEffect(() => {
-    // Check for session
     if (!session) {
       navigate('/');
       return;
@@ -48,39 +47,24 @@ const AuthGuard = ({ children }: AuthGuardProps) => {
       return;
     }
 
-    const currentPath = location.pathname;
-
-    // Root path access
-    if (currentPath === '/app' || currentPath === '/app/dashboard') {
+    // Get the relative path by removing /app/ prefix
+    const relativePath = location.pathname.replace(/^\/app\/?/, '');
+    
+    // Root path and dashboard access
+    if (!relativePath || relativePath === 'dashboard') {
       return;
     }
 
-    // Normalize the current path to match the routePermissions format
-    const normalizedPath = currentPath.endsWith('/') ? currentPath.slice(0, -1) : currentPath;
-
-    // Direct match first
-    if (routePermissions[normalizedPath]) {
-      const permission = routePermissions[normalizedPath];
-      if (!hasPermission(permission.resource, permission.action)) {
-        console.log('Direct permission denied for:', normalizedPath);
-        toast.error("You don't have permission to access this page");
-        navigate('/app/dashboard');
-      }
-      return;
-    }
-
-    // Check parent routes if no direct match
-    const parentPath = Object.keys(routePermissions).find(route => 
-      normalizedPath.startsWith(route) && route !== '/app'
+    // Find matching permission
+    const permission = Object.entries(routePermissions).find(([route]) => 
+      relativePath.startsWith(route)
     );
 
-    if (parentPath) {
-      const permission = routePermissions[parentPath];
-      if (!hasPermission(permission.resource, permission.action)) {
-        console.log('Parent route permission denied for:', normalizedPath);
-        toast.error("You don't have permission to access this page");
-        navigate('/app/dashboard');
-      }
+    if (permission && !hasPermission(permission[1].resource, permission[1].action)) {
+      console.log('Permission denied for:', relativePath);
+      toast.error("You don't have permission to access this page");
+      navigate('./dashboard');
+      return;
     }
 
   }, [session, location.pathname, hasPermission, navigate, userProfile]);

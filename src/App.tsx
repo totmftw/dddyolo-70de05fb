@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { createBrowserRouter, RouterProvider, Route, Routes } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
@@ -37,89 +37,33 @@ const router = createBrowserRouter([
     element: <Auth />,
   },
   {
-    path: "/app",
+    path: "app",
     element: (
       <AuthGuard>
         <AdminOneLayout />
       </AuthGuard>
     ),
     children: [
-      {
-        index: true,
-        element: <Dashboard />,
-      },
-      {
-        path: "customers",
-        element: <CustomerManagement />,
-      },
-      {
-        path: "inventory",
-        element: <InventoryManagement />,
-      },
-      {
-        path: "shipment",
-        element: <Shipment />,
-      },
-      {
-        path: "sales-opportunities",
-        element: <SalesOpportunities />,
-      },
-      {
-        path: "sales-management",
-        element: <SalesOpportunityManagement />,
-      },
-      {
-        path: "account",
-        element: <AccountManagement />,
-      },
-      {
-        path: "payments",
-        element: <PaymentTracking />,
-      },
-      {
-        path: "roles",
-        element: <UserRoleManagement />,
-      },
-      {
-        path: "catalog-builder",
-        element: <CatalogBuilder />,
-      },
-      {
-        path: "whatsapp-config",
-        element: <WhatsappConfig />,
-      },
-      {
-        path: "whatsapp-config/customer",
-        element: <WhatsappCustomerConfig />,
-      },
-      {
-        path: "products",
-        element: <ProductManagement />,
-      },
-      {
-        path: "products/manage",
-        element: <ManageProducts />,
-      },
-      {
-        path: "products/view",
-        element: <LiveInventory />,
-      },
-      {
-        path: "products/admin",
-        element: <ProductConfig />,
-      },
-      {
-        path: "products/collections",
-        element: <CollectionConfig />,
-      },
-      {
-        path: "quantity-discounts",
-        element: <QuantityDiscount />,
-      },
-      {
-        path: "inventory/low-stock",
-        element: <LowStockInventory />,
-      },
+      { index: true, element: <Dashboard /> },
+      { path: "dashboard", element: <Dashboard /> },
+      { path: "customers", element: <CustomerManagement /> },
+      { path: "inventory", element: <InventoryManagement /> },
+      { path: "shipment", element: <Shipment /> },
+      { path: "sales-opportunities", element: <SalesOpportunities /> },
+      { path: "sales-management", element: <SalesOpportunityManagement /> },
+      { path: "account", element: <AccountManagement /> },
+      { path: "payments", element: <PaymentTracking /> },
+      { path: "roles", element: <UserRoleManagement /> },
+      { path: "catalog-builder", element: <CatalogBuilder /> },
+      { path: "whatsapp-config", element: <WhatsappConfig /> },
+      { path: "whatsapp-config/customer", element: <WhatsappCustomerConfig /> },
+      { path: "products", element: <ProductManagement /> },
+      { path: "products/manage", element: <ManageProducts /> },
+      { path: "products/view", element: <LiveInventory /> },
+      { path: "products/admin", element: <ProductConfig /> },
+      { path: "products/collections", element: <CollectionConfig /> },
+      { path: "quantity-discounts", element: <QuantityDiscount /> },
+      { path: "inventory/low-stock", element: <LowStockInventory /> },
     ],
   },
 ]);

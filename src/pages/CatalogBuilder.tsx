@@ -25,8 +25,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Grid, Filter, Save, Eye, Trash2, Send, FileDown } from 'lucide-react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import pdfMake from 'pdfMake/build/pdfmake';
-import 'pdfMake/build/vfs_fonts';
+import pdfMake from 'pdfmake/build/pdfmake';
+import 'pdfmake/build/vfs_fonts';
 
 interface CatalogFilters {
   collections?: string[];
